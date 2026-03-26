@@ -87,7 +87,7 @@ body::after {
   mask-repeat: no-repeat;
   mask-position: 0 -140%;
 
-  animation: gridLightWave 16s ease-in-out infinite;
+  animation: gridLightWave 24s ease-in-out infinite;
 }
 
 @keyframes gridLightWave {
