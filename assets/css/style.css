@@ -87,7 +87,7 @@ rgba(255,255,255,0.18) 60%,
   mask-repeat: no-repeat;
   mask-position: 0 -140%;
 
-  animation: gridLightWave 20s ease-in-out infinite;
+  animation: gridLightWave 18s ease-in-out infinite;
 }
 
 @keyframes gridLightWave {
