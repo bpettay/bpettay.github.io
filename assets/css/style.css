@@ -27,17 +27,16 @@ body {
   line-height: 1.55;
   overflow-x: hidden;
   position: relative;
-  background: linear-gradient(180deg, #0b1220 0%, #111827 45%, #0f172a 100%);
+  background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 45%, var(--bg-bot) 100%);
 }
 
-/* Base grid - always visible */
+/* Static base grid */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-
   background-image:
     linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
@@ -45,28 +44,27 @@ body::before {
   opacity: 0.18;
 }
 
-/* Brightened grid revealed by moving wave */
+/* Bright grid layer revealed by moving light mask */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-
   background-image:
-    linear-gradient(rgba(138,197,255,0.32) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(138,197,255,0.32) 1px, transparent 1px);
+    linear-gradient(rgba(138,197,255,0.28) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(138,197,255,0.28) 1px, transparent 1px);
   background-size: 44px 44px;
   opacity: 1;
 
   -webkit-mask-image: linear-gradient(
     180deg,
     transparent 0%,
-    transparent 35%,
-    rgba(255,255,255,0.25) 40%,
-rgba(255,255,255,0.95) 50%,
-rgba(255,255,255,0.18) 60%,
-    transparent 65%,
+    transparent 34%,
+    rgba(255,255,255,0.5) 42%,
+    rgba(255,255,255,0.95) 50%,
+    rgba(255,255,255,0.2 58%,
+    transparent 66%,
     transparent 100%
   );
   -webkit-mask-size: 100% 220%;
@@ -76,18 +74,18 @@ rgba(255,255,255,0.18) 60%,
   mask-image: linear-gradient(
     180deg,
     transparent 0%,
-    transparent 35%,
-    rgba(255,255,255,0.25) 40%,
-rgba(255,255,255,0.95) 50%,
-rgba(255,255,255,0.18) 60%,
-    transparent 65%,
+    transparent 34%,
+    rgba(255,255,255,0.5) 42%,
+    rgba(255,255,255,0.95) 50%,
+    rgba(255,255,255,0.2) 58%,
+    transparent 66%,
     transparent 100%
   );
   mask-size: 100% 220%;
   mask-repeat: no-repeat;
   mask-position: 0 -140%;
 
-  animation: gridLightWave 18s ease-in-out infinite;
+  animation: gridLightWave 22s ease-in-out infinite;
 }
 
 @keyframes gridLightWave {
@@ -101,9 +99,17 @@ rgba(255,255,255,0.18) 60%,
   }
 }
 
+/* Keep content above background effects */
 header,
 main,
-footer {
+footer,
+.nav,
+.hero,
+.section,
+.hero-card,
+.card,
+.project,
+.contact-card {
   position: relative;
   z-index: 1;
 }
