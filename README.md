@@ -1,34 +1,26 @@
-Brock Pettay — Portfolio Website
+Portfolio Website
 
-This repository contains the source code for my personal engineering portfolio website, hosted using GitHub Pages.
+This repository contains the source code for a personal portfolio website, hosted using GitHub Pages.
 
 Overview
 
-This site serves as a central location to present my work, including engineering projects, technical experience, and resume. It is designed to be clean, direct, and focused on demonstrating practical skills and project outcomes.
+A simple, single-page site designed to present project work, technical experience, and supporting materials in a clean and accessible format.
 
 Features
-Single-page portfolio layout
-Project-focused content with concise summaries
-Responsive design for desktop and mobile
-Hosted with GitHub Pages
-Custom domain integration (brockpettay.com)
+Responsive layout
+Project-based content structure
+Minimal, maintainable codebase
+Custom domain support
 Tech Stack
-HTML5
-CSS3
-GitHub Pages (deployment)
-Purpose
+HTML
+CSS
+GitHub Pages (hosting)
+Usage
 
-The goal of this site is to showcase my engineering experience in a straightforward way, emphasizing:
+This site is intended as a static portfolio and can be modified by updating the index.html file and associated assets.
 
-Project work (FSAE, analysis tools, simulations)
-Technical skills (CAD, FEA, CFD, MATLAB)
-Real-world experience (internships, testing, manufacturing)
-Status
+Deployment
 
-This site is actively being developed and updated as new projects and experience are added.
-
-Access
-
-Live site:
+The site is automatically deployed via GitHub Pages.
 
 https://brockpettay.com
