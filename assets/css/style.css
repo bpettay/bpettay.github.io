@@ -63,9 +63,9 @@ body::after {
     180deg,
     transparent 0%,
     transparent 35%,
-    rgba(255,255,255,0.15) 43%,
-    rgba(255,255,255,0.95) 50%,
-    rgba(255,255,255,0.15) 57%,
+    rgba(255,255,255,0.18) 40%,
+rgba(255,255,255,0.95) 50%,
+rgba(255,255,255,0.18) 60%,
     transparent 65%,
     transparent 100%
   );
