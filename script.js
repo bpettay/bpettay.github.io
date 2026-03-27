@@ -4,6 +4,8 @@
 const siteHeader = document.getElementById("siteHeader");
 
 function handleHeaderScroll() {
+  if (!siteHeader) return;
+
   if (window.scrollY > 12) {
     siteHeader.classList.add("scrolled");
   } else {
@@ -27,20 +29,22 @@ if (yearEl) {
 // =========================
 const revealEls = document.querySelectorAll(".reveal");
 
-const revealObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-      }
-    });
-  },
-  {
-    threshold: 0.12,
-  }
-);
+if (revealEls.length > 0) {
+  const revealObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+        }
+      });
+    },
+    {
+      threshold: 0.12,
+    }
+  );
 
-revealEls.forEach((el) => revealObserver.observe(el));
+  revealEls.forEach((el) => revealObserver.observe(el));
+}
 
 // =========================
 // Active Nav Link by Section
@@ -53,16 +57,15 @@ function updateActiveNav() {
 
   sections.forEach((section) => {
     const rect = section.getBoundingClientRect();
+
     if (rect.top <= 140 && rect.bottom >= 140) {
       currentId = section.id;
     }
   });
 
   navLinks.forEach((link) => {
-    link.classList.toggle(
-      "active",
-      link.getAttribute("href") === `#${currentId}`
-    );
+    const href = link.getAttribute("href");
+    link.classList.toggle("active", href === `#${currentId}`);
   });
 }
 
