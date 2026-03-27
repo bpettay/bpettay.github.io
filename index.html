@@ -1,18 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- =========================
-       Meta
-  ========================== -->
+  <!-- Meta -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Brock | Portfolio</title>
   <meta name="description" content="Engineering portfolio website" />
   <link rel="icon" type="image/png" href="Favicon.png" />
 
-  <!-- =========================
-       Fonts
-  ========================== -->
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -20,31 +16,29 @@
     rel="stylesheet"
   />
 
-  <!-- =========================
-       Styles
-  ========================== -->
-  <link rel="stylesheet" href="style.css" />
+  <!-- FIXED CSS PATH -->
+  <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
-  <!-- =========================
-       Background Effects
-  ========================== -->
+
+  <!-- Background -->
   <div class="bg-base"></div>
   <div class="bg-grid"></div>
   <div class="bg-wave"></div>
 
-  <!-- =========================
-       Site Wrapper
-  ========================== -->
   <div class="site">
+
+    <!-- NAV -->
     <header class="site-header" id="siteHeader">
       <div class="container nav-wrap">
+
         <a href="#" class="brand">
           <span class="brand-mark"></span>
           <span class="brand-text">Brock</span>
         </a>
 
-        <nav class="nav" aria-label="Primary Navigation">
+        <nav class="nav">
           <a href="#home" class="nav-link active">Home</a>
           <a href="#projects" class="nav-link">Projects</a>
           <a href="#playground" class="nav-link">Playground</a>
@@ -52,177 +46,74 @@
           <a href="#contact" class="nav-link">Contact</a>
         </nav>
 
-        <a href="#" class="btn btn-primary nav-cta">Resume</a>
+        <a href="#" class="btn btn-primary">Resume</a>
+
       </div>
     </header>
 
+    <!-- MAIN -->
     <main>
-      <!-- =========================
-           Hero / Home
-      ========================== -->
+
+      <!-- HERO -->
       <section id="home" class="section hero-section">
         <div class="container hero-grid">
+
           <div class="hero-copy reveal">
             <p class="eyebrow">ENGINEERING PORTFOLIO</p>
+
             <h1 class="hero-title">
               Clean, technical, and built to show how the work functions.
             </h1>
+
             <p class="hero-text">
-              Placeholder layout only for now. We are locking in style, structure,
-              and interaction before adding real content.
+              Layout only for now. We’re locking style first.
             </p>
 
             <div class="hero-actions">
-              <a href="#projects" class="btn btn-primary">View Projects</a>
-              <a href="#playground" class="btn btn-secondary">Explore Tools</a>
+              <a href="#projects" class="btn btn-primary">Projects</a>
+              <a href="#playground" class="btn btn-secondary">Tools</a>
             </div>
           </div>
 
-          <div class="hero-panel reveal delay-1">
-            <div class="panel-card card large-card">
-              <div class="panel-top">
-                <span class="panel-dot"></span>
-                <span class="panel-dot"></span>
-                <span class="panel-dot"></span>
-              </div>
-
-              <div class="metric-grid">
-                <div class="metric-card">
-                  <span class="metric-label">Projects</span>
-                  <span class="metric-value">--</span>
-                </div>
-                <div class="metric-card">
-                  <span class="metric-label">Tools</span>
-                  <span class="metric-value">--</span>
-                </div>
-                <div class="metric-card">
-                  <span class="metric-label">Experience</span>
-                  <span class="metric-value">--</span>
-                </div>
-                <div class="metric-card">
-                  <span class="metric-label">Focus</span>
-                  <span class="metric-value">--</span>
-                </div>
-              </div>
-            </div>
+          <div class="hero-panel reveal">
+            <div class="card large-card"></div>
           </div>
+
         </div>
       </section>
 
-      <!-- =========================
-           Featured Placeholder
-      ========================== -->
+      <!-- TEST SECTION -->
       <section class="section">
         <div class="container">
-          <div class="section-heading reveal">
-            <p class="eyebrow">LAYOUT PREVIEW</p>
-            <h2>Reusable section and card system</h2>
-            <p>
-              This block is just here to prove the theme and spacing system before
-              we build each page section for real.
-            </p>
+          <div class="section-heading">
+            <h2>Theme System Test</h2>
+            <p>If this looks styled, your CSS is working.</p>
           </div>
 
-          <div class="card-grid reveal delay-1">
-            <article class="card">
-              <h3>Project Cards</h3>
-              <p>Dark surface, subtle border, soft hover lift, clean spacing.</p>
-            </article>
-
-            <article class="card">
-              <h3>Tool Panels</h3>
-              <p>Built for calculators, plots, toggles, and simple engineering demos.</p>
-            </article>
-
-            <article class="card">
-              <h3>Experience Blocks</h3>
-              <p>Timeline-friendly containers with enough space for structured content.</p>
-            </article>
+          <div class="card-grid">
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
           </div>
         </div>
       </section>
 
-      <!-- =========================
-           Projects
-      ========================== -->
-      <section id="projects" class="section">
-        <div class="container">
-          <div class="section-heading reveal">
-            <p class="eyebrow">PROJECTS</p>
-            <h2>Projects page foundation</h2>
-            <p>We’ll turn this into a filterable project grid next.</p>
-          </div>
-
-          <div class="card-grid reveal delay-1">
-            <article class="card tall-card"></article>
-            <article class="card tall-card"></article>
-            <article class="card tall-card"></article>
-          </div>
-        </div>
-      </section>
-
-      <!-- =========================
-           Playground
-      ========================== -->
-      <section id="playground" class="section">
-        <div class="container">
-          <div class="section-heading reveal">
-            <p class="eyebrow">PLAYGROUND</p>
-            <h2>Interactive tools area</h2>
-            <p>Later this becomes the engineering sandbox.</p>
-          </div>
-
-          <div class="playground-shell reveal delay-1">
-            <div class="card tool-sidebar"></div>
-            <div class="card tool-stage"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- =========================
-           Experience
-      ========================== -->
-      <section id="experience" class="section">
-        <div class="container">
-          <div class="section-heading reveal">
-            <p class="eyebrow">EXPERIENCE</p>
-            <h2>Timeline-ready layout</h2>
-            <p>We’ll build this into a clean experience timeline after the other pages.</p>
-          </div>
-
-          <div class="timeline reveal delay-1">
-            <div class="timeline-item card"></div>
-            <div class="timeline-item card"></div>
-            <div class="timeline-item card"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- =========================
-           Contact
-      ========================== -->
-      <section id="contact" class="section">
-        <div class="container">
-          <div class="section-heading reveal">
-            <p class="eyebrow">CONTACT</p>
-            <h2>Simple contact section shell</h2>
-            <p>We’ll keep this minimal and clean.</p>
-          </div>
-
-          <div class="contact-shell reveal delay-1">
-            <div class="card contact-card"></div>
-            <div class="card contact-card"></div>
-          </div>
-        </div>
-      </section>
     </main>
 
+    <!-- FOOTER -->
     <footer class="site-footer">
-      <div class="container footer-wrap">
+      <div class="container">
         <p>© <span id="year"></span> Brock</p>
       </div>
     </footer>
+
   </div>
+
+  <!-- JS (root stays same) -->
+  <script src="script.js"></script>
+
+</body>
+</html></div>
 
   <script src="script.js"></script>
 </body>
