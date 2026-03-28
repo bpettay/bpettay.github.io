@@ -1,8 +1,5 @@
 /* =========================================================
    Unit Definitions
-   Base-unit approach:
-   - Most categories convert through a base factor
-   - Temperature uses formulas instead
 ========================================================= */
 const unitData = {
   Length: {
@@ -85,8 +82,8 @@ const unitData = {
   Volume: {
     type: "factor",
     units: {
-      "mL": 0.000001,
-      "L": 0.001,
+      mL: 0.000001,
+      L: 0.001,
       "in³": 0.000016387064,
       "ft³": 0.028316846592,
       "m³": 1
@@ -103,7 +100,7 @@ const unitData = {
     units: {
       "m/s": 1,
       "ft/s": 0.3048,
-      "mph": 0.44704,
+      mph: 0.44704,
       "km/h": 0.2777777778
     },
     references: [
@@ -139,7 +136,7 @@ const swapButton = document.getElementById("swapUnits");
 const copyButton = document.getElementById("copyResult");
 
 /* =========================================================
-   Init
+   Initialize
 ========================================================= */
 function initializeConverter() {
   populateCategories();
@@ -155,7 +152,7 @@ function initializeConverter() {
 }
 
 /* =========================================================
-   Populate Category Dropdown
+   Populate Categories
 ========================================================= */
 function populateCategories() {
   categorySelect.innerHTML = "";
@@ -169,7 +166,7 @@ function populateCategories() {
 }
 
 /* =========================================================
-   Populate Unit Dropdowns
+   Populate Units
 ========================================================= */
 function populateUnits(category) {
   fromUnitSelect.innerHTML = "";
@@ -200,7 +197,7 @@ function populateUnits(category) {
 }
 
 /* =========================================================
-   References
+   Update Reference List
 ========================================================= */
 function updateReferences(category) {
   referenceList.innerHTML = "";
@@ -213,7 +210,7 @@ function updateReferences(category) {
 }
 
 /* =========================================================
-   Temperature Conversion Helpers
+   Temperature Conversion
 ========================================================= */
 function convertTemperature(value, from, to) {
   let celsiusValue;
@@ -240,7 +237,7 @@ function convertTemperature(value, from, to) {
 }
 
 /* =========================================================
-   General Conversion
+   Main Conversion
 ========================================================= */
 function convertValue() {
   const category = categorySelect.value;
@@ -319,14 +316,13 @@ async function copyResult() {
 }
 
 /* =========================================================
-   Event Listeners
+   Events
 ========================================================= */
 categorySelect.addEventListener("change", () => {
   const category = categorySelect.value;
   populateUnits(category);
   updateReferences(category);
 
-  /* Useful defaults per category */
   const defaults = {
     Length: ["in", "mm"],
     Pressure: ["psi", "kPa"],
