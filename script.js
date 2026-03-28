@@ -1,436 +1,507 @@
-/* ===============================
-   Root
-=============================== */
-:root {
-  --bg: #0b0f17;
-  --panel: #121927;
-  --panel-2: #161f30;
-  --border: #273247;
-  --border-soft: #202a3d;
-  --text: #e8eef8;
-  --text-muted: #9aa8bf;
-  --accent: #dbe6ff;
-  --max-width: 960px;
-  --radius: 14px;
+// ===============================
+// Navigation
+// ===============================
+const tabs = document.querySelectorAll(".nav-link");
+const pages = document.querySelectorAll(".page");
+const pageButtons = document.querySelectorAll("[data-page-target]");
+
+function openPage(target) {
+  tabs.forEach((item) => {
+    item.classList.remove("active");
+    if (item.dataset.page === target) {
+      item.classList.add("active");
+    }
+  });
+
+  pages.forEach((page) => {
+    page.classList.remove("active");
+    if (page.id === target) {
+      page.classList.add("active");
+    }
+  });
 }
 
-/* ===============================
-   Reset
-=============================== */
-* {
-  box-sizing: border-box;
-}
+tabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    openPage(tab.dataset.page);
+  });
+});
 
-html {
-  scroll-behavior: smooth;
-}
+pageButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    openPage(button.dataset.pageTarget);
+  });
+});
 
-body {
-  margin: 0;
-  font-family: Inter, Arial, Helvetica, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* ===============================
-   Navigation
-=============================== */
-.nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.nav-left {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.logo {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-}
-
-.site-name {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.nav-right {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.nav-link {
-  font: inherit;
-  color: var(--text-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  padding: 0.55rem 0.9rem;
-  cursor: pointer;
-}
-
-.nav-link:hover {
-  color: var(--text);
-  border-color: var(--border);
-}
-
-.nav-link.active {
-  color: var(--text);
-  border-color: var(--border);
-  background: var(--panel);
-}
-
-/* ===============================
-   Pages
-=============================== */
-.page {
-  display: none;
-  width: min(calc(100% - 2rem), var(--max-width));
-  margin: 0 auto;
-  padding: 3rem 0 4rem;
-}
-
-.page.active {
-  display: block;
-}
-
-/* ===============================
-   Home
-=============================== */
-.hero {
-  padding: 2rem 0 1rem;
-}
-
-.eyebrow {
-  margin: 0 0 0.75rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.hero h1 {
-  margin: 0;
-  font-size: clamp(2.3rem, 5vw, 4.25rem);
-  line-height: 1.05;
-  max-width: 780px;
-}
-
-.hero-text {
-  max-width: 700px;
-  margin: 1rem 0 0;
-  color: var(--text-muted);
-  line-height: 1.7;
-  font-size: 1.05rem;
-}
-
-.home-section,
-.feature-section,
-.roadmap-section,
-.cta-section {
-  margin-top: 1.5rem;
-  padding: 1.25rem;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.home-section h2,
-.feature-section h2,
-.roadmap-section h2,
-.cta-section h2 {
-  margin-top: 0;
-  margin-bottom: 0.75rem;
-}
-
-.home-section p,
-.feature-section p,
-.roadmap-section p,
-.cta-section p {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.7;
-}
-
-/* ===============================
-   Featured Areas
-=============================== */
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.feature-card {
-  padding: 1rem;
-  border: 1px solid var(--border-soft);
-  border-radius: 12px;
-  background: var(--panel-2);
-}
-
-.feature-card h3 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-}
-
-.feature-card p {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.65;
-}
-
-/* ===============================
-   Roadmap
-=============================== */
-.roadmap-list {
-  display: grid;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.roadmap-item {
-  display: grid;
-  grid-template-columns: 90px 1fr;
-  gap: 1rem;
-  align-items: start;
-  padding: 1rem;
-  border: 1px solid var(--border-soft);
-  border-radius: 12px;
-  background: var(--panel-2);
-}
-
-.roadmap-item h3 {
-  margin: 0 0 0.4rem;
-}
-
-.roadmap-item p {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.65;
-}
-
-.roadmap-status {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 36px;
-  padding: 0.4rem 0.65rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  border: 1px solid var(--border);
-}
-
-.roadmap-status.current {
-  background: #1b2638;
-  color: var(--text);
-}
-
-.roadmap-status.next {
-  background: #182235;
-  color: var(--text);
-}
-
-.roadmap-status.later {
-  background: #141c2a;
-  color: var(--text-muted);
-}
-
-/* ===============================
-   CTA
-=============================== */
-.cta-row {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  margin-top: 1rem;
-}
-
-.cta-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--panel-2);
-  color: var(--text);
-  font: inherit;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.cta-button:hover {
-  border-color: #3a4a66;
-}
-
-.cta-button.secondary {
-  color: var(--text-muted);
-}
-
-/* ===============================
-   Tools
-=============================== */
-.tool-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-}
-
-.tool-header {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.tool-label {
-  margin: 0 0 0.35rem;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  font-weight: 700;
-}
-
-.tool-card h2 {
-  margin: 0;
-}
-
-.tool-description {
-  margin: 0.9rem 0 1.2rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
-.tool-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-
-.field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.field-full {
-  grid-column: 1 / -1;
-}
-
-label {
-  font-size: 0.92rem;
-  color: var(--text-muted);
-  font-weight: 600;
-}
-
-input,
-select {
-  width: 100%;
-  font: inherit;
-  padding: 0.85rem 0.9rem;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--panel-2);
-  color: var(--text);
-}
-
-input:focus,
-select:focus {
-  outline: none;
-  border-color: #44536f;
-}
-
-.result-panel {
-  margin-top: 1.2rem;
-  padding: 1rem 1.1rem;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--panel-2);
-}
-
-.result-label {
-  margin: 0 0 0.35rem;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  font-weight: 700;
-}
-
-.result-value {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1.15;
-}
-
-.tool-placeholder-wrap {
-  margin-top: 1rem;
-}
-
-.tool-placeholder {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem;
-}
-
-.tool-placeholder h3 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-}
-
-.tool-placeholder p {
-  margin: 0;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
-/* ===============================
-   Responsive
-=============================== */
-@media (max-width: 820px) {
-  .feature-grid,
-  .tool-grid {
-    grid-template-columns: 1fr;
+// ===============================
+// Unit Data
+// ===============================
+const unitData = {
+  Length: {
+    type: "factor",
+    units: {
+      mm: 0.001,
+      cm: 0.01,
+      m: 1,
+      in: 0.0254,
+      ft: 0.3048,
+      yd: 0.9144
+    },
+    common: ["mm", "cm", "m", "in", "ft"]
+  },
+  Pressure: {
+    type: "factor",
+    units: {
+      Pa: 1,
+      kPa: 1000,
+      MPa: 1000000,
+      psi: 6894.757293168,
+      bar: 100000,
+      atm: 101325
+    },
+    common: ["psi", "kPa", "MPa", "bar", "atm"]
+  },
+  Force: {
+    type: "factor",
+    units: {
+      N: 1,
+      kN: 1000,
+      lbf: 4.4482216153
+    },
+    common: ["N", "kN", "lbf"]
+  },
+  Speed: {
+    type: "factor",
+    units: {
+      "m/s": 1,
+      "ft/s": 0.3048,
+      mph: 0.44704,
+      "km/h": 0.2777777778
+    },
+    common: ["m/s", "ft/s", "mph", "km/h"]
+  },
+  Temperature: {
+    type: "temperature",
+    units: ["C", "F", "K"],
+    common: ["C", "F", "K"]
+  },
+  Torque: {
+    type: "factor",
+    units: {
+      "N·m": 1,
+      "ft·lb": 1.3558179483,
+      "in·lb": 0.112984829
+    },
+    common: ["N·m", "ft·lb", "in·lb"]
   }
+};
 
-  .roadmap-item {
-    grid-template-columns: 1fr;
+// ===============================
+// Unit Aliases
+// ===============================
+const unitAliases = {
+  mm: { category: "Length", unit: "mm" },
+  millimeter: { category: "Length", unit: "mm" },
+  millimeters: { category: "Length", unit: "mm" },
+
+  cm: { category: "Length", unit: "cm" },
+  centimeter: { category: "Length", unit: "cm" },
+  centimeters: { category: "Length", unit: "cm" },
+
+  m: { category: "Length", unit: "m" },
+  meter: { category: "Length", unit: "m" },
+  meters: { category: "Length", unit: "m" },
+
+  in: { category: "Length", unit: "in" },
+  inch: { category: "Length", unit: "in" },
+  inches: { category: "Length", unit: "in" },
+
+  ft: { category: "Length", unit: "ft" },
+  foot: { category: "Length", unit: "ft" },
+  feet: { category: "Length", unit: "ft" },
+
+  yd: { category: "Length", unit: "yd" },
+  yard: { category: "Length", unit: "yd" },
+  yards: { category: "Length", unit: "yd" },
+
+  pa: { category: "Pressure", unit: "Pa" },
+  kpa: { category: "Pressure", unit: "kPa" },
+  mpa: { category: "Pressure", unit: "MPa" },
+  psi: { category: "Pressure", unit: "psi" },
+  bar: { category: "Pressure", unit: "bar" },
+  atm: { category: "Pressure", unit: "atm" },
+
+  n: { category: "Force", unit: "N" },
+  kn: { category: "Force", unit: "kN" },
+  lbf: { category: "Force", unit: "lbf" },
+
+  "m/s": { category: "Speed", unit: "m/s" },
+  ms: { category: "Speed", unit: "m/s" },
+  "ft/s": { category: "Speed", unit: "ft/s" },
+  fts: { category: "Speed", unit: "ft/s" },
+  mph: { category: "Speed", unit: "mph" },
+  "km/h": { category: "Speed", unit: "km/h" },
+  kmh: { category: "Speed", unit: "km/h" },
+
+  c: { category: "Temperature", unit: "C" },
+  degc: { category: "Temperature", unit: "C" },
+  celsius: { category: "Temperature", unit: "C" },
+
+  f: { category: "Temperature", unit: "F" },
+  degf: { category: "Temperature", unit: "F" },
+  fahrenheit: { category: "Temperature", unit: "F" },
+
+  k: { category: "Temperature", unit: "K" },
+  kelvin: { category: "Temperature", unit: "K" },
+
+  "n·m": { category: "Torque", unit: "N·m" },
+  nm: { category: "Torque", unit: "N·m" },
+  "n m": { category: "Torque", unit: "N·m" },
+
+  "ft·lb": { category: "Torque", unit: "ft·lb" },
+  ftlb: { category: "Torque", unit: "ft·lb" },
+  "ft lb": { category: "Torque", unit: "ft·lb" },
+  "lb-ft": { category: "Torque", unit: "ft·lb" },
+
+  "in·lb": { category: "Torque", unit: "in·lb" },
+  inlb: { category: "Torque", unit: "in·lb" },
+  "in lb": { category: "Torque", unit: "in·lb" }
+};
+
+// ===============================
+// Elements
+// ===============================
+const category = document.getElementById("category");
+const fromUnit = document.getElementById("fromUnit");
+const toUnit = document.getElementById("toUnit");
+const inputValue = document.getElementById("inputValue");
+const resultValue = document.getElementById("resultValue");
+const resultFormula = document.getElementById("resultFormula");
+const resultFactor = document.getElementById("resultFactor");
+const relatedResults = document.getElementById("relatedResults");
+
+const queryInput = document.getElementById("queryInput");
+const previewQuery = document.getElementById("previewQuery");
+const confirmQuery = document.getElementById("confirmQuery");
+const queryStatus = document.getElementById("queryStatus");
+const previewSummary = document.getElementById("previewSummary");
+const previewFactor = document.getElementById("previewFactor");
+
+let pendingParsedQuery = null;
+
+// ===============================
+// Initialize
+// ===============================
+function initConverter() {
+  Object.keys(unitData).forEach((group) => {
+    const option = document.createElement("option");
+    option.value = group;
+    option.textContent = group;
+    category.appendChild(option);
+  });
+
+  category.value = "Length";
+  updateUnits();
+  setDefaultUnits();
+  convertValue();
+}
+
+// ===============================
+// Populate Units
+// ===============================
+function updateUnits() {
+  fromUnit.innerHTML = "";
+  toUnit.innerHTML = "";
+
+  const info = unitData[category.value];
+  const units = info.type === "temperature" ? info.units : Object.keys(info.units);
+
+  units.forEach((unit) => {
+    const optionFrom = document.createElement("option");
+    optionFrom.value = unit;
+    optionFrom.textContent = unit;
+    fromUnit.appendChild(optionFrom);
+
+    const optionTo = document.createElement("option");
+    optionTo.value = unit;
+    optionTo.textContent = unit;
+    toUnit.appendChild(optionTo);
+  });
+}
+
+// ===============================
+// Defaults
+// ===============================
+function setDefaultUnits() {
+  const defaults = {
+    Length: ["in", "mm"],
+    Pressure: ["psi", "kPa"],
+    Force: ["lbf", "N"],
+    Speed: ["mph", "m/s"],
+    Temperature: ["F", "C"],
+    Torque: ["ft·lb", "N·m"]
+  };
+
+  const selected = defaults[category.value];
+
+  if (selected) {
+    fromUnit.value = selected[0];
+    toUnit.value = selected[1];
   }
 }
 
-@media (max-width: 720px) {
-  .nav {
-    padding: 1rem;
+// ===============================
+// Conversion Helpers
+// ===============================
+function convertTemperature(value, from, to) {
+  let celsius;
+
+  if (from === "C") celsius = value;
+  if (from === "F") celsius = (value - 32) * (5 / 9);
+  if (from === "K") celsius = value - 273.15;
+
+  if (to === "C") return celsius;
+  if (to === "F") return (celsius * 9) / 5 + 32;
+  if (to === "K") return celsius + 273.15;
+
+  return value;
+}
+
+function convertUnits(value, categoryName, from, to) {
+  const info = unitData[categoryName];
+
+  if (info.type === "temperature") {
+    return convertTemperature(value, from, to);
   }
 
-  .page {
-    width: min(calc(100% - 1.25rem), var(--max-width));
-    padding: 2rem 0 3rem;
+  const fromFactor = info.units[from];
+  const toFactor = info.units[to];
+
+  return (value * fromFactor) / toFactor;
+}
+
+function formatNumber(value) {
+  if (!Number.isFinite(value)) return "Invalid";
+
+  const absoluteValue = Math.abs(value);
+
+  if (absoluteValue !== 0 && (absoluteValue >= 1000000 || absoluteValue < 0.0001)) {
+    return value.toExponential(4);
   }
 
-  .nav-right {
-    gap: 0.35rem;
+  return Number(value).toFixed(4).replace(/\.?0+$/, "");
+}
+
+function getFormulaText(value, categoryName, from, to, converted) {
+  if (categoryName === "Temperature") {
+    return `${formatNumber(value)} ${from} = ${formatNumber(converted)} ${to}`;
   }
 
-  .nav-link {
-    padding: 0.5rem 0.75rem;
+  const fromFactor = unitData[categoryName].units[from];
+  const toFactor = unitData[categoryName].units[to];
+
+  return `${formatNumber(value)} × (${fromFactor}) ÷ (${toFactor}) = ${formatNumber(converted)} ${to}`;
+}
+
+function getFactorText(categoryName, from, to) {
+  if (categoryName === "Temperature") {
+    if (from === "C" && to === "F") return "Conversion rule: °F = (°C × 9/5) + 32";
+    if (from === "F" && to === "C") return "Conversion rule: °C = (°F - 32) × 5/9";
+    if (from === "C" && to === "K") return "Conversion rule: K = °C + 273.15";
+    if (from === "K" && to === "C") return "Conversion rule: °C = K - 273.15";
+    if (from === "F" && to === "K") return "Conversion rule: K = (°F - 32) × 5/9 + 273.15";
+    if (from === "K" && to === "F") return "Conversion rule: °F = (K - 273.15) × 9/5 + 32";
+    return "Conversion rule: temperature conversion is affine, not a single constant factor.";
+  }
+
+  const fromFactor = unitData[categoryName].units[from];
+  const toFactor = unitData[categoryName].units[to];
+  const factor = fromFactor / toFactor;
+
+  return `Conversion factor: 1 ${from} = ${formatNumber(factor)} ${to}`;
+}
+
+function renderRelatedConversions(value, categoryName, from, to) {
+  relatedResults.innerHTML = "";
+
+  const units = unitData[categoryName].common.filter((unit) => unit !== from && unit !== to);
+
+  units.forEach((unit) => {
+    const converted = convertUnits(value, categoryName, from, unit);
+
+    const row = document.createElement("div");
+    row.className = "related-item";
+    row.innerHTML = `
+      <span class="related-item-label">${formatNumber(value)} ${from} to ${unit}</span>
+      <span class="related-item-value">${formatNumber(converted)} ${unit}</span>
+    `;
+
+    relatedResults.appendChild(row);
+  });
+
+  if (!units.length) {
+    relatedResults.innerHTML = `
+      <div class="related-item">
+        <span class="related-item-label">No additional common units.</span>
+      </div>
+    `;
   }
 }
+
+// ===============================
+// Main Converter
+// ===============================
+function convertValue() {
+  const raw = parseFloat(inputValue.value);
+
+  if (Number.isNaN(raw)) {
+    resultValue.textContent = "—";
+    resultFormula.textContent = "Enter a valid numeric value.";
+    resultFactor.textContent = "Conversion factor: —";
+    relatedResults.innerHTML = "";
+    return;
+  }
+
+  const converted = convertUnits(raw, category.value, fromUnit.value, toUnit.value);
+
+  resultValue.textContent = `${formatNumber(converted)} ${toUnit.value}`;
+  resultFormula.textContent = getFormulaText(raw, category.value, fromUnit.value, toUnit.value, converted);
+  resultFactor.textContent = getFactorText(category.value, fromUnit.value, toUnit.value);
+
+  renderRelatedConversions(raw, category.value, fromUnit.value, toUnit.value);
+}
+
+// ===============================
+// Query Parsing
+// ===============================
+function normalizeQuery(query) {
+  return query
+    .trim()
+    .toLowerCase()
+    .replace(/degrees/g, "deg")
+    .replace(/degree/g, "deg")
+    .replace(/°/g, "deg")
+    .replace(/\s+/g, " ");
+}
+
+function resolveUnit(rawUnit) {
+  const clean = rawUnit.trim().toLowerCase();
+  return unitAliases[clean] || null;
+}
+
+function parseConversionQuery(query) {
+  const normalized = normalizeQuery(query);
+  const patterns = [
+    /^(-?\d*\.?\d+(?:e[+-]?\d+)?)\s+([a-z\/·\-\s]+?)\s+(?:to|in)\s+([a-z\/·\-\s]+)$/i
+  ];
+
+  for (const pattern of patterns) {
+    const match = normalized.match(pattern);
+
+    if (!match) continue;
+
+    const value = parseFloat(match[1]);
+    const fromRaw = match[2].trim();
+    const toRaw = match[3].trim();
+
+    const fromResolved = resolveUnit(fromRaw);
+    const toResolved = resolveUnit(toRaw);
+
+    if (!fromResolved || !toResolved) {
+      return { error: "Could not recognize one or both units." };
+    }
+
+    if (fromResolved.category !== toResolved.category) {
+      return { error: "Units must belong to the same category." };
+    }
+
+    return {
+      value,
+      category: fromResolved.category,
+      from: fromResolved.unit,
+      to: toResolved.unit
+    };
+  }
+
+  return { error: "Use a format like 10 in to mm." };
+}
+
+// ===============================
+// Preview + Confirm Flow
+// ===============================
+function previewNaturalLanguageConversion() {
+  const query = queryInput.value.trim();
+
+  pendingParsedQuery = null;
+  confirmQuery.disabled = true;
+
+  if (!query) {
+    queryStatus.textContent = "Enter a conversion request like 10 in to mm.";
+    previewSummary.textContent = "No request previewed yet.";
+    previewFactor.textContent = "Conversion factor will appear here.";
+    return;
+  }
+
+  const parsed = parseConversionQuery(query);
+
+  if (parsed.error) {
+    queryStatus.textContent = parsed.error;
+    previewSummary.textContent = "Could not preview the request.";
+    previewFactor.textContent = "Conversion factor will appear here.";
+    return;
+  }
+
+  pendingParsedQuery = parsed;
+  confirmQuery.disabled = false;
+
+  queryStatus.textContent = "Preview looks good? Click Convert.";
+  previewSummary.textContent =
+    `Interpreted as: ${formatNumber(parsed.value)} ${parsed.from} to ${parsed.to} (${parsed.category})`;
+  previewFactor.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
+}
+
+function confirmNaturalLanguageConversion() {
+  if (!pendingParsedQuery) {
+    queryStatus.textContent = "Preview a request first.";
+    return;
+  }
+
+  category.value = pendingParsedQuery.category;
+  updateUnits();
+  fromUnit.value = pendingParsedQuery.from;
+  toUnit.value = pendingParsedQuery.to;
+  inputValue.value = pendingParsedQuery.value;
+
+  convertValue();
+
+  queryStatus.textContent =
+    `Converted: ${formatNumber(pendingParsedQuery.value)} ${pendingParsedQuery.from} to ${pendingParsedQuery.to}`;
+}
+
+// ===============================
+// Events
+// ===============================
+category.addEventListener("change", () => {
+  updateUnits();
+  setDefaultUnits();
+  convertValue();
+});
+
+fromUnit.addEventListener("change", convertValue);
+toUnit.addEventListener("change", convertValue);
+inputValue.addEventListener("input", convertValue);
+
+previewQuery.addEventListener("click", previewNaturalLanguageConversion);
+confirmQuery.addEventListener("click", confirmNaturalLanguageConversion);
+
+queryInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    previewNaturalLanguageConversion();
+  }
+});
+
+// ===============================
+// Start
+// ===============================
+initConverter();
