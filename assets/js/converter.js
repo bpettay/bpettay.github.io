@@ -187,33 +187,38 @@ function initializeConverter() {
     return unitAliases[clean] || null;
   }
 
-  function parseConversionQuery(query) {
+  function parsePartialConversionQuery(query) {
     const normalized = normalizeQuery(query);
-    const patterns = [
+
+    // Full conversion: 10 in to mm
+    const fullMatch = normalized.match(
       /^(-?\d*\.?\d+(?:e[+-]?\d+)?)\s+([a-z\/·\-\s]+?)\s+(?:to|in)\s+([a-z\/·\-\s]+)$/i
-    ];
+    );
 
-    for (const pattern of patterns) {
-      const match = normalized.match(pattern);
-
-      if (!match) continue;
-
-      const value = parseFloat(match[1]);
-      const fromRaw = match[2].trim();
-      const toRaw = match[3].trim();
+    if (fullMatch) {
+      const value = parseFloat(fullMatch[1]);
+      const fromRaw = fullMatch[2].trim();
+      const toRaw = fullMatch[3].trim();
 
       const fromResolved = resolveUnit(fromRaw);
       const toResolved = resolveUnit(toRaw);
 
       if (!fromResolved || !toResolved) {
-        return { error: "Could not recognize one or both units." };
+        return {
+          stage: "invalid",
+          message: "Could not recognize one or both units."
+        };
       }
 
       if (fromResolved.category !== toResolved.category) {
-        return { error: "Units must belong to the same category." };
+        return {
+          stage: "invalid",
+          message: "Units must belong to the same category."
+        };
       }
 
       return {
+        stage: "complete",
         value,
         category: fromResolved.category,
         from: fromResolved.unit,
@@ -221,10 +226,111 @@ function initializeConverter() {
       };
     }
 
-    return { error: "Use a format like 10 in to mm." };
+    // Value + from unit only: 10 in
+    const sourceMatch = normalized.match(
+      /^(-?\d*\.?\d+(?:e[+-]?\d+)?)\s+([a-z\/·\-\s]+)$/i
+    );
+
+    if (sourceMatch) {
+      const value = parseFloat(sourceMatch[1]);
+      const fromRaw = sourceMatch[2].trim();
+      const fromResolved = resolveUnit(fromRaw);
+
+      if (!fromResolved) {
+        return {
+          stage: "partial",
+          value,
+          summary: `Value recognized: ${formatNumber(value)}. Waiting for a valid source unit.`,
+          factor: "Source unit not recognized yet."
+        };
+      }
+
+      return {
+        stage: "source",
+        value,
+        category: fromResolved.category,
+        from: fromResolved.unit
+      };
+    }
+
+    // Value only: 10
+    const valueOnlyMatch = normalized.match(
+      /^(-?\d*\.?\d+(?:e[+-]?\d+)?)$/i
+    );
+
+    if (valueOnlyMatch) {
+      const value = parseFloat(valueOnlyMatch[1]);
+
+      return {
+        stage: "value",
+        value
+      };
+    }
+
+    // Something like "10 in to" or "10 in to m"
+    const transitionMatch = normalized.match(
+      /^(-?\d*\.?\d+(?:e[+-]?\d+)?)\s+([a-z\/·\-\s]+?)\s+(?:to|in)\s*([a-z\/·\-\s]*)$/i
+    );
+
+    if (transitionMatch) {
+      const value = parseFloat(transitionMatch[1]);
+      const fromRaw = transitionMatch[2].trim();
+      const toRaw = transitionMatch[3].trim();
+
+      const fromResolved = resolveUnit(fromRaw);
+
+      if (!fromResolved) {
+        return {
+          stage: "partial",
+          value,
+          summary: `Value recognized: ${formatNumber(value)}. Waiting for a valid source unit.`,
+          factor: "Source unit not recognized yet."
+        };
+      }
+
+      if (!toRaw) {
+        return {
+          stage: "awaiting-target",
+          value,
+          category: fromResolved.category,
+          from: fromResolved.unit
+        };
+      }
+
+      const toResolved = resolveUnit(toRaw);
+
+      if (!toResolved) {
+        return {
+          stage: "target-partial",
+          value,
+          category: fromResolved.category,
+          from: fromResolved.unit,
+          rawTarget: toRaw
+        };
+      }
+
+      if (fromResolved.category !== toResolved.category) {
+        return {
+          stage: "invalid",
+          message: "Units must belong to the same category."
+        };
+      }
+
+      return {
+        stage: "complete",
+        value,
+        category: fromResolved.category,
+        from: fromResolved.unit,
+        to: toResolved.unit
+      };
+    }
+
+    return {
+      stage: "idle"
+    };
   }
 
-  function clearLivePreview(message = "No request previewed yet.") {
+  function clearPreview(message = "Start typing a conversion request.") {
     previewSummary.textContent = message;
     previewFactor.textContent = "Conversion factor will appear here.";
   }
@@ -234,30 +340,76 @@ function initializeConverter() {
 
     if (!query) {
       queryStatus.textContent = "Live conversion updates as you type.";
-      clearLivePreview();
+      clearPreview();
       return;
     }
 
-    const parsed = parseConversionQuery(query);
+    const parsed = parsePartialConversionQuery(query);
 
-    if (parsed.error) {
-      queryStatus.textContent = parsed.error;
-      clearLivePreview("Could not preview the request.");
+    if (parsed.stage === "idle") {
+      queryStatus.textContent = "Use a format like 10 in to mm.";
+      clearPreview("Waiting for a numeric value.");
       return;
     }
 
-    category.value = parsed.category;
-    updateUnits();
-    fromUnit.value = parsed.from;
-    toUnit.value = parsed.to;
-    inputValue.value = parsed.value;
+    if (parsed.stage === "invalid") {
+      queryStatus.textContent = parsed.message;
+      clearPreview("Could not interpret the request.");
+      return;
+    }
 
-    previewSummary.textContent =
-      `Interpreted as: ${formatNumber(parsed.value)} ${parsed.from} to ${parsed.to} (${parsed.category})`;
-    previewFactor.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
-    queryStatus.textContent = "Live conversion updated.";
+    if (parsed.stage === "value") {
+      previewSummary.textContent = `Value recognized: ${formatNumber(parsed.value)}`;
+      previewFactor.textContent = "Waiting for source unit.";
+      queryStatus.textContent = "Number detected.";
+      return;
+    }
 
-    renderConversion(parsed.value, parsed.category, parsed.from, parsed.to);
+    if (parsed.stage === "partial") {
+      previewSummary.textContent = parsed.summary;
+      previewFactor.textContent = parsed.factor;
+      queryStatus.textContent = "Partial request detected.";
+      return;
+    }
+
+    if (parsed.stage === "source") {
+      previewSummary.textContent =
+        `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} (${parsed.category})`;
+      previewFactor.textContent = "Waiting for target unit.";
+      queryStatus.textContent = "Source unit recognized.";
+      return;
+    }
+
+    if (parsed.stage === "awaiting-target") {
+      previewSummary.textContent =
+        `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} → target unit pending`;
+      previewFactor.textContent = "Waiting for target unit.";
+      queryStatus.textContent = "Target unit not entered yet.";
+      return;
+    }
+
+    if (parsed.stage === "target-partial") {
+      previewSummary.textContent =
+        `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} → "${parsed.rawTarget}"`;
+      previewFactor.textContent = "Target unit is being typed.";
+      queryStatus.textContent = "Target unit partially recognized.";
+      return;
+    }
+
+    if (parsed.stage === "complete") {
+      category.value = parsed.category;
+      updateUnits();
+      fromUnit.value = parsed.from;
+      toUnit.value = parsed.to;
+      inputValue.value = parsed.value;
+
+      previewSummary.textContent =
+        `Interpreted as: ${formatNumber(parsed.value)} ${parsed.from} to ${parsed.to} (${parsed.category})`;
+      previewFactor.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
+      queryStatus.textContent = "Live conversion updated.";
+
+      renderConversion(parsed.value, parsed.category, parsed.from, parsed.to);
+    }
   }
 
   function bindEvents() {
@@ -286,5 +438,5 @@ function initializeConverter() {
   setDefaultUnits();
   bindEvents();
   convertValue();
-  clearLivePreview();
+  clearPreview();
 }
