@@ -17,9 +17,14 @@
     Styles
   ================================ -->
   <link rel="stylesheet" href="./assets/css/style.css" />
+  <link rel="stylesheet" href="./assets/css/home.css" />
+  <link rel="stylesheet" href="./assets/css/tools.css" />
 </head>
 
 <body>
+  <!-- ===============================
+    Navigation
+  ================================ -->
   <nav class="nav">
     <div class="nav-left">
       <img
@@ -36,6 +41,9 @@
     </div>
   </nav>
 
+  <!-- ===============================
+    Home Page
+  ================================ -->
   <main id="home" class="page active">
     <section class="hero">
       <p class="eyebrow">Mechanical Engineering</p>
@@ -136,13 +144,21 @@
       <h2>Next Steps</h2>
       <div class="cta-row">
         <button class="cta-button" type="button" data-page-target="tools">Open Tools</button>
-        <a class="cta-button secondary" href="./assets/pdf/brock-pettay-resume.pdf" target="_blank" rel="noopener">
+        <a
+          class="cta-button secondary"
+          href="./assets/pdf/brock-pettay-resume.pdf"
+          target="_blank"
+          rel="noopener"
+        >
           View Resume
         </a>
       </div>
     </section>
   </main>
 
+  <!-- ===============================
+    Tools Page
+  ================================ -->
   <main id="tools" class="page">
     <section class="tool-card">
       <div class="tool-header">
@@ -229,6 +245,12 @@
     </section>
   </main>
 
+  <!-- ===============================
+    Scripts
+  ================================ -->
+  <script src="./assets/js/converter-data.js"></script>
+  <script src="./assets/js/navigation.js"></script>
+  <script src="./assets/js/converter.js"></script>
   <script src="./script.js"></script>
 </body>
 </html>
