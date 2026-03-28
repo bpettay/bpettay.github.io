@@ -336,81 +336,100 @@ function initializeConverter() {
   }
 
   function updateLivePreview() {
-    const query = queryInput.value.trim();
+  const query = queryInput.value.trim();
 
-    if (!query) {
-      queryStatus.textContent = "Live conversion updates as you type.";
-      clearPreview();
-      return;
-    }
-
-    const parsed = parsePartialConversionQuery(query);
-
-    if (parsed.stage === "idle") {
-      queryStatus.textContent = "Use a format like 10 in to mm.";
-      clearPreview("Waiting for a numeric value.");
-      return;
-    }
-
-    if (parsed.stage === "invalid") {
-      queryStatus.textContent = parsed.message;
-      clearPreview("Could not interpret the request.");
-      return;
-    }
-
-    if (parsed.stage === "value") {
-      previewSummary.textContent = `Value recognized: ${formatNumber(parsed.value)}`;
-      previewFactor.textContent = "Waiting for source unit.";
-      queryStatus.textContent = "Number detected.";
-      return;
-    }
-
-    if (parsed.stage === "partial") {
-      previewSummary.textContent = parsed.summary;
-      previewFactor.textContent = parsed.factor;
-      queryStatus.textContent = "Partial request detected.";
-      return;
-    }
-
-    if (parsed.stage === "source") {
-      previewSummary.textContent =
-        `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} (${parsed.category})`;
-      previewFactor.textContent = "Waiting for target unit.";
-      queryStatus.textContent = "Source unit recognized.";
-      return;
-    }
-
-    if (parsed.stage === "awaiting-target") {
-      previewSummary.textContent =
-        `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} → target unit pending`;
-      previewFactor.textContent = "Waiting for target unit.";
-      queryStatus.textContent = "Target unit not entered yet.";
-      return;
-    }
-
-    if (parsed.stage === "target-partial") {
-      previewSummary.textContent =
-        `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} → "${parsed.rawTarget}"`;
-      previewFactor.textContent = "Target unit is being typed.";
-      queryStatus.textContent = "Target unit partially recognized.";
-      return;
-    }
-
-    if (parsed.stage === "complete") {
-      category.value = parsed.category;
-      updateUnits();
-      fromUnit.value = parsed.from;
-      toUnit.value = parsed.to;
-      inputValue.value = parsed.value;
-
-      previewSummary.textContent =
-        `Interpreted as: ${formatNumber(parsed.value)} ${parsed.from} to ${parsed.to} (${parsed.category})`;
-      previewFactor.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
-      queryStatus.textContent = "Live conversion updated.";
-
-      renderConversion(parsed.value, parsed.category, parsed.from, parsed.to);
-    }
+  if (!query) {
+    queryStatus.textContent = "Live conversion updates as you type.";
+    clearPreview();
+    return;
   }
+
+  const parsed = parsePartialConversionQuery(query);
+
+  if (parsed.stage === "idle") {
+    queryStatus.textContent = "Use a format like 10 in to mm.";
+    clearPreview("Waiting for a numeric value.");
+    return;
+  }
+
+  if (parsed.stage === "invalid") {
+    queryStatus.textContent = parsed.message;
+    clearPreview("Could not interpret the request.");
+    return;
+  }
+
+  if (parsed.stage === "value") {
+    inputValue.value = parsed.value;
+
+    previewSummary.textContent = `Value recognized: ${formatNumber(parsed.value)}`;
+    previewFactor.textContent = "Waiting for source unit.";
+    queryStatus.textContent = "Number detected.";
+    return;
+  }
+
+  if (parsed.stage === "partial") {
+    inputValue.value = parsed.value;
+
+    previewSummary.textContent = parsed.summary;
+    previewFactor.textContent = parsed.factor;
+    queryStatus.textContent = "Partial request detected.";
+    return;
+  }
+
+  if (parsed.stage === "source") {
+    category.value = parsed.category;
+    updateUnits();
+    fromUnit.value = parsed.from;
+    inputValue.value = parsed.value;
+
+    previewSummary.textContent =
+      `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} (${parsed.category})`;
+    previewFactor.textContent = "Waiting for target unit.";
+    queryStatus.textContent = "Source unit recognized.";
+    return;
+  }
+
+  if (parsed.stage === "awaiting-target") {
+    category.value = parsed.category;
+    updateUnits();
+    fromUnit.value = parsed.from;
+    inputValue.value = parsed.value;
+
+    previewSummary.textContent =
+      `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} → target unit pending`;
+    previewFactor.textContent = "Waiting for target unit.";
+    queryStatus.textContent = "Target unit not entered yet.";
+    return;
+  }
+
+  if (parsed.stage === "target-partial") {
+    category.value = parsed.category;
+    updateUnits();
+    fromUnit.value = parsed.from;
+    inputValue.value = parsed.value;
+
+    previewSummary.textContent =
+      `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} → "${parsed.rawTarget}"`;
+    previewFactor.textContent = "Target unit is being typed.";
+    queryStatus.textContent = "Target unit partially recognized.";
+    return;
+  }
+
+  if (parsed.stage === "complete") {
+    category.value = parsed.category;
+    updateUnits();
+    fromUnit.value = parsed.from;
+    toUnit.value = parsed.to;
+    inputValue.value = parsed.value;
+
+    previewSummary.textContent =
+      `Interpreted as: ${formatNumber(parsed.value)} ${parsed.from} to ${parsed.to} (${parsed.category})`;
+    previewFactor.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
+    queryStatus.textContent = "Live conversion updated.";
+
+    renderConversion(parsed.value, parsed.category, parsed.from, parsed.to);
+  }
+}
 
   function bindEvents() {
     category.addEventListener("change", () => {
