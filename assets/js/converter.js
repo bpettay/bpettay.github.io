@@ -53,6 +53,18 @@ function initializeConverter() {
     }
   }
 
+  function formatNumber(value) {
+    if (!Number.isFinite(value)) return "Invalid";
+
+    const absoluteValue = Math.abs(value);
+
+    if (absoluteValue !== 0 && (absoluteValue >= 1000000 || absoluteValue < 0.0001)) {
+      return value.toExponential(4);
+    }
+
+    return Number(value).toFixed(4).replace(/\.?0+$/, "");
+  }
+
   function convertTemperature(value, from, to) {
     let celsius;
 
@@ -78,18 +90,6 @@ function initializeConverter() {
     const toFactor = info.units[to];
 
     return (value * fromFactor) / toFactor;
-  }
-
-  function formatNumber(value) {
-    if (!Number.isFinite(value)) return "Invalid";
-
-    const absoluteValue = Math.abs(value);
-
-    if (absoluteValue !== 0 && (absoluteValue >= 1000000 || absoluteValue < 0.0001)) {
-      return value.toExponential(4);
-    }
-
-    return Number(value).toFixed(4).replace(/\.?0+$/, "");
   }
 
   function getFormulaText(value, categoryName, from, to, converted) {
@@ -172,6 +172,11 @@ function initializeConverter() {
     renderConversion(raw, category.value, fromUnit.value, toUnit.value);
   }
 
+  function clearPreview(message = "Start typing a conversion request.") {
+    previewSummary.textContent = message;
+    previewFactor.textContent = "Conversion factor will appear here.";
+  }
+
   function normalizeQuery(query) {
     return query
       .trim()
@@ -179,7 +184,45 @@ function initializeConverter() {
       .replace(/degrees/g, "deg")
       .replace(/degree/g, "deg")
       .replace(/°/g, "deg")
+      .replace(/square inches/g, "in^2")
+      .replace(/square inch/g, "in^2")
+      .replace(/square feet/g, "ft^2")
+      .replace(/square foot/g, "ft^2")
+      .replace(/square millimeters/g, "mm^2")
+      .replace(/square millimeter/g, "mm^2")
+      .replace(/square centimeters/g, "cm^2")
+      .replace(/square centimeter/g, "cm^2")
+      .replace(/square meters/g, "m^2")
+      .replace(/square meter/g, "m^2")
+      .replace(/cubic inches/g, "in^3")
+      .replace(/cubic inch/g, "in^3")
+      .replace(/cubic feet/g, "ft^3")
+      .replace(/cubic foot/g, "ft^3")
+      .replace(/cubic centimeters/g, "cm^3")
+      .replace(/cubic centimeter/g, "cm^3")
+      .replace(/cubic meters/g, "m^3")
+      .replace(/cubic meter/g, "m^3")
       .replace(/\s+/g, " ");
+  }
+
+  function parseSmartNumber(raw) {
+    const text = raw.trim();
+
+    if (/^-?\d+\/\d+$/.test(text)) {
+      const [num, den] = text.split("/").map(Number);
+      if (den === 0) return NaN;
+      return num / den;
+    }
+
+    if (/^-?\d+\s+\d+\/\d+$/.test(text)) {
+      const parts = text.split(" ");
+      const whole = Number(parts[0]);
+      const [num, den] = parts[1].split("/").map(Number);
+      if (den === 0) return NaN;
+      return whole >= 0 ? whole + num / den : whole - num / den;
+    }
+
+    return parseFloat(text);
   }
 
   function resolveUnit(rawUnit) {
@@ -190,31 +233,28 @@ function initializeConverter() {
   function parsePartialConversionQuery(query) {
     const normalized = normalizeQuery(query);
 
-    // Full conversion: 10 in to mm
     const fullMatch = normalized.match(
-      /^(-?\d*\.?\d+(?:e[+-]?\d+)?)\s+([a-z\/·\-\s]+?)\s+(?:to|in)\s+([a-z\/·\-\s]+)$/i
+      /^(-?(?:\d+(?:\.\d+)?|\d+\/\d+|\d+\s+\d+\/\d+)(?:e[+-]?\d+)?)\s+([a-z0-9\/\^\.\·\-\s]+?)\s+(?:to|in)\s+([a-z0-9\/\^\.\·\-\s]+)$/i
     );
 
     if (fullMatch) {
-      const value = parseFloat(fullMatch[1]);
+      const value = parseSmartNumber(fullMatch[1]);
       const fromRaw = fullMatch[2].trim();
       const toRaw = fullMatch[3].trim();
 
       const fromResolved = resolveUnit(fromRaw);
       const toResolved = resolveUnit(toRaw);
 
+      if (!Number.isFinite(value)) {
+        return { stage: "invalid", message: "Could not parse the value." };
+      }
+
       if (!fromResolved || !toResolved) {
-        return {
-          stage: "invalid",
-          message: "Could not recognize one or both units."
-        };
+        return { stage: "invalid", message: "Could not recognize one or both units." };
       }
 
       if (fromResolved.category !== toResolved.category) {
-        return {
-          stage: "invalid",
-          message: "Units must belong to the same category."
-        };
+        return { stage: "invalid", message: "Units must belong to the same category." };
       }
 
       return {
@@ -226,58 +266,19 @@ function initializeConverter() {
       };
     }
 
-    // Value + from unit only: 10 in
-    const sourceMatch = normalized.match(
-      /^(-?\d*\.?\d+(?:e[+-]?\d+)?)\s+([a-z\/·\-\s]+)$/i
-    );
-
-    if (sourceMatch) {
-      const value = parseFloat(sourceMatch[1]);
-      const fromRaw = sourceMatch[2].trim();
-      const fromResolved = resolveUnit(fromRaw);
-
-      if (!fromResolved) {
-        return {
-          stage: "partial",
-          value,
-          summary: `Value recognized: ${formatNumber(value)}. Waiting for a valid source unit.`,
-          factor: "Source unit not recognized yet."
-        };
-      }
-
-      return {
-        stage: "source",
-        value,
-        category: fromResolved.category,
-        from: fromResolved.unit
-      };
-    }
-
-    // Value only: 10
-    const valueOnlyMatch = normalized.match(
-      /^(-?\d*\.?\d+(?:e[+-]?\d+)?)$/i
-    );
-
-    if (valueOnlyMatch) {
-      const value = parseFloat(valueOnlyMatch[1]);
-
-      return {
-        stage: "value",
-        value
-      };
-    }
-
-    // Something like "10 in to" or "10 in to m"
     const transitionMatch = normalized.match(
-      /^(-?\d*\.?\d+(?:e[+-]?\d+)?)\s+([a-z\/·\-\s]+?)\s+(?:to|in)\s*([a-z\/·\-\s]*)$/i
+      /^(-?(?:\d+(?:\.\d+)?|\d+\/\d+|\d+\s+\d+\/\d+)(?:e[+-]?\d+)?)\s+([a-z0-9\/\^\.\·\-\s]+?)\s+(?:to|in)\s*([a-z0-9\/\^\.\·\-\s]*)$/i
     );
 
     if (transitionMatch) {
-      const value = parseFloat(transitionMatch[1]);
+      const value = parseSmartNumber(transitionMatch[1]);
       const fromRaw = transitionMatch[2].trim();
       const toRaw = transitionMatch[3].trim();
-
       const fromResolved = resolveUnit(fromRaw);
+
+      if (!Number.isFinite(value)) {
+        return { stage: "invalid", message: "Could not parse the value." };
+      }
 
       if (!fromResolved) {
         return {
@@ -325,111 +326,151 @@ function initializeConverter() {
       };
     }
 
+    const sourceMatch = normalized.match(
+      /^(-?(?:\d+(?:\.\d+)?|\d+\/\d+|\d+\s+\d+\/\d+)(?:e[+-]?\d+)?)\s+([a-z0-9\/\^\.\·\-\s]+)$/i
+    );
+
+    if (sourceMatch) {
+      const value = parseSmartNumber(sourceMatch[1]);
+      const fromRaw = sourceMatch[2].trim();
+      const fromResolved = resolveUnit(fromRaw);
+
+      if (!Number.isFinite(value)) {
+        return { stage: "invalid", message: "Could not parse the value." };
+      }
+
+      if (!fromResolved) {
+        return {
+          stage: "partial",
+          value,
+          summary: `Value recognized: ${formatNumber(value)}. Waiting for a valid source unit.`,
+          factor: "Source unit not recognized yet."
+        };
+      }
+
+      return {
+        stage: "source",
+        value,
+        category: fromResolved.category,
+        from: fromResolved.unit
+      };
+    }
+
+    const valueOnlyMatch = normalized.match(
+      /^(-?(?:\d+(?:\.\d+)?|\d+\/\d+|\d+\s+\d+\/\d+)(?:e[+-]?\d+)?)$/i
+    );
+
+    if (valueOnlyMatch) {
+      const value = parseSmartNumber(valueOnlyMatch[1]);
+
+      if (!Number.isFinite(value)) {
+        return { stage: "invalid", message: "Could not parse the value." };
+      }
+
+      return {
+        stage: "value",
+        value
+      };
+    }
+
     return {
       stage: "idle"
     };
   }
 
-  function clearPreview(message = "Start typing a conversion request.") {
-    previewSummary.textContent = message;
-    previewFactor.textContent = "Conversion factor will appear here.";
-  }
-
   function updateLivePreview() {
-  const query = queryInput.value.trim();
+    const query = queryInput.value.trim();
 
-  if (!query) {
-    queryStatus.textContent = "Live conversion updates as you type.";
-    clearPreview();
-    return;
+    if (!query) {
+      queryStatus.textContent = "Live conversion updates as you type.";
+      clearPreview();
+      return;
+    }
+
+    const parsed = parsePartialConversionQuery(query);
+
+    if (parsed.stage === "idle") {
+      queryStatus.textContent = "Use a format like 10 in to mm.";
+      clearPreview("Waiting for a numeric value.");
+      return;
+    }
+
+    if (parsed.stage === "invalid") {
+      queryStatus.textContent = parsed.message;
+      clearPreview("Could not interpret the request.");
+      return;
+    }
+
+    if (parsed.stage === "value") {
+      inputValue.value = parsed.value;
+      previewSummary.textContent = `Value recognized: ${formatNumber(parsed.value)}`;
+      previewFactor.textContent = "Waiting for source unit.";
+      queryStatus.textContent = "Number detected.";
+      return;
+    }
+
+    if (parsed.stage === "partial") {
+      inputValue.value = parsed.value;
+      previewSummary.textContent = parsed.summary;
+      previewFactor.textContent = parsed.factor;
+      queryStatus.textContent = "Partial request detected.";
+      return;
+    }
+
+    if (parsed.stage === "source") {
+      category.value = parsed.category;
+      updateUnits();
+      fromUnit.value = parsed.from;
+      inputValue.value = parsed.value;
+
+      previewSummary.textContent =
+        `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} (${parsed.category})`;
+      previewFactor.textContent = "Waiting for target unit.";
+      queryStatus.textContent = "Source unit recognized.";
+      return;
+    }
+
+    if (parsed.stage === "awaiting-target") {
+      category.value = parsed.category;
+      updateUnits();
+      fromUnit.value = parsed.from;
+      inputValue.value = parsed.value;
+
+      previewSummary.textContent =
+        `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} → target unit pending`;
+      previewFactor.textContent = "Waiting for target unit.";
+      queryStatus.textContent = "Target unit not entered yet.";
+      return;
+    }
+
+    if (parsed.stage === "target-partial") {
+      category.value = parsed.category;
+      updateUnits();
+      fromUnit.value = parsed.from;
+      inputValue.value = parsed.value;
+
+      previewSummary.textContent =
+        `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} → "${parsed.rawTarget}"`;
+      previewFactor.textContent = "Target unit is being typed.";
+      queryStatus.textContent = "Target unit partially recognized.";
+      return;
+    }
+
+    if (parsed.stage === "complete") {
+      category.value = parsed.category;
+      updateUnits();
+      fromUnit.value = parsed.from;
+      toUnit.value = parsed.to;
+      inputValue.value = parsed.value;
+
+      previewSummary.textContent =
+        `Interpreted as: ${formatNumber(parsed.value)} ${parsed.from} to ${parsed.to} (${parsed.category})`;
+      previewFactor.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
+      queryStatus.textContent = "Live conversion updated.";
+
+      renderConversion(parsed.value, parsed.category, parsed.from, parsed.to);
+    }
   }
-
-  const parsed = parsePartialConversionQuery(query);
-
-  if (parsed.stage === "idle") {
-    queryStatus.textContent = "Use a format like 10 in to mm.";
-    clearPreview("Waiting for a numeric value.");
-    return;
-  }
-
-  if (parsed.stage === "invalid") {
-    queryStatus.textContent = parsed.message;
-    clearPreview("Could not interpret the request.");
-    return;
-  }
-
-  if (parsed.stage === "value") {
-    inputValue.value = parsed.value;
-
-    previewSummary.textContent = `Value recognized: ${formatNumber(parsed.value)}`;
-    previewFactor.textContent = "Waiting for source unit.";
-    queryStatus.textContent = "Number detected.";
-    return;
-  }
-
-  if (parsed.stage === "partial") {
-    inputValue.value = parsed.value;
-
-    previewSummary.textContent = parsed.summary;
-    previewFactor.textContent = parsed.factor;
-    queryStatus.textContent = "Partial request detected.";
-    return;
-  }
-
-  if (parsed.stage === "source") {
-    category.value = parsed.category;
-    updateUnits();
-    fromUnit.value = parsed.from;
-    inputValue.value = parsed.value;
-
-    previewSummary.textContent =
-      `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} (${parsed.category})`;
-    previewFactor.textContent = "Waiting for target unit.";
-    queryStatus.textContent = "Source unit recognized.";
-    return;
-  }
-
-  if (parsed.stage === "awaiting-target") {
-    category.value = parsed.category;
-    updateUnits();
-    fromUnit.value = parsed.from;
-    inputValue.value = parsed.value;
-
-    previewSummary.textContent =
-      `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} → target unit pending`;
-    previewFactor.textContent = "Waiting for target unit.";
-    queryStatus.textContent = "Target unit not entered yet.";
-    return;
-  }
-
-  if (parsed.stage === "target-partial") {
-    category.value = parsed.category;
-    updateUnits();
-    fromUnit.value = parsed.from;
-    inputValue.value = parsed.value;
-
-    previewSummary.textContent =
-      `Interpreted so far: ${formatNumber(parsed.value)} ${parsed.from} → "${parsed.rawTarget}"`;
-    previewFactor.textContent = "Target unit is being typed.";
-    queryStatus.textContent = "Target unit partially recognized.";
-    return;
-  }
-
-  if (parsed.stage === "complete") {
-    category.value = parsed.category;
-    updateUnits();
-    fromUnit.value = parsed.from;
-    toUnit.value = parsed.to;
-    inputValue.value = parsed.value;
-
-    previewSummary.textContent =
-      `Interpreted as: ${formatNumber(parsed.value)} ${parsed.from} to ${parsed.to} (${parsed.category})`;
-    previewFactor.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
-    queryStatus.textContent = "Live conversion updated.";
-
-    renderConversion(parsed.value, parsed.category, parsed.from, parsed.to);
-  }
-}
 
   function bindEvents() {
     category.addEventListener("change", () => {
@@ -441,7 +482,6 @@ function initializeConverter() {
     fromUnit.addEventListener("change", convertValue);
     toUnit.addEventListener("change", convertValue);
     inputValue.addEventListener("input", convertValue);
-
     queryInput.addEventListener("input", updateLivePreview);
 
     queryInput.addEventListener("keydown", (event) => {
