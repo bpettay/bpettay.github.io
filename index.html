@@ -1,185 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- =========================================================
-    Basic Page Setup
-  ========================================================== -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tools | Brock</title>
 
-  <!-- =========================================================
-    Styles
-    Folder structure:
-    root/
-    ├── index.html
-    ├── script.js
-    └── assets/
-        └── css/
-            └── style.css
-  ========================================================== -->
+  <title>Brock | Engineering</title>
+
+  <!-- Favicon (ROOT LEVEL) -->
+  <link rel="icon" type="image/png" href="./Favicon.png">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="./assets/css/style.css" />
 </head>
+
 <body>
-  <!-- =========================================================
-    Background
-  ========================================================== -->
-  <div class="background-grid"></div>
 
-  <!-- =========================================================
-    Main Wrapper
-  ========================================================== -->
-  <main class="page-shell">
-    <!-- =======================================================
-      Header / Hero
-    ======================================================== -->
-    <header class="hero">
-      <p class="eyebrow">Engineering Utilities</p>
-      <h1>Tools</h1>
-      <p class="hero-text">
-        A practical set of quick-use tools for common engineering and shop-floor tasks.
-        Built for speed, clarity, and everyday use.
+  <!-- ================= NAV ================= -->
+  <nav class="nav">
+    <div class="nav-left">
+      <img src="./assets/img/bp-monogram.png" alt="logo" class="logo">
+      <span>Brock</span>
+    </div>
+
+    <div class="nav-right">
+      <button class="nav-link active" data-page="home">Home</button>
+      <button class="nav-link" data-page="tools">Tools</button>
+    </div>
+  </nav>
+
+  <!-- ================= HOME ================= -->
+  <main id="home" class="page active">
+    <section class="hero">
+      <h1>Engineering. Simple.</h1>
+      <p>
+        A clean workspace for practical tools, quick calculations,
+        and real-world engineering use.
       </p>
-    </header>
-
-    <!-- =======================================================
-      Tool Cards Grid
-    ======================================================== -->
-    <section class="tool-grid">
-      <article class="tool-card active-tool">
-        <div class="tool-card-header">
-          <div>
-            <p class="tool-label">Live Tool</p>
-            <h2>Unit Converter</h2>
-          </div>
-          <span class="status-pill">Ready</span>
-        </div>
-
-        <p class="tool-description">
-          Convert common engineering units including length, pressure, force,
-          torque, mass, volume, speed, and temperature.
-        </p>
-
-        <!-- ===================================================
-          Converter Controls
-        ==================================================== -->
-        <div class="converter-panel">
-          <div class="field-group">
-            <label for="category">Category</label>
-            <select id="category"></select>
-          </div>
-
-          <div class="converter-row">
-            <div class="field-group">
-              <label for="inputValue">Value</label>
-              <input
-                id="inputValue"
-                type="number"
-                step="any"
-                placeholder="Enter value"
-                value="1"
-              />
-            </div>
-
-            <div class="field-group">
-              <label for="fromUnit">From</label>
-              <select id="fromUnit"></select>
-            </div>
-
-            <button id="swapUnits" class="icon-button" type="button" aria-label="Swap units">
-              ⇄
-            </button>
-
-            <div class="field-group">
-              <label for="toUnit">To</label>
-              <select id="toUnit"></select>
-            </div>
-          </div>
-
-          <div class="converter-actions">
-            <div class="field-group precision-wrap">
-              <label for="precision">Precision</label>
-              <select id="precision">
-                <option value="2">2 decimals</option>
-                <option value="3">3 decimals</option>
-                <option value="4" selected>4 decimals</option>
-                <option value="5">5 decimals</option>
-                <option value="6">6 decimals</option>
-              </select>
-            </div>
-
-            <button id="copyResult" class="secondary-button" type="button">
-              Copy Result
-            </button>
-          </div>
-
-          <!-- =================================================
-            Result
-          ================================================== -->
-          <div class="result-panel">
-            <p class="result-label">Converted Value</p>
-            <p id="resultValue" class="result-value">—</p>
-            <p id="resultFormula" class="result-formula">Enter a value to begin.</p>
-          </div>
-
-          <!-- =================================================
-            Quick References
-          ================================================== -->
-          <div class="reference-box">
-            <p class="reference-title">Common References</p>
-            <ul id="referenceList"></ul>
-          </div>
-        </div>
-      </article>
-
-      <!-- =====================================================
-        Placeholder Cards For Future Tools
-      ====================================================== -->
-      <article class="tool-card">
-        <div class="tool-card-header">
-          <div>
-            <p class="tool-label">Planned</p>
-            <h2>Drill / Tap Helper</h2>
-          </div>
-          <span class="status-pill muted">Soon</span>
-        </div>
-        <p class="tool-description">
-          Clearance hole sizes, tap drill sizes, and quick decimal / fraction / drill conversions.
-        </p>
-      </article>
-
-      <article class="tool-card">
-        <div class="tool-card-header">
-          <div>
-            <p class="tool-label">Planned</p>
-            <h2>Shop Math</h2>
-          </div>
-          <span class="status-pill muted">Soon</span>
-        </div>
-        <p class="tool-description">
-          Area, volume, cylinder volume, density, and other fast common-use calculations.
-        </p>
-      </article>
-
-      <article class="tool-card">
-        <div class="tool-card-header">
-          <div>
-            <p class="tool-label">Planned</p>
-            <h2>Material Reference</h2>
-          </div>
-          <span class="status-pill muted">Soon</span>
-        </div>
-        <p class="tool-description">
-          Quick reference values for common engineering materials and properties.
-        </p>
-      </article>
     </section>
   </main>
 
-  <!-- =========================================================
-    Script
-    script.js is in root, same level as index.html
-  ========================================================== -->
+  <!-- ================= TOOLS ================= -->
+  <main id="tools" class="page">
+    <section class="tool">
+      <h2>Unit Converter</h2>
+
+      <div class="tool-row">
+        <select id="category"></select>
+      </div>
+
+      <div class="tool-row">
+        <input id="inputValue" type="number" value="1" />
+
+        <select id="fromUnit"></select>
+        <span>→</span>
+        <select id="toUnit"></select>
+      </div>
+
+      <div class="result">
+        <p id="resultValue">—</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- JS -->
   <script src="./script.js"></script>
 </body>
 </html>
