@@ -159,52 +159,36 @@
   <!-- ===============================
     Tools Page
   ================================ -->
-  <main id="tools" class="page">
-    <section class="tool-card">
-      <div class="tool-header">
-        <div>
-          <p class="tool-label">Live Tool</p>
-          <h2>Unit Converter</h2>
-        </div>
+<main id="tools" class="page">
+  <section class="tool-card compact-tool-card">
+    <div class="tool-header compact-tool-header">
+      <div>
+        <p class="tool-label">Live Tool</p>
+        <h2>Unit Converter</h2>
       </div>
+    </div>
 
-      <p class="tool-description">
-        Type a request like <strong>10 in to mm</strong>, preview how it is interpreted,
-        then confirm the conversion.
-      </p>
-
-      <div class="query-panel">
-        <label for="queryInput">Quick Convert</label>
-        <div class="query-row">
-          <input
-            id="queryInput"
-            type="text"
-            placeholder="Example: 10 in to mm"
-            autocomplete="off"
-          />
-        </div>
-
-        <div class="query-actions">
-          <button id="previewQuery" class="cta-button" type="button">Preview</button>
-          <button id="confirmQuery" class="cta-button secondary" type="button" disabled>
-            Convert
-          </button>
-        </div>
+    <div class="compact-converter-layout">
+<div class="compact-query-top">
+  <input
+    id="queryInput"
+    type="text"
+    placeholder="10 in to mm"
+    autocomplete="off"
+  />
 </div>
-
-        <div id="previewPanel" class="preview-panel">
-          <p class="result-label">Interpretation Preview</p>
+        <div id="previewPanel" class="preview-panel compact-preview-panel">
           <p id="previewSummary" class="preview-summary">No request previewed yet.</p>
           <p id="previewFactor" class="preview-factor">Conversion factor will appear here.</p>
         </div>
 
-        <p id="queryStatus" class="query-status">
-          Try: 10 in to mm, 60 mph to m/s, 32 F to C
+        <p id="queryStatus" class="query-status compact-query-status">
+          Live preview updates as you type.
         </p>
       </div>
 
-      <div class="tool-grid">
-        <div class="field-group field-full">
+      <div class="tool-grid compact-tool-grid">
+        <div class="field-group">
           <label for="category">Category</label>
           <select id="category"></select>
         </div>
@@ -225,26 +209,22 @@
         </div>
       </div>
 
-      <div class="result-panel">
-        <p class="result-label">Result</p>
-        <p id="resultValue" class="result-value">—</p>
-        <p id="resultFormula" class="result-formula">Enter a value or preview a request above.</p>
-        <p id="resultFactor" class="result-factor">Conversion factor: —</p>
-      </div>
+      <div class="compact-results-grid">
+        <div class="result-panel compact-result-panel">
+          <p class="result-label">Result</p>
+          <p id="resultValue" class="result-value">—</p>
+          <p id="resultFormula" class="result-formula">Enter a value or type a request.</p>
+          <p id="resultFactor" class="result-factor">Conversion factor: —</p>
+        </div>
 
-      <div class="related-panel">
-        <p class="result-label">Other Common Units</p>
-        <div id="relatedResults" class="related-results"></div>
+        <div class="related-panel compact-related-panel">
+          <p class="result-label">Related Units</p>
+          <div id="relatedResults" class="related-results compact-related-results"></div>
+        </div>
       </div>
-    </section>
-
-    <section class="tool-placeholder-wrap">
-      <div class="tool-placeholder">
-        <h3>Future Tools</h3>
-        <p>Drill / tap helper, shop math, torque helpers, and more.</p>
-      </div>
-    </section>
-  </main>
+    </div>
+  </section>
+</main>
 
   <!-- ===============================
     Scripts
