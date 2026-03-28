@@ -58,14 +58,9 @@
 
 .compact-query-top {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 1fr;
   gap: 0.6rem;
   align-items: center;
-}
-
-.compact-convert-button {
-  min-height: 42px;
-  white-space: nowrap;
 }
 
 .preview-panel {
