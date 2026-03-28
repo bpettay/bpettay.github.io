@@ -9,13 +9,9 @@ function initializeConverter() {
   const relatedResults = document.getElementById("relatedResults");
 
   const queryInput = document.getElementById("queryInput");
-  const previewQuery = document.getElementById("previewQuery");
-  const confirmQuery = document.getElementById("confirmQuery");
   const queryStatus = document.getElementById("queryStatus");
   const previewSummary = document.getElementById("previewSummary");
   const previewFactor = document.getElementById("previewFactor");
-
-  let pendingParsedQuery = null;
 
   function populateCategories() {
     category.innerHTML = "";
@@ -152,6 +148,16 @@ function initializeConverter() {
     }
   }
 
+  function renderConversion(value, categoryName, from, to) {
+    const converted = convertUnits(value, categoryName, from, to);
+
+    resultValue.textContent = `${formatNumber(converted)} ${to}`;
+    resultFormula.textContent = getFormulaText(value, categoryName, from, to, converted);
+    resultFactor.textContent = getFactorText(categoryName, from, to);
+
+    renderRelatedConversions(value, categoryName, from, to);
+  }
+
   function convertValue() {
     const raw = parseFloat(inputValue.value);
 
@@ -163,13 +169,7 @@ function initializeConverter() {
       return;
     }
 
-    const converted = convertUnits(raw, category.value, fromUnit.value, toUnit.value);
-
-    resultValue.textContent = `${formatNumber(converted)} ${toUnit.value}`;
-    resultFormula.textContent = getFormulaText(raw, category.value, fromUnit.value, toUnit.value, converted);
-    resultFactor.textContent = getFactorText(category.value, fromUnit.value, toUnit.value);
-
-    renderRelatedConversions(raw, category.value, fromUnit.value, toUnit.value);
+    renderConversion(raw, category.value, fromUnit.value, toUnit.value);
   }
 
   function normalizeQuery(query) {
@@ -225,8 +225,6 @@ function initializeConverter() {
   }
 
   function clearLivePreview(message = "No request previewed yet.") {
-    pendingParsedQuery = null;
-    confirmQuery.disabled = true;
     previewSummary.textContent = message;
     previewFactor.textContent = "Conversion factor will appear here.";
   }
@@ -235,7 +233,7 @@ function initializeConverter() {
     const query = queryInput.value.trim();
 
     if (!query) {
-      queryStatus.textContent = "Try: 10 in to mm, 60 mph to m/s, 32 F to C";
+      queryStatus.textContent = "Live conversion updates as you type.";
       clearLivePreview();
       return;
     }
@@ -248,31 +246,18 @@ function initializeConverter() {
       return;
     }
 
-    pendingParsedQuery = parsed;
-    confirmQuery.disabled = false;
+    category.value = parsed.category;
+    updateUnits();
+    fromUnit.value = parsed.from;
+    toUnit.value = parsed.to;
+    inputValue.value = parsed.value;
 
-    queryStatus.textContent = "Interpretation updated live. Click Convert to confirm.";
     previewSummary.textContent =
       `Interpreted as: ${formatNumber(parsed.value)} ${parsed.from} to ${parsed.to} (${parsed.category})`;
     previewFactor.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
-  }
+    queryStatus.textContent = "Live conversion updated.";
 
-  function confirmNaturalLanguageConversion() {
-    if (!pendingParsedQuery) {
-      queryStatus.textContent = "Enter a valid conversion request first.";
-      return;
-    }
-
-    category.value = pendingParsedQuery.category;
-    updateUnits();
-    fromUnit.value = pendingParsedQuery.from;
-    toUnit.value = pendingParsedQuery.to;
-    inputValue.value = pendingParsedQuery.value;
-
-    convertValue();
-
-    queryStatus.textContent =
-      `Converted: ${formatNumber(pendingParsedQuery.value)} ${pendingParsedQuery.from} to ${pendingParsedQuery.to}`;
+    renderConversion(parsed.value, parsed.category, parsed.from, parsed.to);
   }
 
   function bindEvents() {
@@ -288,16 +273,9 @@ function initializeConverter() {
 
     queryInput.addEventListener("input", updateLivePreview);
 
-    if (previewQuery) {
-      previewQuery.style.display = "none";
-    }
-
-    confirmQuery.addEventListener("click", confirmNaturalLanguageConversion);
-
     queryInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
-        confirmNaturalLanguageConversion();
       }
     });
   }
