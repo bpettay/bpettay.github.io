@@ -20,9 +20,6 @@
 </head>
 
 <body>
-  <!-- ===============================
-    Navigation
-  ================================ -->
   <nav class="nav">
     <div class="nav-left">
       <img
@@ -39,9 +36,6 @@
     </div>
   </nav>
 
-  <!-- ===============================
-    Home Page
-  ================================ -->
   <main id="home" class="page active">
     <section class="hero">
       <p class="eyebrow">Mechanical Engineering</p>
@@ -149,9 +143,6 @@
     </section>
   </main>
 
-  <!-- ===============================
-    Tools Page
-  ================================ -->
   <main id="tools" class="page">
     <section class="tool-card">
       <div class="tool-header">
@@ -162,8 +153,38 @@
       </div>
 
       <p class="tool-description">
-        Quick conversion for common engineering units.
+        Type a request like <strong>10 in to mm</strong>, preview how it is interpreted,
+        then confirm the conversion.
       </p>
+
+      <div class="query-panel">
+        <label for="queryInput">Quick Convert</label>
+        <div class="query-row">
+          <input
+            id="queryInput"
+            type="text"
+            placeholder="Example: 10 in to mm"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="query-actions">
+          <button id="previewQuery" class="cta-button" type="button">Preview</button>
+          <button id="confirmQuery" class="cta-button secondary" type="button" disabled>
+            Convert
+          </button>
+        </div>
+
+        <div id="previewPanel" class="preview-panel">
+          <p class="result-label">Interpretation Preview</p>
+          <p id="previewSummary" class="preview-summary">No request previewed yet.</p>
+          <p id="previewFactor" class="preview-factor">Conversion factor will appear here.</p>
+        </div>
+
+        <p id="queryStatus" class="query-status">
+          Try: 10 in to mm, 60 mph to m/s, 32 F to C
+        </p>
+      </div>
 
       <div class="tool-grid">
         <div class="field-group field-full">
@@ -190,6 +211,13 @@
       <div class="result-panel">
         <p class="result-label">Result</p>
         <p id="resultValue" class="result-value">—</p>
+        <p id="resultFormula" class="result-formula">Enter a value or preview a request above.</p>
+        <p id="resultFactor" class="result-factor">Conversion factor: —</p>
+      </div>
+
+      <div class="related-panel">
+        <p class="result-label">Other Common Units</p>
+        <div id="relatedResults" class="related-results"></div>
       </div>
     </section>
 
@@ -201,9 +229,6 @@
     </section>
   </main>
 
-  <!-- ===============================
-    Script
-  ================================ -->
   <script src="./script.js"></script>
 </body>
 </html>
