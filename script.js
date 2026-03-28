@@ -1,103 +1,436 @@
-// ================= NAVIGATION =================
-const tabs = document.querySelectorAll(".nav-link");
-const pages = document.querySelectorAll(".page");
+/* ===============================
+   Root
+=============================== */
+:root {
+  --bg: #0b0f17;
+  --panel: #121927;
+  --panel-2: #161f30;
+  --border: #273247;
+  --border-soft: #202a3d;
+  --text: #e8eef8;
+  --text-muted: #9aa8bf;
+  --accent: #dbe6ff;
+  --max-width: 960px;
+  --radius: 14px;
+}
 
-tabs.forEach((tab) => {
-  tab.addEventListener("click", () => {
-    const target = tab.dataset.page;
+/* ===============================
+   Reset
+=============================== */
+* {
+  box-sizing: border-box;
+}
 
-    tabs.forEach((t) => t.classList.remove("active"));
-    tab.classList.add("active");
+html {
+  scroll-behavior: smooth;
+}
 
-    pages.forEach((p) => {
-      p.classList.remove("active");
-      if (p.id === target) p.classList.add("active");
-    });
-  });
-});
+body {
+  margin: 0;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
 
-// ================= UNIT DATA =================
-const unitData = {
-  Length: {
-    units: { mm: 0.001, cm: 0.01, m: 1, in: 0.0254, ft: 0.3048 }
-  },
-  Pressure: {
-    units: { Pa: 1, kPa: 1000, MPa: 1e6, psi: 6894.757 }
-  },
-  Force: {
-    units: { N: 1, kN: 1000, lbf: 4.44822 }
-  },
-  Speed: {
-    units: { "m/s": 1, mph: 0.44704, "km/h": 0.27778 }
+/* ===============================
+   Navigation
+=============================== */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.site-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.nav-right {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nav-link {
+  font: inherit;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 0.55rem 0.9rem;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.nav-link.active {
+  color: var(--text);
+  border-color: var(--border);
+  background: var(--panel);
+}
+
+/* ===============================
+   Pages
+=============================== */
+.page {
+  display: none;
+  width: min(calc(100% - 2rem), var(--max-width));
+  margin: 0 auto;
+  padding: 3rem 0 4rem;
+}
+
+.page.active {
+  display: block;
+}
+
+/* ===============================
+   Home
+=============================== */
+.hero {
+  padding: 2rem 0 1rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2.3rem, 5vw, 4.25rem);
+  line-height: 1.05;
+  max-width: 780px;
+}
+
+.hero-text {
+  max-width: 700px;
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+.home-section,
+.feature-section,
+.roadmap-section,
+.cta-section {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.home-section h2,
+.feature-section h2,
+.roadmap-section h2,
+.cta-section h2 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.home-section p,
+.feature-section p,
+.roadmap-section p,
+.cta-section p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ===============================
+   Featured Areas
+=============================== */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.feature-card {
+  padding: 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: var(--panel-2);
+}
+
+.feature-card h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* ===============================
+   Roadmap
+=============================== */
+.roadmap-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.roadmap-item {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: var(--panel-2);
+}
+
+.roadmap-item h3 {
+  margin: 0 0 0.4rem;
+}
+
+.roadmap-item p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.roadmap-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0.4rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--border);
+}
+
+.roadmap-status.current {
+  background: #1b2638;
+  color: var(--text);
+}
+
+.roadmap-status.next {
+  background: #182235;
+  color: var(--text);
+}
+
+.roadmap-status.later {
+  background: #141c2a;
+  color: var(--text-muted);
+}
+
+/* ===============================
+   CTA
+=============================== */
+.cta-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cta-button:hover {
+  border-color: #3a4a66;
+}
+
+.cta-button.secondary {
+  color: var(--text-muted);
+}
+
+/* ===============================
+   Tools
+=============================== */
+.tool-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.tool-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tool-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.tool-card h2 {
+  margin: 0;
+}
+
+.tool-description {
+  margin: 0.9rem 0 1.2rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.field-full {
+  grid-column: 1 / -1;
+}
+
+label {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+input,
+select {
+  width: 100%;
+  font: inherit;
+  padding: 0.85rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #44536f;
+}
+
+.result-panel {
+  margin-top: 1.2rem;
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+}
+
+.result-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.result-value {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.tool-placeholder-wrap {
+  margin-top: 1rem;
+}
+
+.tool-placeholder {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.tool-placeholder h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.tool-placeholder p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ===============================
+   Responsive
+=============================== */
+@media (max-width: 820px) {
+  .feature-grid,
+  .tool-grid {
+    grid-template-columns: 1fr;
   }
-};
 
-// ================= ELEMENTS =================
-const category = document.getElementById("category");
-const fromUnit = document.getElementById("fromUnit");
-const toUnit = document.getElementById("toUnit");
-const inputValue = document.getElementById("inputValue");
-const resultValue = document.getElementById("resultValue");
-
-// ================= INIT =================
-function init() {
-  Object.keys(unitData).forEach((cat) => {
-    const option = document.createElement("option");
-    option.value = cat;
-    option.textContent = cat;
-    category.appendChild(option);
-  });
-
-  category.value = "Length";
-  updateUnits();
-  convert();
+  .roadmap-item {
+    grid-template-columns: 1fr;
+  }
 }
 
-// ================= UPDATE UNITS =================
-function updateUnits() {
-  fromUnit.innerHTML = "";
-  toUnit.innerHTML = "";
-
-  const units = Object.keys(unitData[category.value].units);
-
-  units.forEach((u) => {
-    const o1 = document.createElement("option");
-    const o2 = document.createElement("option");
-
-    o1.value = o2.value = u;
-    o1.textContent = o2.textContent = u;
-
-    fromUnit.appendChild(o1);
-    toUnit.appendChild(o2);
-  });
-
-  fromUnit.value = units[0];
-  toUnit.value = units[1] || units[0];
-}
-
-// ================= CONVERT =================
-function convert() {
-  const val = parseFloat(inputValue.value);
-  if (isNaN(val)) {
-    resultValue.textContent = "—";
-    return;
+@media (max-width: 720px) {
+  .nav {
+    padding: 1rem;
   }
 
-  const data = unitData[category.value].units;
-  const result = (val * data[fromUnit.value]) / data[toUnit.value];
+  .page {
+    width: min(calc(100% - 1.25rem), var(--max-width));
+    padding: 2rem 0 3rem;
+  }
 
-  resultValue.textContent = result.toFixed(4) + " " + toUnit.value;
+  .nav-right {
+    gap: 0.35rem;
+  }
+
+  .nav-link {
+    padding: 0.5rem 0.75rem;
+  }
 }
-
-// ================= EVENTS =================
-category.addEventListener("change", () => {
-  updateUnits();
-  convert();
-});
-
-fromUnit.addEventListener("change", convert);
-toUnit.addEventListener("change", convert);
-inputValue.addEventListener("input", convert);
-
-// ================= START =================
-init();
