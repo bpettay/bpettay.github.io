@@ -1,0 +1,162 @@
+.hero {
+  padding: 2rem 0 1rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2.3rem, 5vw, 4.25rem);
+  line-height: 1.05;
+  max-width: 780px;
+}
+
+.hero-text {
+  max-width: 700px;
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+.home-section,
+.feature-section,
+.roadmap-section,
+.cta-section {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.home-section h2,
+.feature-section h2,
+.roadmap-section h2,
+.cta-section h2 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.home-section p,
+.feature-section p,
+.roadmap-section p,
+.cta-section p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ===============================
+   Featured Areas
+=============================== */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.feature-card {
+  padding: 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: var(--panel-2);
+}
+
+.feature-card h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* ===============================
+   Roadmap
+=============================== */
+.roadmap-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.roadmap-item {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: var(--panel-2);
+}
+
+.roadmap-item h3 {
+  margin: 0 0 0.4rem;
+}
+
+.roadmap-item p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.roadmap-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0.4rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--border);
+}
+
+.roadmap-status.current {
+  background: #1b2638;
+  color: var(--text);
+}
+
+.roadmap-status.next {
+  background: #182235;
+  color: var(--text);
+}
+
+.roadmap-status.later {
+  background: #141c2a;
+  color: var(--text-muted);
+}
+
+/* ===============================
+   CTA
+=============================== */
+.cta-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+@media (max-width: 820px) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .roadmap-item {
+    grid-template-columns: 1fr;
+  }
+}
