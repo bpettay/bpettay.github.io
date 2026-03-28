@@ -224,16 +224,19 @@ function initializeConverter() {
     return { error: "Use a format like 10 in to mm." };
   }
 
-  function previewNaturalLanguageConversion() {
-    const query = queryInput.value.trim();
-
+  function clearLivePreview(message = "No request previewed yet.") {
     pendingParsedQuery = null;
     confirmQuery.disabled = true;
+    previewSummary.textContent = message;
+    previewFactor.textContent = "Conversion factor will appear here.";
+  }
+
+  function updateLivePreview() {
+    const query = queryInput.value.trim();
 
     if (!query) {
-      queryStatus.textContent = "Enter a conversion request like 10 in to mm.";
-      previewSummary.textContent = "No request previewed yet.";
-      previewFactor.textContent = "Conversion factor will appear here.";
+      queryStatus.textContent = "Try: 10 in to mm, 60 mph to m/s, 32 F to C";
+      clearLivePreview();
       return;
     }
 
@@ -241,15 +244,14 @@ function initializeConverter() {
 
     if (parsed.error) {
       queryStatus.textContent = parsed.error;
-      previewSummary.textContent = "Could not preview the request.";
-      previewFactor.textContent = "Conversion factor will appear here.";
+      clearLivePreview("Could not preview the request.");
       return;
     }
 
     pendingParsedQuery = parsed;
     confirmQuery.disabled = false;
 
-    queryStatus.textContent = "Preview looks good? Click Convert.";
+    queryStatus.textContent = "Interpretation updated live. Click Convert to confirm.";
     previewSummary.textContent =
       `Interpreted as: ${formatNumber(parsed.value)} ${parsed.from} to ${parsed.to} (${parsed.category})`;
     previewFactor.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
@@ -257,7 +259,7 @@ function initializeConverter() {
 
   function confirmNaturalLanguageConversion() {
     if (!pendingParsedQuery) {
-      queryStatus.textContent = "Preview a request first.";
+      queryStatus.textContent = "Enter a valid conversion request first.";
       return;
     }
 
@@ -284,13 +286,18 @@ function initializeConverter() {
     toUnit.addEventListener("change", convertValue);
     inputValue.addEventListener("input", convertValue);
 
-    previewQuery.addEventListener("click", previewNaturalLanguageConversion);
+    queryInput.addEventListener("input", updateLivePreview);
+
+    if (previewQuery) {
+      previewQuery.style.display = "none";
+    }
+
     confirmQuery.addEventListener("click", confirmNaturalLanguageConversion);
 
     queryInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
-        previewNaturalLanguageConversion();
+        confirmNaturalLanguageConversion();
       }
     });
   }
@@ -301,4 +308,5 @@ function initializeConverter() {
   setDefaultUnits();
   bindEvents();
   convertValue();
+  clearLivePreview();
 }
