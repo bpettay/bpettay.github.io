@@ -1,68 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- ===============================
+    Basic Meta
+  ================================ -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- ===============================
+    Title + Favicon
+  ================================ -->
   <title>Brock | Engineering</title>
+  <link rel="icon" type="image/png" href="./Favicon.png" />
 
-  <!-- Favicon (ROOT LEVEL) -->
-  <link rel="icon" type="image/png" href="./Favicon.png">
-
-  <!-- CSS -->
+  <!-- ===============================
+    Styles
+  ================================ -->
   <link rel="stylesheet" href="./assets/css/style.css" />
 </head>
 
 <body>
-
-  <!-- ================= NAV ================= -->
+  <!-- ===============================
+    Navigation
+  ================================ -->
   <nav class="nav">
     <div class="nav-left">
-      <img src="./assets/img/bp-monogram.png" alt="logo" class="logo">
-      <span>Brock</span>
+      <img
+        src="./assets/img/bp-monogram.png"
+        alt="Brock Pettay monogram"
+        class="logo"
+      />
+      <span class="site-name">Brock</span>
     </div>
 
     <div class="nav-right">
-      <button class="nav-link active" data-page="home">Home</button>
-      <button class="nav-link" data-page="tools">Tools</button>
+      <button class="nav-link active" data-page="home" type="button">Home</button>
+      <button class="nav-link" data-page="tools" type="button">Tools</button>
     </div>
   </nav>
 
-  <!-- ================= HOME ================= -->
+  <!-- ===============================
+    Home Page
+  ================================ -->
   <main id="home" class="page active">
     <section class="hero">
-      <h1>Engineering. Simple.</h1>
-      <p>
-        A clean workspace for practical tools, quick calculations,
-        and real-world engineering use.
+      <p class="eyebrow">Mechanical Engineering</p>
+      <h1>Practical tools, project work, and clean presentation.</h1>
+      <p class="hero-text">
+        This site is built to keep engineering work simple, organized, and useful.
+        The focus is on practical tools, selected project work, and straightforward
+        presentation without extra clutter.
       </p>
     </section>
-  </main>
 
-  <!-- ================= TOOLS ================= -->
-  <main id="tools" class="page">
-    <section class="tool">
-      <h2>Unit Converter</h2>
+    <section class="home-section">
+      <h2>About</h2>
+      <p>
+        I’m Brock Pettay, a mechanical engineering student focused on practical
+        engineering work, testing, design, and problem solving. This site serves
+        as a simple hub for tools, technical projects, and professional material.
+      </p>
+    </section>
 
-      <div class="tool-row">
-        <select id="category"></select>
+    <section class="feature-section">
+      <h2>Featured Areas</h2>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <h3>Tools</h3>
+          <p>
+            Quick engineering utilities built for work and project use, starting
+            with a unit converter and expanding over time.
+          </p>
+        </article>
+
+        <article class="feature-card">
+          <h3>Projects</h3>
+          <p>
+            A place for selected technical work, design projects, analysis, and
+            engineering development as the site grows.
+          </p>
+        </article>
+
+        <article class="feature-card">
+          <h3>Resume</h3>
+          <p>
+            Professional background, experience, and supporting material kept in
+            one clean and accessible place.
+          </p>
+        </article>
       </div>
+    </section>
 
-      <div class="tool-row">
-        <input id="inputValue" type="number" value="1" />
+    <section class="home-section">
+      <h2>Why This Site Exists</h2>
+      <p>
+        The goal is to keep useful engineering resources in one place. Instead of
+        overbuilding the site, the focus is on making it clean, readable, and
+        genuinely useful for real work.
+      </p>
+    </section>
 
-        <select id="fromUnit"></select>
-        <span>→</span>
-        <select id="toUnit"></select>
+    <section class="roadmap-section">
+      <h2>Roadmap</h2>
+      <div class="roadmap-list">
+        <article class="roadmap-item">
+          <span class="roadmap-status current">Current</span>
+          <div>
+            <h3>Core Site Structure</h3>
+            <p>
+              Build out a clean landing page and a simple tools section that can
+              expand without becoming messy.
+            </p>
+          </div>
+        </article>
+
+        <article class="roadmap-item">
+          <span class="roadmap-status next">Next</span>
+          <div>
+            <h3>Practical Engineering Tools</h3>
+            <p>
+              Add tools like drill and tap references, shop math, torque helpers,
+              and other utilities that are actually useful in work and projects.
+            </p>
+          </div>
+        </article>
+
+        <article class="roadmap-item">
+          <span class="roadmap-status later">Later</span>
+          <div>
+            <h3>Project Showcase</h3>
+            <p>
+              Add selected engineering projects, technical writeups, analysis, and
+              documentation in a format that stays clean and easy to navigate.
+            </p>
+          </div>
+        </article>
       </div>
+    </section>
 
-      <div class="result">
-        <p id="resultValue">—</p>
+    <section class="cta-section">
+      <h2>Next Steps</h2>
+      <div class="cta-row">
+        <button class="cta-button" type="button" data-page-target="tools">Open Tools</button>
+        <a class="cta-button secondary" href="./assets/pdf/brock-pettay-resume.pdf" target="_blank" rel="noopener">
+          View Resume
+        </a>
       </div>
     </section>
   </main>
 
-  <!-- JS -->
+  <!-- ===============================
+    Tools Page
+  ================================ -->
+  <main id="tools" class="page">
+    <section class="tool-card">
+      <div class="tool-header">
+        <div>
+          <p class="tool-label">Live Tool</p>
+          <h2>Unit Converter</h2>
+        </div>
+      </div>
+
+      <p class="tool-description">
+        Quick conversion for common engineering units.
+      </p>
+
+      <div class="tool-grid">
+        <div class="field-group field-full">
+          <label for="category">Category</label>
+          <select id="category"></select>
+        </div>
+
+        <div class="field-group">
+          <label for="inputValue">Value</label>
+          <input id="inputValue" type="number" step="any" value="1" />
+        </div>
+
+        <div class="field-group">
+          <label for="fromUnit">From</label>
+          <select id="fromUnit"></select>
+        </div>
+
+        <div class="field-group">
+          <label for="toUnit">To</label>
+          <select id="toUnit"></select>
+        </div>
+      </div>
+
+      <div class="result-panel">
+        <p class="result-label">Result</p>
+        <p id="resultValue" class="result-value">—</p>
+      </div>
+    </section>
+
+    <section class="tool-placeholder-wrap">
+      <div class="tool-placeholder">
+        <h3>Future Tools</h3>
+        <p>Drill / tap helper, shop math, torque helpers, and more.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===============================
+    Script
+  ================================ -->
   <script src="./script.js"></script>
 </body>
 </html>
