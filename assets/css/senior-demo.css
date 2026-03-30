@@ -330,14 +330,13 @@
 
 @media (max-width: 900px) {
   .sd-demo {
-    width: min(calc(100% - 0.8rem), 1840px);
+    width: min(calc(100vw - 0.6rem), 2400px);
   }
 
   .sd-chart-card canvas {
     height: 300px;
   }
 }
-
 @media (max-width: 640px) {
   .sd-demo-header {
     padding: 0.9rem;
