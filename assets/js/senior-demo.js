@@ -143,7 +143,21 @@
           chartState.lateral.activeView = target;
           resetLateralPlayback();
         }
+function renderActiveLongitudinalChartOnly() {
+  if (chartState.longitudinal.activeView === "accel") {
+    renderLongitudinalAccelChart();
+  } else {
+    renderLongitudinalBrakeChart();
+  }
+}
 
+function renderActiveLateralChartOnly() {
+  if (chartState.lateral.activeView === "sweep") {
+    renderLateralSweepChart();
+  } else {
+    renderLateralHandlingChart();
+  }
+}
         renderVisibleCharts();
       });
     });
@@ -233,21 +247,24 @@
   }
 
   function tickLongitudinal() {
-    const state = playbackState.long;
-    if (!state.isPlaying) return;
+  const state = playbackState.long;
+  if (!state.isPlaying) return;
 
-    const now = performance.now();
-    state.progress = Math.min((now - state.startTime) / state.durationMs, 1);
+  const now = performance.now();
+  state.progress = Math.min((now - state.startTime) / state.durationMs, 1);
 
-    updateLongitudinalAnimation();
-    renderVisibleCharts();
+  updateLongitudinalAnimation();
+  renderActiveLongitudinalChartOnly();
 
-    if (state.progress >= 1) {
-      state.isPlaying = false;
-      state.frameId = null;
-      setStatus("sd-long-status", "Complete");
-      return;
-    }
+  if (state.progress >= 1) {
+    state.isPlaying = false;
+    state.frameId = null;
+    setStatus("sd-long-status", "Complete");
+    return;
+  }
+
+  state.frameId = requestAnimationFrame(tickLongitudinal);
+}
 
     state.frameId = requestAnimationFrame(tickLongitudinal);
   }
@@ -275,22 +292,24 @@
   }
 
   function tickLateral() {
-    const state = playbackState.lat;
-    if (!state.isPlaying) return;
+  const state = playbackState.lat;
+  if (!state.isPlaying) return;
 
-    const now = performance.now();
-    state.progress = Math.min((now - state.startTime) / state.durationMs, 1);
+  const now = performance.now();
+  state.progress = Math.min((now - state.startTime) / state.durationMs, 1);
 
-    updateLateralAnimation();
-    renderVisibleCharts();
+  updateLateralAnimation();
+  renderActiveLateralChartOnly();
 
-    if (state.progress >= 1) {
-      state.isPlaying = false;
-      state.frameId = null;
-      setStatus("sd-lat-status", "Complete");
-      return;
-    }
+  if (state.progress >= 1) {
+    state.isPlaying = false;
+    state.frameId = null;
+    setStatus("sd-lat-status", "Complete");
+    return;
+  }
 
+  state.frameId = requestAnimationFrame(tickLateral);
+}
     state.frameId = requestAnimationFrame(tickLateral);
   }
 
@@ -352,7 +371,7 @@ function updateLongitudinalAnimation() {
   normalized = Math.max(0, Math.min(1, normalized));
 
   const xPx = usableWidth * normalized;
-  car.style.transform = `translate(${xPx}px, -50%)`;
+  car.style.transform = `translate3d(${xPx}px, -50%, 0)`;
 
   readout.innerHTML = `
     <span>Time: ${formatPlaybackValue(time)} s</span>
@@ -392,7 +411,7 @@ function updateLongitudinalAnimation() {
 
     car.style.left = `${x}px`;
     car.style.top = `${y}px`;
-    car.style.transform = `translate(-50%, -50%) rotate(${rotation}rad)`;
+    car.style.transform = `translate3d(-50%, -50%, 0) rotate(${rotation}rad)`;
 
     const time = interpolateLabelValue(activeChart.labels, progress);
     const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
