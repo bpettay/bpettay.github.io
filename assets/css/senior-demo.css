@@ -39,6 +39,7 @@
   display: grid;
   gap: 0.95rem;
 }
+
 .sd-demo-header {
   display: flex;
   align-items: center;
@@ -169,6 +170,207 @@
     ),
     rgba(12, 20, 34, 0.94);
   color: var(--sd-text);
+}
+
+/* =========================================================
+   Playback Controls
+========================================================= */
+
+.sd-playback-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.sd-playback-btn {
+  border: 1px solid rgba(135, 184, 255, 0.26);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(135, 184, 255, 0.14),
+      rgba(182, 156, 255, 0.08)
+    ),
+    rgba(12, 20, 34, 0.94);
+  color: var(--sd-text);
+  border-radius: 999px;
+  padding: 0.42rem 0.82rem;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.sd-playback-btn:hover {
+  border-color: rgba(135, 184, 255, 0.42);
+  transform: translateY(-1px);
+}
+
+.sd-playback-btn.secondary {
+  background: rgba(9, 15, 26, 0.78);
+  color: var(--sd-text-muted);
+  border-color: var(--sd-border);
+}
+
+.sd-playback-status {
+  color: var(--sd-text-soft);
+  font-size: 0.74rem;
+  font-weight: 600;
+  margin-left: 0.15rem;
+}
+
+/* =========================================================
+   Animation Stage
+========================================================= */
+
+.sd-animation-stage {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.7rem;
+  border-radius: var(--sd-radius-lg);
+  border: 1px solid var(--sd-border);
+  background: rgba(8, 13, 24, 0.62);
+}
+
+.sd-live-readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  color: var(--sd-text-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+/* =========================================================
+   Longitudinal Animation
+========================================================= */
+
+.sd-track {
+  position: relative;
+  height: 88px;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(10, 16, 28, 0.88), rgba(5, 9, 18, 0.92));
+  overflow: hidden;
+}
+
+.sd-track-line {
+  position: absolute;
+  left: 3.5%;
+  right: 3.5%;
+  top: 50%;
+  height: 6px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(135, 184, 255, 0.16),
+      rgba(143, 224, 178, 0.18),
+      rgba(182, 156, 255, 0.16)
+    );
+  box-shadow: 0 0 0 1px rgba(135, 184, 255, 0.08) inset;
+}
+
+.sd-stage-marker {
+  position: absolute;
+  top: 13px;
+  color: var(--sd-text-soft);
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.sd-stage-marker.start {
+  left: 3.5%;
+}
+
+.sd-stage-marker.end {
+  right: 3.5%;
+}
+
+.sd-long-car {
+  position: absolute;
+  left: 3.5%;
+  top: 50%;
+  width: 48px;
+  height: 24px;
+  transform: translate(0, -50%);
+  transition: transform 0.08s linear;
+}
+
+/* =========================================================
+   Lateral Animation
+========================================================= */
+
+.sd-corner-wrap {
+  position: relative;
+  height: 180px;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 70% 30%, rgba(135, 184, 255, 0.06), transparent 34%),
+    linear-gradient(180deg, rgba(10, 16, 28, 0.88), rgba(5, 9, 18, 0.92));
+  overflow: hidden;
+}
+
+.sd-corner-path {
+  position: absolute;
+  inset: 20px;
+  border: 6px solid rgba(135, 184, 255, 0.14);
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  border-radius: 999px;
+  transform: rotate(45deg);
+}
+
+.sd-lat-car {
+  position: absolute;
+  left: 22%;
+  top: 72%;
+  width: 48px;
+  height: 24px;
+  transform: translate(-50%, -50%) rotate(-20deg);
+  transform-origin: center;
+  transition: transform 0.08s linear;
+}
+
+/* =========================================================
+   Shared Car Styling
+========================================================= */
+
+.sd-car-body {
+  position: absolute;
+  inset: 4px 5px;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(135, 184, 255, 0.9), rgba(182, 156, 255, 0.84));
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+    0 6px 14px rgba(0, 0, 0, 0.22);
+}
+
+.sd-car-wheel {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #05070c;
+  box-shadow: 0 0 0 1px rgba(234, 241, 255, 0.16);
+}
+
+.sd-car-wheel.front {
+  top: 2px;
+  right: 6px;
+}
+
+.sd-car-wheel.rear {
+  bottom: 2px;
+  left: 6px;
 }
 
 /* =========================================================
@@ -323,6 +525,7 @@
     height: 390px;
   }
 }
+
 @media (max-width: 1280px) {
   .sd-demo-grid {
     grid-template-columns: 1fr;
@@ -341,7 +544,12 @@
   .sd-chart-card canvas {
     height: 300px;
   }
+
+  .sd-corner-wrap {
+    height: 150px;
+  }
 }
+
 @media (max-width: 640px) {
   .sd-demo-header {
     padding: 0.9rem;
@@ -352,27 +560,32 @@
   }
 
   .sd-tab,
-  .sd-subtab {
+  .sd-subtab,
+  .sd-playback-btn {
     width: 100%;
     justify-content: center;
   }
 
   .sd-tab-row,
-  .sd-subtab-row {
+  .sd-subtab-row,
+  .sd-playback-row {
     gap: 0.3rem;
   }
 
   .sd-chart-card canvas {
     height: 240px;
   }
-}
-  .sd-chart-card canvas {
-    height: 240px;
+
+  .sd-track {
+    height: 72px;
   }
-}
-#senior-demo.page {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 1.4rem 0 2rem;
+
+  .sd-corner-wrap {
+    height: 132px;
+  }
+
+  .sd-live-readout {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
 }
