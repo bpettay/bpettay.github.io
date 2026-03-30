@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="./assets/css/style.css" />
   <link rel="stylesheet" href="./assets/css/home.css" />
   <link rel="stylesheet" href="./assets/css/tools.css" />
+  <link rel="stylesheet" href="./assets/css/senior-demo.css" />
 </head>
 
 <body>
@@ -38,6 +39,7 @@
     <div class="nav-right">
       <button class="nav-link active" data-page="home" type="button">Home</button>
       <button class="nav-link" data-page="tools" type="button">Tools</button>
+      <button class="nav-link" data-page="senior-demo" type="button">Senior Demo</button>
     </div>
   </nav>
 
@@ -159,24 +161,25 @@
   <!-- ===============================
     Tools Page
   ================================ -->
-<main id="tools" class="page">
-  <section class="tool-card compact-tool-card">
-    <div class="tool-header compact-tool-header">
-      <div>
-        <p class="tool-label">Live Tool</p>
-        <h2>Unit Converter</h2>
+  <main id="tools" class="page">
+    <section class="tool-card compact-tool-card">
+      <div class="tool-header compact-tool-header">
+        <div>
+          <p class="tool-label">Live Tool</p>
+          <h2>Unit Converter</h2>
+        </div>
       </div>
-    </div>
 
-    <div class="compact-converter-layout">
-<div class="compact-query-top">
-  <input
-    id="queryInput"
-    type="text"
-    placeholder="10 in to mm"
-    autocomplete="off"
-  />
-</div>
+      <div class="compact-converter-layout">
+        <div class="compact-query-top">
+          <input
+            id="queryInput"
+            type="text"
+            placeholder="10 in to mm"
+            autocomplete="off"
+          />
+        </div>
+
         <div id="previewPanel" class="preview-panel compact-preview-panel">
           <p id="previewSummary" class="preview-summary">No request previewed yet.</p>
           <p id="previewFactor" class="preview-factor">Conversion factor will appear here.</p>
@@ -222,17 +225,267 @@
           <div id="relatedResults" class="related-results compact-related-results"></div>
         </div>
       </div>
-    </div>
-  </section>
-</main>
-<!-- Senior Project Demo Start -->
-<!-- Senior Project Demo End -->
+    </section>
+  </main>
+
+  <!-- ===============================
+    Senior Project Demo Page
+  ================================ -->
+  <main id="senior-demo" class="page">
+    <section class="sd-demo">
+      <div class="sd-demo-header">
+        <div>
+          <p class="sd-demo-eyebrow">Senior Design</p>
+          <h1>Senior Project Demo</h1>
+          <p class="sd-demo-subtitle">Aerodynamic effects on vehicle performance</p>
+        </div>
+      </div>
+
+      <div class="sd-demo-grid">
+        <section class="sd-panel" aria-labelledby="sd-longitudinal-title">
+          <div class="sd-panel-header">
+            <div>
+              <p class="sd-panel-label">Tool 1</p>
+              <h2 id="sd-longitudinal-title">Longitudinal Performance</h2>
+            </div>
+          </div>
+
+          <div class="sd-metric-grid" id="sd-longitudinal-metrics">
+            <article class="sd-metric-card">
+              <p class="sd-metric-label">0–30 mph Time</p>
+              <div class="sd-metric-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+
+            <article class="sd-metric-card">
+              <p class="sd-metric-label">30–0 mph Distance</p>
+              <div class="sd-metric-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+
+            <article class="sd-metric-card">
+              <p class="sd-metric-label">Peak Acceleration</p>
+              <div class="sd-metric-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+
+            <article class="sd-metric-card">
+              <p class="sd-metric-label">Peak Deceleration</p>
+              <div class="sd-metric-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="sd-tab-row">
+            <button class="sd-tab active" type="button" data-sd-group="longitudinal" data-sd-tab="accel">
+              Acceleration
+            </button>
+            <button class="sd-tab" type="button" data-sd-group="longitudinal" data-sd-tab="brake">
+              Braking
+            </button>
+          </div>
+
+          <div class="sd-chart-panel">
+            <div class="sd-chart-grid active" data-sd-panel="longitudinal" data-sd-content="accel">
+              <div class="sd-chart-card">
+                <p class="sd-chart-title">Position vs Time</p>
+                <canvas id="sd-long-accel-position"></canvas>
+              </div>
+              <div class="sd-chart-card">
+                <p class="sd-chart-title">Velocity vs Time</p>
+                <canvas id="sd-long-accel-velocity"></canvas>
+              </div>
+              <div class="sd-chart-card">
+                <p class="sd-chart-title">Acceleration vs Time</p>
+                <canvas id="sd-long-accel-acceleration"></canvas>
+              </div>
+              <div class="sd-chart-card">
+                <p class="sd-chart-title">Axle Loads vs Time</p>
+                <canvas id="sd-long-accel-loads"></canvas>
+              </div>
+            </div>
+
+            <div class="sd-chart-grid" data-sd-panel="longitudinal" data-sd-content="brake">
+              <div class="sd-chart-card">
+                <p class="sd-chart-title">Distance vs Time</p>
+                <canvas id="sd-long-brake-position"></canvas>
+              </div>
+              <div class="sd-chart-card">
+                <p class="sd-chart-title">Velocity vs Time</p>
+                <canvas id="sd-long-brake-velocity"></canvas>
+              </div>
+              <div class="sd-chart-card">
+                <p class="sd-chart-title">Acceleration vs Time</p>
+                <canvas id="sd-long-brake-acceleration"></canvas>
+              </div>
+              <div class="sd-chart-card">
+                <p class="sd-chart-title">Axle Loads vs Time</p>
+                <canvas id="sd-long-brake-loads"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="sd-secondary-grid" id="sd-longitudinal-secondary">
+            <article class="sd-secondary-card">
+              <p class="sd-secondary-label">Max Downforce</p>
+              <div class="sd-secondary-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+
+            <article class="sd-secondary-card">
+              <p class="sd-secondary-label">Max Drag</p>
+              <div class="sd-secondary-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+
+            <article class="sd-secondary-card">
+              <p class="sd-secondary-label">Max Weight Transfer Gain</p>
+              <div class="sd-secondary-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="sd-panel" aria-labelledby="sd-lateral-title">
+          <div class="sd-panel-header">
+            <div>
+              <p class="sd-panel-label">Tool 2</p>
+              <h2 id="sd-lateral-title">Lateral Performance</h2>
+            </div>
+          </div>
+
+          <div class="sd-metric-grid" id="sd-lateral-metrics">
+            <article class="sd-metric-card">
+              <p class="sd-metric-label">Peak High-Speed G</p>
+              <div class="sd-metric-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+
+            <article class="sd-metric-card">
+              <p class="sd-metric-label">FSAE Skidpad G</p>
+              <div class="sd-metric-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+
+            <article class="sd-metric-card">
+              <p class="sd-metric-label">Speed @ R = 15.25 m</p>
+              <div class="sd-metric-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+
+            <article class="sd-metric-card">
+              <p class="sd-metric-label">K @ 1.0 G</p>
+              <div class="sd-metric-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="sd-tab-row">
+            <button class="sd-tab active" type="button" data-sd-group="lateral" data-sd-tab="sweep">
+              Steering Sweep
+            </button>
+            <button class="sd-tab" type="button" data-sd-group="lateral" data-sd-tab="handling">
+              Handling Curve
+            </button>
+          </div>
+
+          <div class="sd-chart-panel">
+            <div class="sd-chart-grid active sd-chart-grid-lateral" data-sd-panel="lateral" data-sd-content="sweep">
+              <div class="sd-chart-card">
+                <p class="sd-chart-title">Steering Input vs Time</p>
+                <canvas id="sd-lat-steer"></canvas>
+              </div>
+              <div class="sd-chart-card">
+                <p class="sd-chart-title">Lateral Acceleration vs Time</p>
+                <canvas id="sd-lat-accel"></canvas>
+              </div>
+              <div class="sd-chart-card">
+                <p class="sd-chart-title">Body Sideslip vs Time</p>
+                <canvas id="sd-lat-sideslip"></canvas>
+              </div>
+              <div class="sd-chart-card">
+                <p class="sd-chart-title">Yaw Rate vs Time</p>
+                <canvas id="sd-lat-yaw"></canvas>
+              </div>
+              <div class="sd-chart-card sd-chart-card-full">
+                <p class="sd-chart-title">Vertical Tire Loads vs Time</p>
+                <canvas id="sd-lat-loads"></canvas>
+              </div>
+            </div>
+
+            <div class="sd-chart-grid active-large" data-sd-panel="lateral" data-sd-content="handling">
+              <div class="sd-chart-card sd-chart-card-full">
+                <p class="sd-chart-title">Handling Curve</p>
+                <canvas id="sd-lat-handling"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="sd-secondary-grid" id="sd-lateral-secondary">
+            <article class="sd-secondary-card">
+              <p class="sd-secondary-label">K Fit Avg</p>
+              <div class="sd-secondary-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+
+            <article class="sd-secondary-card">
+              <p class="sd-secondary-label">Aero Downforce @ Skidpad</p>
+              <div class="sd-secondary-values">
+                <span>ZR26 Base —</span>
+                <span>ZR26 Aero —</span>
+                <span>ZR25 Aero —</span>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
   <!-- ===============================
     Scripts
   ================================ -->
   <script src="./assets/js/converter-data.js"></script>
-<script src="./assets/js/navigation.js"></script>
-<script src="./assets/js/converter.js"></script>
-<script src="./assets/js/script.js"></script>
+  <script src="./assets/js/navigation.js"></script>
+  <script src="./assets/js/converter.js"></script>
+  <script src="./assets/js/senior-demo-data.js"></script>
+  <script src="./assets/js/senior-demo.js"></script>
+  <script src="./assets/js/script.js"></script>
 </body>
 </html>
