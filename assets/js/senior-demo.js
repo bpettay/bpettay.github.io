@@ -77,10 +77,6 @@
     renderVisibleCharts();
   }
 
-  /* =========================================================
-     Tables
-  ========================================================= */
-
   function populateTable(tableId, rows) {
     const table = document.getElementById(tableId);
     if (!table) return;
@@ -108,10 +104,6 @@
     });
   }
 
-  /* =========================================================
-     Main Tabs
-  ========================================================= */
-
   function initMainTabs() {
     const tabs = document.querySelectorAll(".sd-tab");
 
@@ -138,34 +130,18 @@
 
         if (group === "longitudinal") {
           chartState.longitudinal.activeView = target;
+          stopLongitudinalPlayback();
           resetLongitudinalPlayback();
         } else if (group === "lateral") {
           chartState.lateral.activeView = target;
+          stopLateralPlayback();
           resetLateralPlayback();
         }
-function renderActiveLongitudinalChartOnly() {
-  if (chartState.longitudinal.activeView === "accel") {
-    renderLongitudinalAccelChart();
-  } else {
-    renderLongitudinalBrakeChart();
-  }
-}
 
-function renderActiveLateralChartOnly() {
-  if (chartState.lateral.activeView === "sweep") {
-    renderLateralSweepChart();
-  } else {
-    renderLateralHandlingChart();
-  }
-}
         renderVisibleCharts();
       });
     });
   }
-
-  /* =========================================================
-     Sub Tabs
-  ========================================================= */
 
   function initSubTabs() {
     const subtabs = document.querySelectorAll(".sd-subtab");
@@ -183,12 +159,15 @@ function renderActiveLateralChartOnly() {
 
         if (subgroup === "longitudinal-accel") {
           chartState.longitudinal.accel = target;
+          stopLongitudinalPlayback();
           resetLongitudinalPlayback();
         } else if (subgroup === "longitudinal-brake") {
           chartState.longitudinal.brake = target;
+          stopLongitudinalPlayback();
           resetLongitudinalPlayback();
         } else if (subgroup === "lateral-sweep") {
           chartState.lateral.sweep = target;
+          stopLateralPlayback();
           resetLateralPlayback();
         }
 
@@ -196,10 +175,6 @@ function renderActiveLateralChartOnly() {
       });
     });
   }
-
-  /* =========================================================
-     Playback Controls
-  ========================================================= */
 
   function initPlaybackControls() {
     const longPlay = document.getElementById("sd-long-play");
@@ -247,24 +222,21 @@ function renderActiveLateralChartOnly() {
   }
 
   function tickLongitudinal() {
-  const state = playbackState.long;
-  if (!state.isPlaying) return;
+    const state = playbackState.long;
+    if (!state.isPlaying) return;
 
-  const now = performance.now();
-  state.progress = Math.min((now - state.startTime) / state.durationMs, 1);
+    const now = performance.now();
+    state.progress = Math.min((now - state.startTime) / state.durationMs, 1);
 
-  updateLongitudinalAnimation();
-  renderActiveLongitudinalChartOnly();
+    updateLongitudinalAnimation();
+    renderActiveLongitudinalChartOnly();
 
-  if (state.progress >= 1) {
-    state.isPlaying = false;
-    state.frameId = null;
-    setStatus("sd-long-status", "Complete");
-    return;
-  }
-
-  state.frameId = requestAnimationFrame(tickLongitudinal);
-}
+    if (state.progress >= 1) {
+      state.isPlaying = false;
+      state.frameId = null;
+      setStatus("sd-long-status", "Complete");
+      return;
+    }
 
     state.frameId = requestAnimationFrame(tickLongitudinal);
   }
@@ -277,8 +249,7 @@ function renderActiveLateralChartOnly() {
   }
 
   function resetLongitudinalPlayback() {
-    const state = playbackState.long;
-    state.progress = 0;
+    playbackState.long.progress = 0;
     updateLongitudinalAnimation();
     setStatus("sd-long-status", "Ready");
   }
@@ -292,24 +263,22 @@ function renderActiveLateralChartOnly() {
   }
 
   function tickLateral() {
-  const state = playbackState.lat;
-  if (!state.isPlaying) return;
+    const state = playbackState.lat;
+    if (!state.isPlaying) return;
 
-  const now = performance.now();
-  state.progress = Math.min((now - state.startTime) / state.durationMs, 1);
+    const now = performance.now();
+    state.progress = Math.min((now - state.startTime) / state.durationMs, 1);
 
-  updateLateralAnimation();
-  renderActiveLateralChartOnly();
+    updateLateralAnimation();
+    renderActiveLateralChartOnly();
 
-  if (state.progress >= 1) {
-    state.isPlaying = false;
-    state.frameId = null;
-    setStatus("sd-lat-status", "Complete");
-    return;
-  }
+    if (state.progress >= 1) {
+      state.isPlaying = false;
+      state.frameId = null;
+      setStatus("sd-lat-status", "Complete");
+      return;
+    }
 
-  state.frameId = requestAnimationFrame(tickLateral);
-}
     state.frameId = requestAnimationFrame(tickLateral);
   }
 
@@ -321,8 +290,7 @@ function renderActiveLateralChartOnly() {
   }
 
   function resetLateralPlayback() {
-    const state = playbackState.lat;
-    state.progress = 0;
+    playbackState.lat.progress = 0;
     updateLateralAnimation();
     setStatus("sd-lat-status", "Ready");
   }
@@ -332,52 +300,85 @@ function renderActiveLateralChartOnly() {
     if (el) el.textContent = text;
   }
 
-  /* =========================================================
-     Animation Updates
-  ========================================================= */
+  function buildDenseSeries(series, samples = 320) {
+    if (!series || series.length === 0) return [];
+    if (series.length === 1) return new Array(samples).fill(series[0]);
 
-function updateLongitudinalAnimation() {
-  const progress = playbackState.long.progress;
-  const car = document.getElementById("sd-long-car");
-  const readout = document.getElementById("sd-long-readout");
-  const track = document.querySelector("#sd-long-stage .sd-track");
-  if (!car || !readout || !track) return;
+    const dense = [];
+    const maxIndex = series.length - 1;
 
-  const activeChart = getCurrentLongitudinalChart();
-  if (!activeChart) return;
+    for (let i = 0; i < samples; i += 1) {
+      const t = (i / (samples - 1)) * maxIndex;
+      const low = Math.floor(t);
+      const high = Math.min(maxIndex, Math.ceil(t));
+      const frac = t - low;
 
-  const trackRect = track.getBoundingClientRect();
-  const usableWidth = Math.max(trackRect.width - 90, 0);
+      const lowVal = Number(series[low]) || 0;
+      const highVal = Number(series[high]) || lowVal;
 
-  const time = interpolateLabelValue(activeChart.labels, progress);
-  const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
+      dense.push(lowVal + (highVal - lowVal) * frac);
+    }
 
-  let motionSeries = [];
-
-  if (chartState.longitudinal.activeView === "accel") {
-    motionSeries = demoData.longitudinal.charts.accel.position.series[0]?.data || [];
-  } else {
-    motionSeries = demoData.longitudinal.charts.brake.position.series[0]?.data || [];
+    return dense;
   }
 
-  const denseMotionSeries = buildDenseSeries(motionSeries, 320);
-  const motionValue = interpolateDenseSeries(denseMotionSeries, progress);
+  function interpolateDenseSeries(series, progress) {
+    if (!series || series.length === 0) return 0;
+    if (series.length === 1) return series[0];
 
-  const motionMin = Math.min(...denseMotionSeries);
-  const motionMax = Math.max(...denseMotionSeries);
-  const motionRange = Math.max(motionMax - motionMin, 1e-6);
+    const maxIndex = series.length - 1;
+    const rawIndex = Math.max(0, Math.min(1, progress)) * maxIndex;
+    const low = Math.floor(rawIndex);
+    const high = Math.min(maxIndex, Math.ceil(rawIndex));
+    const frac = rawIndex - low;
 
-  let normalized = (motionValue - motionMin) / motionRange;
-  normalized = Math.max(0, Math.min(1, normalized));
+    const lowVal = Number(series[low]) || 0;
+    const highVal = Number(series[high]) || lowVal;
 
-  const xPx = usableWidth * normalized;
-  car.style.transform = `translate3d(${xPx}px, -50%, 0)`;
+    return lowVal + (highVal - lowVal) * frac;
+  }
 
-  readout.innerHTML = `
-    <span>Time: ${formatPlaybackValue(time)} s</span>
-    <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
-  `;
-}
+  function updateLongitudinalAnimation() {
+    const progress = playbackState.long.progress;
+    const car = document.getElementById("sd-long-car");
+    const readout = document.getElementById("sd-long-readout");
+    const track = document.querySelector("#sd-long-stage .sd-track");
+    if (!car || !readout || !track) return;
+
+    const activeChart = getCurrentLongitudinalChart();
+    if (!activeChart) return;
+
+    const trackRect = track.getBoundingClientRect();
+    const usableWidth = Math.max(trackRect.width - 90, 0);
+
+    const time = interpolateLabelValue(activeChart.labels, progress);
+    const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
+
+    let motionSeries = [];
+
+    if (chartState.longitudinal.activeView === "accel") {
+      motionSeries = demoData.longitudinal.charts.accel.position.series[0]?.data || [];
+    } else {
+      motionSeries = demoData.longitudinal.charts.brake.position.series[0]?.data || [];
+    }
+
+    const denseMotionSeries = buildDenseSeries(motionSeries, 400);
+    const motionValue = interpolateDenseSeries(denseMotionSeries, progress);
+
+    const motionMin = Math.min(...denseMotionSeries);
+    const motionMax = Math.max(...denseMotionSeries);
+    const motionRange = Math.max(motionMax - motionMin, 1e-6);
+
+    const normalized = Math.max(0, Math.min(1, (motionValue - motionMin) / motionRange));
+    const xPx = usableWidth * normalized;
+
+    car.style.transform = `translate3d(${xPx}px, -50%, 0)`;
+
+    readout.innerHTML = `
+      <span>Time: ${formatPlaybackValue(time)} s</span>
+      <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
+    `;
+  }
 
   function updateLateralAnimation() {
     const progress = playbackState.lat.progress;
@@ -422,15 +423,27 @@ function updateLongitudinalAnimation() {
     `;
   }
 
-  /* =========================================================
-     Visible Chart Rendering
-  ========================================================= */
-
   function renderVisibleCharts() {
     renderLongitudinalAccelChart();
     renderLongitudinalBrakeChart();
     renderLateralSweepChart();
     renderLateralHandlingChart();
+  }
+
+  function renderActiveLongitudinalChartOnly() {
+    if (chartState.longitudinal.activeView === "accel") {
+      renderLongitudinalAccelChart();
+    } else {
+      renderLongitudinalBrakeChart();
+    }
+  }
+
+  function renderActiveLateralChartOnly() {
+    if (chartState.lateral.activeView === "sweep") {
+      renderLateralSweepChart();
+    } else {
+      renderLateralHandlingChart();
+    }
   }
 
   function renderLongitudinalAccelChart() {
@@ -500,10 +513,6 @@ function updateLongitudinalAnimation() {
     const key = chartState.lateral.sweep;
     return demoData.lateral.charts.sweep[key];
   }
-
-  /* =========================================================
-     Canvas Chart Drawing
-  ========================================================= */
 
   function renderChartById(canvasId, chartData, progress = 1) {
     const canvas = document.getElementById(canvasId);
@@ -708,47 +717,6 @@ function updateLongitudinalAnimation() {
     });
   }
 
-  /* =========================================================
-     Helpers
-  ========================================================= */
-function buildDenseSeries(series, samples = 240) {
-  if (!series || series.length === 0) return [];
-
-  if (series.length === 1) return new Array(samples).fill(series[0]);
-
-  const dense = [];
-  const maxIndex = series.length - 1;
-
-  for (let i = 0; i < samples; i += 1) {
-    const t = (i / (samples - 1)) * maxIndex;
-    const low = Math.floor(t);
-    const high = Math.min(maxIndex, Math.ceil(t));
-    const frac = t - low;
-
-    const lowVal = Number(series[low]) || 0;
-    const highVal = Number(series[high]) || lowVal;
-
-    dense.push(lowVal + (highVal - lowVal) * frac);
-  }
-
-  return dense;
-}
-
-function interpolateDenseSeries(series, progress) {
-  if (!series || series.length === 0) return 0;
-  if (series.length === 1) return series[0];
-
-  const maxIndex = series.length - 1;
-  const rawIndex = Math.max(0, Math.min(1, progress)) * maxIndex;
-  const low = Math.floor(rawIndex);
-  const high = Math.min(maxIndex, Math.ceil(rawIndex));
-  const frac = rawIndex - low;
-
-  const lowVal = Number(series[low]) || 0;
-  const highVal = Number(series[high]) || lowVal;
-
-  return lowVal + (highVal - lowVal) * frac;
-}
   function interpolateLabelValue(labels, progress) {
     if (!labels || !labels.length) return 0;
     const maxIndex = labels.length - 1;
@@ -788,10 +756,6 @@ function interpolateDenseSeries(series, progress) {
     return value.toFixed(2);
   }
 
-  /* =========================================================
-     Resize
-  ========================================================= */
-
   let resizeTimer = null;
 
   window.addEventListener("resize", () => {
@@ -802,10 +766,6 @@ function interpolateDenseSeries(series, progress) {
       renderVisibleCharts();
     }, 120);
   });
-
-  /* =========================================================
-     Start
-  ========================================================= */
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initSeniorDemo);
