@@ -380,48 +380,56 @@
     `;
   }
 
-  function updateLateralAnimation() {
-    const progress = playbackState.lat.progress;
-    const car = document.getElementById("sd-lat-car");
-    const readout = document.getElementById("sd-lat-readout");
-    const wrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
-    if (!car || !readout || !wrap) return;
+ function updateLateralAnimation() {
+  const progress = playbackState.lat.progress;
+  const car = document.getElementById("sd-lat-car");
+  const readout = document.getElementById("sd-lat-readout");
+  const wrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
+  if (!car || !readout || !wrap) return;
 
-    const activeChart = getCurrentLateralChart();
-    if (!activeChart) return;
+  const activeChart = getCurrentLateralChart();
+  if (!activeChart) return;
 
-    const wrapRect = wrap.getBoundingClientRect();
-    const width = wrapRect.width;
-    const height = wrapRect.height;
+  const wrapRect = wrap.getBoundingClientRect();
+  const width = wrapRect.width;
+  const height = wrapRect.height;
 
-    const cx = width * 0.38;
-    const cy = height * 0.78;
-    const rx = width * 0.42;
-    const ry = height * 0.54;
+  const cx = width * 0.5;
+  const cy = height * 0.5;
 
-    const startAngle = Math.PI * 1.02;
-    const endAngle = Math.PI * 1.88;
-    const angle = startAngle + (endAngle - startAngle) * progress;
+  const rx = width * 0.34;
+  const ry = height * 0.34;
 
-    const x = cx + Math.cos(angle) * rx;
-    const y = cy + Math.sin(angle) * ry;
+  let startAngle;
+  let endAngle;
 
-    const dx = -Math.sin(angle) * rx;
-    const dy = Math.cos(angle) * ry;
-    const rotation = Math.atan2(dy, dx);
-
-    car.style.left = `${x}px`;
-    car.style.top = `${y}px`;
-    car.style.transform = `translate3d(-50%, -50%, 0) rotate(${rotation}rad)`;
-
-    const time = interpolateLabelValue(activeChart.labels, progress);
-    const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
-
-    readout.innerHTML = `
-      <span>Time: ${formatPlaybackValue(time)} s</span>
-      <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
-    `;
+  if (chartState.lateral.activeView === "handling") {
+    startAngle = -Math.PI * 0.15;
+    endAngle = Math.PI * 1.15;
+  } else {
+    startAngle = -Math.PI * 0.35;
+    endAngle = Math.PI * 0.95;
   }
+
+  const angle = startAngle + (endAngle - startAngle) * progress;
+
+  const x = cx + Math.cos(angle) * rx;
+  const y = cy + Math.sin(angle) * ry;
+
+  const tangentAngle = angle + Math.PI / 2;
+
+  car.style.left = `${x}px`;
+  car.style.top = `${y}px`;
+  car.style.transform = `translate3d(-50%, -50%, 0) rotate(${tangentAngle}rad)`;
+
+  const time = interpolateLabelValue(activeChart.labels, progress);
+  const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
+
+  readout.innerHTML = `
+    <span>Time: ${formatPlaybackValue(time)} s</span>
+    <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
+  `;
+}
 
   function renderVisibleCharts() {
     renderLongitudinalAccelChart();
