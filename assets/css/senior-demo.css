@@ -25,12 +25,17 @@
 ========================================================= */
 
 #senior-demo.page {
-  padding: 1.4rem 0 2rem;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 1.4rem 1.25rem 2rem;
+  box-sizing: border-box;
 }
 
 .sd-demo {
-  width: min(calc(100% - 2rem), 1800px);
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   display: grid;
   gap: 0.95rem;
 }
@@ -310,8 +315,8 @@
 ========================================================= */
 
 @media (max-width: 1500px) {
-  .sd-demo {
-    width: min(calc(100vw - 2rem), 1800px);
+  #senior-demo.page {
+    padding: 1.2rem 1rem 1.8rem;
   }
 
   .sd-chart-card canvas {
@@ -329,8 +334,8 @@
 }
 
 @media (max-width: 900px) {
-  .sd-demo {
-    width: min(calc(100vw - 1rem), 1800px);
+  #senior-demo.page {
+    padding: 1rem 0.8rem 1.5rem;
   }
 
   .sd-chart-card canvas {
@@ -370,9 +375,4 @@
   max-width: none;
   margin: 0;
   padding: 1.4rem 0 2rem;
-}
-
-#senior-demo .sd-demo {
-  width: min(calc(100% - 2rem), 1800px);
-  margin: 0 auto;
 }
