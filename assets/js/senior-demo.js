@@ -317,38 +317,48 @@
      Animation Updates
   ========================================================= */
 
-  function updateLongitudinalAnimation() {
-    const progress = playbackState.long.progress;
-    const car = document.getElementById("sd-long-car");
-    const readout = document.getElementById("sd-long-readout");
-    const track = document.querySelector("#sd-long-stage .sd-track");
-    if (!car || !readout || !track) return;
+function updateLongitudinalAnimation() {
+  const progress = playbackState.long.progress;
+  const car = document.getElementById("sd-long-car");
+  const readout = document.getElementById("sd-long-readout");
+  const track = document.querySelector("#sd-long-stage .sd-track");
+  if (!car || !readout || !track) return;
 
-    const activeChart = getCurrentLongitudinalChart();
-    if (!activeChart) return;
+  const activeChart = getCurrentLongitudinalChart();
+  if (!activeChart) return;
 
-    const trackRect = track.getBoundingClientRect();
-    const usableWidth = Math.max(trackRect.width - 90, 0);
+  const trackRect = track.getBoundingClientRect();
+  const usableWidth = Math.max(trackRect.width - 90, 0);
 
-    let xPx = 0;
+  const time = interpolateLabelValue(activeChart.labels, progress);
+  const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
 
-    if (chartState.longitudinal.activeView === "accel") {
-      xPx = usableWidth * progress;
-    } else {
-      const eased = 1 - Math.pow(1 - progress, 1.8);
-      xPx = usableWidth * (1 - eased);
-    }
+  let motionSeries = [];
+  let motionValue = 0;
 
-    car.style.transform = `translate(${xPx}px, -50%)`;
-
-    const time = interpolateLabelValue(activeChart.labels, progress);
-    const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
-
-    readout.innerHTML = `
-      <span>Time: ${formatPlaybackValue(time)} s</span>
-      <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
-    `;
+  if (chartState.longitudinal.activeView === "accel") {
+    motionSeries = demoData.longitudinal.charts.accel.position.series[0]?.data || [];
+    motionValue = interpolateSeriesValue(motionSeries, progress);
+  } else {
+    motionSeries = demoData.longitudinal.charts.brake.position.series[0]?.data || [];
+    motionValue = interpolateSeriesValue(motionSeries, progress);
   }
+
+  const motionMin = Math.min(...motionSeries);
+  const motionMax = Math.max(...motionSeries);
+  const motionRange = Math.max(motionMax - motionMin, 1e-6);
+
+  let normalized = (motionValue - motionMin) / motionRange;
+  normalized = Math.max(0, Math.min(1, normalized));
+
+  const xPx = usableWidth * normalized;
+  car.style.transform = `translate(${xPx}px, -50%)`;
+
+  readout.innerHTML = `
+    <span>Time: ${formatPlaybackValue(time)} s</span>
+    <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
+  `;
+}
 
   function updateLateralAnimation() {
     const progress = playbackState.lat.progress;
