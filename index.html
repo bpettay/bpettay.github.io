@@ -231,9 +231,6 @@
   <!-- ===============================
     Senior Project Demo Page
   ================================ -->
-    <!-- ===============================
-    Senior Project Demo Page
-  ================================ -->
   <main id="senior-demo" class="page">
     <section class="sd-demo">
       <div class="sd-demo-header">
@@ -261,6 +258,29 @@
             <button class="sd-tab" type="button" data-sd-group="longitudinal" data-sd-tab="brake">
               Braking
             </button>
+          </div>
+
+          <div class="sd-playback-row">
+            <button class="sd-playback-btn" type="button" id="sd-long-play">Start</button>
+            <button class="sd-playback-btn secondary" type="button" id="sd-long-reset">Reset</button>
+            <span class="sd-playback-status" id="sd-long-status">Ready</span>
+          </div>
+
+          <div class="sd-animation-stage" id="sd-long-stage">
+            <div class="sd-track">
+              <div class="sd-track-line"></div>
+              <div class="sd-long-car" id="sd-long-car">
+                <div class="sd-car-body"></div>
+                <div class="sd-car-wheel front"></div>
+                <div class="sd-car-wheel rear"></div>
+              </div>
+              <div class="sd-stage-marker start">Start</div>
+              <div class="sd-stage-marker end">Finish</div>
+            </div>
+            <div class="sd-live-readout" id="sd-long-readout">
+              <span>Time: 0.00 s</span>
+              <span>Value: —</span>
+            </div>
           </div>
 
           <div class="sd-chart-panel">
@@ -400,6 +420,27 @@
             </button>
           </div>
 
+          <div class="sd-playback-row">
+            <button class="sd-playback-btn" type="button" id="sd-lat-play">Start</button>
+            <button class="sd-playback-btn secondary" type="button" id="sd-lat-reset">Reset</button>
+            <span class="sd-playback-status" id="sd-lat-status">Ready</span>
+          </div>
+
+          <div class="sd-animation-stage" id="sd-lat-stage">
+            <div class="sd-corner-wrap">
+              <div class="sd-corner-path"></div>
+              <div class="sd-lat-car" id="sd-lat-car">
+                <div class="sd-car-body"></div>
+                <div class="sd-car-wheel front"></div>
+                <div class="sd-car-wheel rear"></div>
+              </div>
+            </div>
+            <div class="sd-live-readout" id="sd-lat-readout">
+              <span>Time: 0.00 s</span>
+              <span>Value: —</span>
+            </div>
+          </div>
+
           <div class="sd-chart-panel">
             <div class="sd-chart-view active" data-sd-panel="lateral" data-sd-content="sweep">
               <div class="sd-chart-card sd-chart-card-main">
@@ -503,7 +544,6 @@
       </div>
     </section>
   </main>
-
   <!-- ===============================
     Scripts
   ================================ -->
