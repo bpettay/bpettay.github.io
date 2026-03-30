@@ -29,7 +29,7 @@
 }
 
 .sd-demo {
-  width: min(calc(100vw - 0.35rem), 2400px);
+  width: min(calc(100vw - 4rem), 1800px);
   margin: 0 auto;
   display: grid;
   gap: 0.95rem;
@@ -311,7 +311,7 @@
 
 @media (max-width: 1500px) {
   .sd-demo {
-    width: min(calc(100vw - 0.5rem), 2400px);
+    width: min(calc(100vw - 2rem), 1800px);
   }
 
   .sd-chart-card canvas {
@@ -330,7 +330,7 @@
 
 @media (max-width: 900px) {
   .sd-demo {
-    width: min(calc(100vw - 0.6rem), 2400px);
+    width: min(calc(100vw - 1rem), 1800px);
   }
 
   .sd-chart-card canvas {
