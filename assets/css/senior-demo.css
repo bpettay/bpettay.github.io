@@ -320,12 +320,15 @@
 
 .sd-corner-path {
   position: absolute;
-  inset: 20px;
+  left: 6%;
+  top: 10%;
+  width: 78%;
+  height: 82%;
   border: 6px solid rgba(135, 184, 255, 0.14);
   border-left-color: transparent;
   border-bottom-color: transparent;
   border-radius: 999px;
-  transform: rotate(45deg);
+  transform: rotate(18deg);
 }
 
 .sd-lat-car {
