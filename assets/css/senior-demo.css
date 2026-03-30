@@ -29,12 +29,11 @@
 }
 
 .sd-demo {
-  width: min(calc(100% - 1rem), 1840px);
+  width: min(calc(100vw - 0.35rem), 2400px);
   margin: 0 auto;
   display: grid;
   gap: 0.95rem;
 }
-
 .sd-demo-header {
   display: flex;
   align-items: center;
@@ -312,14 +311,13 @@
 
 @media (max-width: 1500px) {
   .sd-demo {
-    width: min(calc(100% - 0.8rem), 1840px);
+    width: min(calc(100vw - 0.5rem), 2400px);
   }
 
   .sd-chart-card canvas {
     height: 390px;
   }
 }
-
 @media (max-width: 1280px) {
   .sd-demo-grid {
     grid-template-columns: 1fr;
