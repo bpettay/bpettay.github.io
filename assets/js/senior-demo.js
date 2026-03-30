@@ -1,356 +1,450 @@
 /* =========================================================
    Senior Project Demo
-   Temporary event-only demo styles
+   Temporary event-only rendering logic
 ========================================================= */
 
-:root {
-  --sd-bg: rgba(10, 16, 28, 0.82);
-  --sd-bg-strong: rgba(14, 22, 36, 0.94);
-  --sd-border: rgba(135, 184, 255, 0.18);
-  --sd-border-strong: rgba(135, 184, 255, 0.3);
-  --sd-text: #eaf1ff;
-  --sd-text-muted: #a8badb;
-  --sd-text-soft: #7f92b6;
-  --sd-accent: #87b8ff;
-  --sd-accent-2: #b69cff;
-  --sd-radius-xl: 24px;
-  --sd-radius-lg: 18px;
-  --sd-radius-md: 14px;
-  --sd-radius-sm: 10px;
-  --sd-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
-}
+(function () {
+  const demoData = window.seniorDemoData;
 
-/* =========================================================
-   Page Wrapper
-========================================================= */
-
-#senior-demo.page {
-  padding: 2rem 0 3rem;
-}
-
-.sd-demo {
-  width: min(calc(100% - 2rem), 1500px);
-  margin: 0 auto;
-  display: grid;
-  gap: 1.2rem;
-}
-
-.sd-demo-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.15rem 1.35rem;
-  border: 1px solid var(--sd-border);
-  border-radius: var(--sd-radius-xl);
-  background:
-    linear-gradient(
-      135deg,
-      rgba(135, 184, 255, 0.08),
-      rgba(182, 156, 255, 0.06)
-    ),
-    var(--sd-bg);
-  box-shadow: var(--sd-shadow);
-  backdrop-filter: blur(14px);
-}
-
-.sd-demo-eyebrow {
-  margin: 0 0 0.3rem;
-  color: var(--sd-accent);
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.74rem;
-  font-weight: 700;
-}
-
-.sd-demo-header h1 {
-  margin: 0;
-  font-size: clamp(1.9rem, 3vw, 2.8rem);
-  line-height: 1;
-}
-
-.sd-demo-subtitle {
-  margin: 0.45rem 0 0;
-  color: var(--sd-text-muted);
-  font-size: 0.98rem;
-  line-height: 1.4;
-}
-
-/* =========================================================
-   Main Grid
-========================================================= */
-
-.sd-demo-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.2rem;
-  align-items: start;
-}
-
-.sd-panel {
-  display: grid;
-  gap: 0.9rem;
-  min-height: 100%;
-  padding: 1.1rem;
-  border-radius: var(--sd-radius-xl);
-  border: 1px solid var(--sd-border);
-  background: var(--sd-bg);
-  box-shadow: var(--sd-shadow);
-  backdrop-filter: blur(12px);
-}
-
-.sd-panel-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.sd-panel-label {
-  margin: 0 0 0.3rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  color: var(--sd-text-soft);
-  font-weight: 700;
-}
-
-.sd-panel h2 {
-  margin: 0;
-  font-size: 1.45rem;
-  line-height: 1.1;
-}
-
-/* =========================================================
-   Main Tabs
-========================================================= */
-
-.sd-tab-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
-.sd-tab {
-  border: 1px solid var(--sd-border);
-  background: rgba(9, 15, 26, 0.78);
-  color: var(--sd-text-muted);
-  border-radius: 999px;
-  padding: 0.45rem 0.8rem;
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.sd-tab:hover {
-  border-color: var(--sd-border-strong);
-  color: var(--sd-text);
-  transform: translateY(-1px);
-}
-
-.sd-tab.active {
-  border-color: rgba(135, 184, 255, 0.4);
-  background:
-    linear-gradient(
-      135deg,
-      rgba(135, 184, 255, 0.16),
-      rgba(182, 156, 255, 0.1)
-    ),
-    rgba(12, 20, 34, 0.94);
-  color: var(--sd-text);
-}
-
-/* =========================================================
-   Chart Views
-========================================================= */
-
-.sd-chart-panel {
-  display: grid;
-}
-
-.sd-chart-view {
-  display: none;
-  gap: 0.75rem;
-}
-
-.sd-chart-view.active {
-  display: grid;
-}
-
-.sd-chart-card {
-  min-width: 0;
-  padding: 0.8rem;
-  border-radius: var(--sd-radius-lg);
-  border: 1px solid var(--sd-border);
-  background: rgba(8, 13, 24, 0.62);
-}
-
-.sd-chart-card-main {
-  padding: 0.9rem;
-}
-
-.sd-chart-title {
-  margin: 0 0 0.7rem;
-  color: var(--sd-text);
-  font-size: 0.92rem;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-.sd-chart-card canvas {
-  display: block;
-  width: 100%;
-  height: 390px;
-  border-radius: 12px;
-  background: rgba(5, 9, 18, 0.72);
-}
-
-/* =========================================================
-   Chart Selector Tabs
-========================================================= */
-
-.sd-subtab-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.sd-subtab {
-  border: 1px solid rgba(135, 184, 255, 0.14);
-  background: rgba(8, 13, 24, 0.6);
-  color: var(--sd-text-soft);
-  border-radius: 999px;
-  padding: 0.38rem 0.7rem;
-  font: inherit;
-  font-size: 0.76rem;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease,
-    color 0.2s ease;
-}
-
-.sd-subtab:hover {
-  border-color: var(--sd-border-strong);
-  color: var(--sd-text);
-}
-
-.sd-subtab.active {
-  border-color: rgba(135, 184, 255, 0.32);
-  background: rgba(18, 30, 48, 0.92);
-  color: var(--sd-text);
-}
-
-/* =========================================================
-   Tables
-========================================================= */
-
-.sd-table-wrap {
-  overflow-x: auto;
-  border-radius: var(--sd-radius-lg);
-  border: 1px solid var(--sd-border);
-  background: rgba(8, 13, 24, 0.54);
-}
-
-.sd-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 540px;
-}
-
-.sd-table thead th {
-  padding: 0.75rem 0.8rem;
-  border-bottom: 1px solid var(--sd-border);
-  background: rgba(12, 20, 34, 0.88);
-  color: var(--sd-text);
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.sd-table thead th:first-child {
-  text-align: left;
-}
-
-.sd-table tbody td {
-  padding: 0.72rem 0.8rem;
-  border-bottom: 1px solid rgba(135, 184, 255, 0.08);
-  color: var(--sd-text-muted);
-  font-size: 0.82rem;
-  line-height: 1.35;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.sd-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.sd-table tbody td:first-child {
-  color: var(--sd-text);
-  font-weight: 600;
-  text-align: left;
-}
-
-.sd-table-secondary thead th {
-  background: rgba(10, 17, 29, 0.84);
-}
-
-/* =========================================================
-   Responsive
-========================================================= */
-
-@media (max-width: 1280px) {
-  .sd-demo-grid {
-    grid-template-columns: 1fr;
+  if (!demoData) {
+    console.warn("seniorDemoData is not available.");
+    return;
   }
 
-  .sd-chart-card canvas {
-    height: 360px;
-  }
-}
+  const vehicleOrder = ["zr26Base", "zr26Aero", "zr25Aero"];
 
-@media (max-width: 900px) {
-  .sd-demo {
-    width: min(calc(100% - 1rem), 1500px);
+  const seriesStyles = {
+    zr26Base: { color: "#87b8ff", lineWidth: 2.4, dash: [] },
+    zr26Aero: { color: "#8fe0b2", lineWidth: 2.6, dash: [] },
+    zr25Aero: { color: "#b69cff", lineWidth: 2.2, dash: [6, 4] },
+
+    "zr26Base-front": { color: "#87b8ff", lineWidth: 2.2, dash: [] },
+    "zr26Base-rear": { color: "#87b8ff", lineWidth: 1.9, dash: [6, 4] },
+    "zr26Aero-front": { color: "#8fe0b2", lineWidth: 2.2, dash: [] },
+    "zr26Aero-rear": { color: "#8fe0b2", lineWidth: 1.9, dash: [6, 4] },
+    "zr25Aero-front": { color: "#b69cff", lineWidth: 2.2, dash: [] },
+    "zr25Aero-rear": { color: "#b69cff", lineWidth: 1.9, dash: [6, 4] },
+
+    "zr26Base-fit": { color: "#87b8ff", lineWidth: 1.8, dash: [3, 3] },
+    "zr26Aero-fit": { color: "#8fe0b2", lineWidth: 1.8, dash: [3, 3] },
+    "zr25Aero-fit": { color: "#b69cff", lineWidth: 1.8, dash: [3, 3] },
+
+    ackermann: { color: "#eaf1ff", lineWidth: 1.4, dash: [8, 6] }
+  };
+
+  const chartState = {
+    longitudinal: {
+      accel: "position",
+      brake: "position"
+    },
+    lateral: {
+      sweep: "steer",
+      handling: "main"
+    }
+  };
+
+  function initSeniorDemo() {
+    populateTable("sd-longitudinal-metrics", demoData.longitudinal.metrics);
+    populateTable("sd-longitudinal-secondary", demoData.longitudinal.secondary);
+    populateTable("sd-lateral-metrics", demoData.lateral.metrics);
+    populateTable("sd-lateral-secondary", demoData.lateral.secondary);
+
+    initMainTabs();
+    initSubTabs();
+    renderVisibleCharts();
   }
 
-  .sd-chart-card canvas {
-    height: 300px;
-  }
-}
+  /* =========================================================
+     Tables
+  ========================================================= */
 
-@media (max-width: 640px) {
-  .sd-demo-header {
-    padding: 1rem;
+  function populateTable(tableId, rows) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    const tbody = table.querySelector("tbody");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    rows.forEach((rowData) => {
+      const tr = document.createElement("tr");
+
+      const metricCell = document.createElement("td");
+      metricCell.textContent = rowData.label;
+      tr.appendChild(metricCell);
+
+      vehicleOrder.forEach((vehicleKey) => {
+        const td = document.createElement("td");
+        const value = rowData.values[vehicleKey] ?? "—";
+        td.textContent = `${value} ${rowData.unit}`;
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
   }
 
-  .sd-panel {
-    padding: 0.95rem;
+  /* =========================================================
+     Main Tabs
+  ========================================================= */
+
+  function initMainTabs() {
+    const tabs = document.querySelectorAll(".sd-tab");
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const group = tab.dataset.sdGroup;
+        const target = tab.dataset.sdTab;
+
+        document
+          .querySelectorAll(`.sd-tab[data-sd-group="${group}"]`)
+          .forEach((btn) => btn.classList.remove("active"));
+
+        tab.classList.add("active");
+
+        document
+          .querySelectorAll(`.sd-chart-view[data-sd-panel="${group}"]`)
+          .forEach((view) => view.classList.remove("active"));
+
+        const targetView = document.querySelector(
+          `.sd-chart-view[data-sd-panel="${group}"][data-sd-content="${target}"]`
+        );
+
+        if (targetView) {
+          targetView.classList.add("active");
+        }
+
+        renderVisibleCharts();
+      });
+    });
   }
 
-  .sd-tab-row,
-  .sd-subtab-row {
-    gap: 0.35rem;
+  /* =========================================================
+     Sub Tabs
+  ========================================================= */
+
+  function initSubTabs() {
+    const subtabs = document.querySelectorAll(".sd-subtab");
+
+    subtabs.forEach((subtab) => {
+      subtab.addEventListener("click", () => {
+        const subgroup = subtab.dataset.sdSubgroup;
+        const target = subtab.dataset.sdSubtab;
+
+        document
+          .querySelectorAll(`.sd-subtab[data-sd-subgroup="${subgroup}"]`)
+          .forEach((btn) => btn.classList.remove("active"));
+
+        subtab.classList.add("active");
+
+        if (subgroup === "longitudinal-accel") {
+          chartState.longitudinal.accel = target;
+        } else if (subgroup === "longitudinal-brake") {
+          chartState.longitudinal.brake = target;
+        } else if (subgroup === "lateral-sweep") {
+          chartState.lateral.sweep = target;
+        }
+
+        renderVisibleCharts();
+      });
+    });
   }
 
-  .sd-tab,
-  .sd-subtab {
-    width: 100%;
-    justify-content: center;
+  /* =========================================================
+     Visible Chart Rendering
+  ========================================================= */
+
+  function renderVisibleCharts() {
+    renderLongitudinalAccelChart();
+    renderLongitudinalBrakeChart();
+    renderLateralSweepChart();
+    renderLateralHandlingChart();
   }
 
-  .sd-chart-card canvas {
-    height: 240px;
+  function renderLongitudinalAccelChart() {
+    const titleEl = document.getElementById("sd-longitudinal-chart-title");
+    const canvasId = "sd-longitudinal-main-chart";
+    const key = chartState.longitudinal.accel;
+    const chartData = demoData.longitudinal.charts.accel[key];
+
+    if (titleEl && chartData) {
+      titleEl.textContent = chartData.title;
+    }
+
+    renderChartById(canvasId, chartData);
   }
-}
+
+  function renderLongitudinalBrakeChart() {
+    const titleEl = document.getElementById("sd-longitudinal-brake-chart-title");
+    const canvasId = "sd-longitudinal-brake-main-chart";
+    const key = chartState.longitudinal.brake;
+    const chartData = demoData.longitudinal.charts.brake[key];
+
+    if (titleEl && chartData) {
+      titleEl.textContent = chartData.title;
+    }
+
+    renderChartById(canvasId, chartData);
+  }
+
+  function renderLateralSweepChart() {
+    const titleEl = document.getElementById("sd-lateral-chart-title");
+    const canvasId = "sd-lateral-main-chart";
+    const key = chartState.lateral.sweep;
+    const chartData = demoData.lateral.charts.sweep[key];
+
+    if (titleEl && chartData) {
+      titleEl.textContent = chartData.title;
+    }
+
+    renderChartById(canvasId, chartData);
+  }
+
+  function renderLateralHandlingChart() {
+    const titleEl = document.getElementById("sd-lateral-handling-chart-title");
+    const canvasId = "sd-lateral-handling-chart";
+    const chartData = demoData.lateral.charts.handling.main;
+
+    if (titleEl && chartData) {
+      titleEl.textContent = chartData.title;
+    }
+
+    renderChartById(canvasId, chartData);
+  }
+
+  /* =========================================================
+     Canvas Chart Drawing
+  ========================================================= */
+
+  function renderChartById(canvasId, chartData) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !chartData) return;
+
+    setupCanvasForDisplay(canvas);
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    drawLineChart(ctx, canvas, chartData);
+  }
+
+  function setupCanvasForDisplay(canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+
+    const displayWidth = Math.max(Math.floor(rect.width * dpr), 300);
+    const displayHeight = Math.max(Math.floor(rect.height * dpr), 180);
+
+    if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+      canvas.width = displayWidth;
+      canvas.height = displayHeight;
+    }
+  }
+
+  function drawLineChart(ctx, canvas, chartData) {
+    const w = canvas.width;
+    const h = canvas.height;
+
+    const padding = {
+      top: 48,
+      right: 18,
+      bottom: 46,
+      left: 58
+    };
+
+    const plotW = w - padding.left - padding.right;
+    const plotH = h - padding.top - padding.bottom;
+
+    const allValues = chartData.series.flatMap((series) => series.data);
+    const minValue = Math.min(...allValues);
+    const maxValue = Math.max(...allValues);
+
+    const flatRange = Math.abs(maxValue - minValue) < 1e-9;
+    const rangePadding = flatRange ? 1 : (maxValue - minValue) * 0.12;
+
+    const yMin = minValue - rangePadding;
+    const yMax = maxValue + rangePadding;
+
+    const count = chartData.labels.length;
+    const xStep = count > 1 ? plotW / (count - 1) : plotW;
+
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.fillStyle = "rgba(5, 9, 18, 0.72)";
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = "rgba(135, 184, 255, 0.10)";
+    ctx.lineWidth = 1;
+
+    const horizontalLines = 4;
+    for (let i = 0; i <= horizontalLines; i += 1) {
+      const y = padding.top + (plotH / horizontalLines) * i;
+      ctx.beginPath();
+      ctx.moveTo(padding.left, y);
+      ctx.lineTo(w - padding.right, y);
+      ctx.stroke();
+    }
+
+    const verticalLines = Math.min(count - 1, 5);
+    for (let i = 0; i <= verticalLines; i += 1) {
+      const x = padding.left + (plotW / Math.max(verticalLines, 1)) * i;
+      ctx.beginPath();
+      ctx.moveTo(x, padding.top);
+      ctx.lineTo(x, h - padding.bottom);
+      ctx.stroke();
+    }
+
+    ctx.strokeStyle = "rgba(234, 241, 255, 0.22)";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, padding.top);
+    ctx.lineTo(padding.left, h - padding.bottom);
+    ctx.lineTo(w - padding.right, h - padding.bottom);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(168, 186, 219, 0.95)";
+    ctx.font = `${Math.max(11, Math.floor(h * 0.038))}px Inter, Arial, sans-serif`;
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+
+    for (let i = 0; i <= horizontalLines; i += 1) {
+      const value = yMax - ((yMax - yMin) / horizontalLines) * i;
+      const y = padding.top + (plotH / horizontalLines) * i;
+      ctx.fillText(formatAxisValue(value), padding.left - 8, y);
+    }
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+
+    const xLabelStep = Math.ceil(count / 5);
+    chartData.labels.forEach((label, index) => {
+      if (index % xLabelStep !== 0 && index !== count - 1) return;
+      const x = padding.left + xStep * index;
+      ctx.fillText(label, x, h - padding.bottom + 8);
+    });
+
+    chartData.series.forEach((series) => {
+      const style = seriesStyles[series.key] || {
+        color: "#eaf1ff",
+        lineWidth: 2,
+        dash: []
+      };
+
+      ctx.beginPath();
+      ctx.strokeStyle = style.color;
+      ctx.lineWidth = style.lineWidth;
+      ctx.setLineDash(style.dash || []);
+
+      series.data.forEach((value, index) => {
+        const x = padding.left + xStep * index;
+        const y = padding.top + ((yMax - value) / (yMax - yMin)) * plotH;
+
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      series.data.forEach((value, index) => {
+        const x = padding.left + xStep * index;
+        const y = padding.top + ((yMax - value) / (yMax - yMin)) * plotH;
+
+        ctx.beginPath();
+        ctx.fillStyle = style.color;
+        ctx.arc(x, y, 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    });
+
+    ctx.save();
+    ctx.fillStyle = "rgba(168, 186, 219, 0.92)";
+    ctx.font = `${Math.max(11, Math.floor(h * 0.04))}px Inter, Arial, sans-serif`;
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText(chartData.xLabel || "", padding.left + plotW / 2, h - 4);
+
+    ctx.translate(16, padding.top + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(chartData.yLabel || "", 0, 0);
+    ctx.restore();
+
+    drawLegend(ctx, canvas, chartData.series);
+  }
+
+  function drawLegend(ctx, canvas, seriesList) {
+    const filteredSeries = seriesList.slice(0, 7);
+    const startX = 14;
+    let x = startX;
+    let y = 18;
+    const maxWidth = canvas.width - 20;
+
+    ctx.font = `${Math.max(10, Math.floor(canvas.height * 0.032))}px Inter, Arial, sans-serif`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    filteredSeries.forEach((series) => {
+      const style = seriesStyles[series.key] || {
+        color: "#eaf1ff",
+        dash: [],
+        lineWidth: 2
+      };
+
+      const labelWidth = ctx.measureText(series.label).width;
+      const itemWidth = 22 + labelWidth + 16;
+
+      if (x + itemWidth > maxWidth) {
+        x = startX;
+        y += 16;
+      }
+
+      ctx.strokeStyle = style.color;
+      ctx.lineWidth = style.lineWidth;
+      ctx.setLineDash(style.dash || []);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 14, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = "rgba(234, 241, 255, 0.88)";
+      ctx.fillText(series.label, x + 18, y);
+
+      x += itemWidth;
+    });
+  }
+
+  function formatAxisValue(value) {
+    if (Math.abs(value) >= 1000) return Math.round(value).toString();
+    if (Math.abs(value) >= 100) return value.toFixed(0);
+    if (Math.abs(value) >= 10) return value.toFixed(1);
+    return value.toFixed(2);
+  }
+
+  /* =========================================================
+     Resize
+  ========================================================= */
+
+  let resizeTimer = null;
+
+  window.addEventListener("resize", () => {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      renderVisibleCharts();
+    }, 120);
+  });
+
+  /* =========================================================
+     Start
+  ========================================================= */
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initSeniorDemo);
+  } else {
+    initSeniorDemo();
+  }
+})();
