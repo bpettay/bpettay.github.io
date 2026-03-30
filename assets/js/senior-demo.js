@@ -244,6 +244,7 @@
 
     if (state.progress >= 1) {
       state.isPlaying = false;
+      state.frameId = null;
       setStatus("sd-long-status", "Complete");
       return;
     }
@@ -285,6 +286,7 @@
 
     if (state.progress >= 1) {
       state.isPlaying = false;
+      state.frameId = null;
       setStatus("sd-lat-status", "Complete");
       return;
     }
@@ -319,22 +321,32 @@
     const progress = playbackState.long.progress;
     const car = document.getElementById("sd-long-car");
     const readout = document.getElementById("sd-long-readout");
-    const stage = document.getElementById("sd-long-stage");
-    if (!car || !readout || !stage) return;
+    const track = document.querySelector("#sd-long-stage .sd-track");
+    if (!car || !readout || !track) return;
 
     const activeChart = getCurrentLongitudinalChart();
     if (!activeChart) return;
 
-    const leftPercent = progress * 90;
-    car.style.transform = `translate(${leftPercent}%, -50%)`;
+    const trackRect = track.getBoundingClientRect();
+    const usableWidth = Math.max(trackRect.width - 90, 0);
+
+    let xPx = 0;
+
+    if (chartState.longitudinal.activeView === "accel") {
+      xPx = usableWidth * progress;
+    } else {
+      const eased = 1 - Math.pow(1 - progress, 1.8);
+      xPx = usableWidth * (1 - eased);
+    }
+
+    car.style.transform = `translate(${xPx}px, -50%)`;
 
     const time = interpolateLabelValue(activeChart.labels, progress);
     const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
 
-    const labelUnit = activeChart.yLabel || "Value";
     readout.innerHTML = `
       <span>Time: ${formatPlaybackValue(time)} s</span>
-      <span>${labelUnit}: ${formatPlaybackValue(value)}</span>
+      <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
     `;
   }
 
@@ -342,35 +354,42 @@
     const progress = playbackState.lat.progress;
     const car = document.getElementById("sd-lat-car");
     const readout = document.getElementById("sd-lat-readout");
-    if (!car || !readout) return;
+    const wrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
+    if (!car || !readout || !wrap) return;
 
     const activeChart = getCurrentLateralChart();
     if (!activeChart) return;
 
-    const startAngle = 2.35;
-    const endAngle = 5.2;
+    const wrapRect = wrap.getBoundingClientRect();
+    const width = wrapRect.width;
+    const height = wrapRect.height;
+
+    const cx = width * 0.38;
+    const cy = height * 0.78;
+    const rx = width * 0.42;
+    const ry = height * 0.54;
+
+    const startAngle = Math.PI * 1.02;
+    const endAngle = Math.PI * 1.88;
     const angle = startAngle + (endAngle - startAngle) * progress;
 
-    const radiusX = 62;
-    const radiusY = 48;
-    const centerX = 36;
-    const centerY = 68;
+    const x = cx + Math.cos(angle) * rx;
+    const y = cy + Math.sin(angle) * ry;
 
-    const x = centerX + Math.cos(angle) * radiusX;
-    const y = centerY + Math.sin(angle) * radiusY;
-    const rot = angle + Math.PI / 2;
+    const dx = -Math.sin(angle) * rx;
+    const dy = Math.cos(angle) * ry;
+    const rotation = Math.atan2(dy, dx);
 
-    car.style.left = `${x}%`;
-    car.style.top = `${y}%`;
-    car.style.transform = `translate(-50%, -50%) rotate(${rot}rad)`;
+    car.style.left = `${x}px`;
+    car.style.top = `${y}px`;
+    car.style.transform = `translate(-50%, -50%) rotate(${rotation}rad)`;
 
     const time = interpolateLabelValue(activeChart.labels, progress);
     const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
-    const labelUnit = activeChart.yLabel || "Value";
 
     readout.innerHTML = `
       <span>Time: ${formatPlaybackValue(time)} s</span>
-      <span>${labelUnit}: ${formatPlaybackValue(value)}</span>
+      <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
     `;
   }
 
@@ -392,7 +411,11 @@
     const chartData = demoData.longitudinal.charts.accel[key];
 
     if (titleEl && chartData) titleEl.textContent = chartData.title;
-    renderChartById(canvasId, chartData, playbackState.long.progress, chartState.longitudinal.activeView === "accel");
+    renderChartById(
+      canvasId,
+      chartData,
+      chartState.longitudinal.activeView === "accel" ? playbackState.long.progress : 1
+    );
   }
 
   function renderLongitudinalBrakeChart() {
@@ -402,7 +425,11 @@
     const chartData = demoData.longitudinal.charts.brake[key];
 
     if (titleEl && chartData) titleEl.textContent = chartData.title;
-    renderChartById(canvasId, chartData, playbackState.long.progress, chartState.longitudinal.activeView === "brake");
+    renderChartById(
+      canvasId,
+      chartData,
+      chartState.longitudinal.activeView === "brake" ? playbackState.long.progress : 1
+    );
   }
 
   function renderLateralSweepChart() {
@@ -412,7 +439,11 @@
     const chartData = demoData.lateral.charts.sweep[key];
 
     if (titleEl && chartData) titleEl.textContent = chartData.title;
-    renderChartById(canvasId, chartData, playbackState.lat.progress, chartState.lateral.activeView === "sweep");
+    renderChartById(
+      canvasId,
+      chartData,
+      chartState.lateral.activeView === "sweep" ? playbackState.lat.progress : 1
+    );
   }
 
   function renderLateralHandlingChart() {
@@ -421,7 +452,11 @@
     const chartData = demoData.lateral.charts.handling.main;
 
     if (titleEl && chartData) titleEl.textContent = chartData.title;
-    renderChartById(canvasId, chartData, playbackState.lat.progress, chartState.lateral.activeView === "handling");
+    renderChartById(
+      canvasId,
+      chartData,
+      chartState.lateral.activeView === "handling" ? playbackState.lat.progress : 1
+    );
   }
 
   function getCurrentLongitudinalChart() {
@@ -441,7 +476,7 @@
      Canvas Chart Drawing
   ========================================================= */
 
-  function renderChartById(canvasId, chartData, progress = 1, isActive = true) {
+  function renderChartById(canvasId, chartData, progress = 1) {
     const canvas = document.getElementById(canvasId);
     if (!canvas || !chartData) return;
 
@@ -450,7 +485,7 @@
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    drawLineChart(ctx, canvas, chartData, isActive ? progress : 1);
+    drawLineChart(ctx, canvas, chartData, progress);
   }
 
   function setupCanvasForDisplay(canvas) {
