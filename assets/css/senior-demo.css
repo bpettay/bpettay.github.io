@@ -13,10 +13,10 @@
   --sd-text-soft: #7f92b6;
   --sd-accent: #87b8ff;
   --sd-accent-2: #b69cff;
-  --sd-success: #8fe0b2;
   --sd-radius-xl: 24px;
   --sd-radius-lg: 18px;
   --sd-radius-md: 14px;
+  --sd-radius-sm: 10px;
   --sd-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
 }
 
@@ -25,14 +25,14 @@
 ========================================================= */
 
 #senior-demo.page {
-  padding: 2.2rem 0 3rem;
+  padding: 2rem 0 3rem;
 }
 
 .sd-demo {
   width: min(calc(100% - 2rem), 1500px);
   margin: 0 auto;
   display: grid;
-  gap: 1.25rem;
+  gap: 1.2rem;
 }
 
 .sd-demo-header {
@@ -40,10 +40,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.35rem 1.5rem;
+  padding: 1.15rem 1.35rem;
   border: 1px solid var(--sd-border);
   border-radius: var(--sd-radius-xl);
-  background: linear-gradient(
+  background:
+    linear-gradient(
       135deg,
       rgba(135, 184, 255, 0.08),
       rgba(182, 156, 255, 0.06)
@@ -54,25 +55,25 @@
 }
 
 .sd-demo-eyebrow {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.3rem;
   color: var(--sd-accent);
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 700;
 }
 
 .sd-demo-header h1 {
   margin: 0;
-  font-size: clamp(2rem, 3vw, 3rem);
+  font-size: clamp(1.9rem, 3vw, 2.8rem);
   line-height: 1;
 }
 
 .sd-demo-subtitle {
-  margin: 0.5rem 0 0;
+  margin: 0.45rem 0 0;
   color: var(--sd-text-muted);
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 0.98rem;
+  line-height: 1.4;
 }
 
 /* =========================================================
@@ -82,15 +83,15 @@
 .sd-demo-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
+  gap: 1.2rem;
   align-items: start;
 }
 
 .sd-panel {
   display: grid;
-  gap: 1rem;
+  gap: 0.9rem;
   min-height: 100%;
-  padding: 1.2rem;
+  padding: 1.1rem;
   border-radius: var(--sd-radius-xl);
   border: 1px solid var(--sd-border);
   background: var(--sd-bg);
@@ -106,8 +107,8 @@
 }
 
 .sd-panel-label {
-  margin: 0 0 0.35rem;
-  font-size: 0.72rem;
+  margin: 0 0 0.3rem;
+  font-size: 0.7rem;
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--sd-text-soft);
@@ -116,67 +117,35 @@
 
 .sd-panel h2 {
   margin: 0;
-  font-size: 1.55rem;
+  font-size: 1.45rem;
   line-height: 1.1;
 }
 
 /* =========================================================
-   Metrics
-========================================================= */
-
-.sd-metric-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.85rem;
-}
-
-.sd-metric-card {
-  padding: 0.95rem 1rem;
-  border-radius: var(--sd-radius-lg);
-  border: 1px solid var(--sd-border);
-  background: rgba(8, 13, 24, 0.62);
-}
-
-.sd-metric-label {
-  margin: 0 0 0.7rem;
-  color: var(--sd-text);
-  font-size: 0.88rem;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-.sd-metric-values {
-  display: grid;
-  gap: 0.38rem;
-}
-
-.sd-metric-values span {
-  color: var(--sd-text-muted);
-  font-size: 0.87rem;
-  line-height: 1.35;
-}
-
-/* =========================================================
-   Tabs
+   Main Tabs
 ========================================================= */
 
 .sd-tab-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
+  gap: 0.45rem;
 }
 
 .sd-tab {
   border: 1px solid var(--sd-border);
-  background: rgba(9, 15, 26, 0.82);
+  background: rgba(9, 15, 26, 0.78);
   color: var(--sd-text-muted);
   border-radius: 999px;
-  padding: 0.72rem 1rem;
+  padding: 0.45rem 0.8rem;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 700;
+  line-height: 1;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease,
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
     transform 0.2s ease;
 }
 
@@ -187,63 +156,50 @@
 }
 
 .sd-tab.active {
-  border-color: rgba(135, 184, 255, 0.42);
-  background: linear-gradient(
+  border-color: rgba(135, 184, 255, 0.4);
+  background:
+    linear-gradient(
       135deg,
-      rgba(135, 184, 255, 0.18),
-      rgba(182, 156, 255, 0.12)
+      rgba(135, 184, 255, 0.16),
+      rgba(182, 156, 255, 0.1)
     ),
-    rgba(12, 20, 34, 0.96);
+    rgba(12, 20, 34, 0.94);
   color: var(--sd-text);
 }
 
 /* =========================================================
-   Charts
+   Chart Views
 ========================================================= */
 
 .sd-chart-panel {
   display: grid;
 }
 
-.sd-chart-grid {
+.sd-chart-view {
   display: none;
-  gap: 0.85rem;
+  gap: 0.75rem;
 }
 
-.sd-chart-grid.active {
+.sd-chart-view.active {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.sd-chart-grid.active-large {
-  display: none;
-}
-
-.sd-chart-grid.active-large.is-visible {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.sd-chart-grid-lateral.active {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .sd-chart-card {
   min-width: 0;
-  padding: 0.85rem;
+  padding: 0.8rem;
   border-radius: var(--sd-radius-lg);
   border: 1px solid var(--sd-border);
   background: rgba(8, 13, 24, 0.62);
 }
 
-.sd-chart-card-full {
-  grid-column: 1 / -1;
+.sd-chart-card-main {
+  padding: 0.9rem;
 }
 
 .sd-chart-title {
   margin: 0 0 0.7rem;
   color: var(--sd-text);
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   font-weight: 700;
   line-height: 1.3;
 }
@@ -251,49 +207,103 @@
 .sd-chart-card canvas {
   display: block;
   width: 100%;
-  height: 220px;
+  height: 390px;
   border-radius: 12px;
   background: rgba(5, 9, 18, 0.72);
 }
 
-.sd-chart-card-full canvas {
-  height: 245px;
+/* =========================================================
+   Chart Selector Tabs
+========================================================= */
+
+.sd-subtab-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.sd-subtab {
+  border: 1px solid rgba(135, 184, 255, 0.14);
+  background: rgba(8, 13, 24, 0.6);
+  color: var(--sd-text-soft);
+  border-radius: 999px;
+  padding: 0.38rem 0.7rem;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.sd-subtab:hover {
+  border-color: var(--sd-border-strong);
+  color: var(--sd-text);
+}
+
+.sd-subtab.active {
+  border-color: rgba(135, 184, 255, 0.32);
+  background: rgba(18, 30, 48, 0.92);
+  color: var(--sd-text);
 }
 
 /* =========================================================
-   Secondary Stats
+   Tables
 ========================================================= */
 
-.sd-secondary-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.85rem;
-}
-
-.sd-secondary-card {
-  padding: 0.9rem 1rem;
+.sd-table-wrap {
+  overflow-x: auto;
   border-radius: var(--sd-radius-lg);
   border: 1px solid var(--sd-border);
-  background: rgba(8, 13, 24, 0.52);
+  background: rgba(8, 13, 24, 0.54);
 }
 
-.sd-secondary-label {
-  margin: 0 0 0.55rem;
+.sd-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 540px;
+}
+
+.sd-table thead th {
+  padding: 0.75rem 0.8rem;
+  border-bottom: 1px solid var(--sd-border);
+  background: rgba(12, 20, 34, 0.88);
   color: var(--sd-text);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
-  line-height: 1.3;
+  text-align: right;
+  white-space: nowrap;
 }
 
-.sd-secondary-values {
-  display: grid;
-  gap: 0.32rem;
+.sd-table thead th:first-child {
+  text-align: left;
 }
 
-.sd-secondary-values span {
+.sd-table tbody td {
+  padding: 0.72rem 0.8rem;
+  border-bottom: 1px solid rgba(135, 184, 255, 0.08);
   color: var(--sd-text-muted);
   font-size: 0.82rem;
   line-height: 1.35;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sd-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.sd-table tbody td:first-child {
+  color: var(--sd-text);
+  font-weight: 600;
+  text-align: left;
+}
+
+.sd-table-secondary thead th {
+  background: rgba(10, 17, 29, 0.84);
 }
 
 /* =========================================================
@@ -305,8 +315,8 @@
     grid-template-columns: 1fr;
   }
 
-  .sd-panel {
-    padding: 1.05rem;
+  .sd-chart-card canvas {
+    height: 360px;
   }
 }
 
@@ -315,39 +325,32 @@
     width: min(calc(100% - 1rem), 1500px);
   }
 
-  .sd-metric-grid,
-  .sd-secondary-grid,
-  .sd-chart-grid.active,
-  .sd-chart-grid-lateral.active {
-    grid-template-columns: 1fr;
-  }
-
-  .sd-chart-card-full {
-    grid-column: auto;
-  }
-
-  .sd-chart-card canvas,
-  .sd-chart-card-full canvas {
-    height: 210px;
+  .sd-chart-card canvas {
+    height: 300px;
   }
 }
 
 @media (max-width: 640px) {
   .sd-demo-header {
-    padding: 1rem 1rem 1.1rem;
+    padding: 1rem;
   }
 
   .sd-panel {
     padding: 0.95rem;
   }
 
-  .sd-tab {
+  .sd-tab-row,
+  .sd-subtab-row {
+    gap: 0.35rem;
+  }
+
+  .sd-tab,
+  .sd-subtab {
     width: 100%;
     justify-content: center;
   }
 
-  .sd-tab-row {
-    display: grid;
-    grid-template-columns: 1fr;
+  .sd-chart-card canvas {
+    height: 240px;
   }
 }
