@@ -313,22 +313,20 @@
   height: 180px;
   border-radius: 14px;
   background:
-    radial-gradient(circle at 70% 30%, rgba(135, 184, 255, 0.06), transparent 34%),
+    radial-gradient(circle at 50% 50%, rgba(135, 184, 255, 0.05), transparent 48%),
     linear-gradient(180deg, rgba(10, 16, 28, 0.88), rgba(5, 9, 18, 0.92));
   overflow: hidden;
 }
 
 .sd-corner-path {
   position: absolute;
-  left: 6%;
-  top: 10%;
-  width: 78%;
-  height: 82%;
-  border: 6px solid rgba(135, 184, 255, 0.14);
-  border-left-color: transparent;
-  border-bottom-color: transparent;
-  border-radius: 999px;
-  transform: rotate(18deg);
+  left: 50%;
+  top: 50%;
+  width: 68%;
+  height: 68%;
+  transform: translate(-50%, -50%);
+  border: 6px solid rgba(135, 184, 255, 0.16);
+  border-radius: 50%;
 }
 
 .sd-lat-car {
