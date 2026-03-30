@@ -334,18 +334,18 @@ function updateLongitudinalAnimation() {
   const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
 
   let motionSeries = [];
-  let motionValue = 0;
 
   if (chartState.longitudinal.activeView === "accel") {
     motionSeries = demoData.longitudinal.charts.accel.position.series[0]?.data || [];
-    motionValue = interpolateSeriesValue(motionSeries, progress);
   } else {
     motionSeries = demoData.longitudinal.charts.brake.position.series[0]?.data || [];
-    motionValue = interpolateSeriesValue(motionSeries, progress);
   }
 
-  const motionMin = Math.min(...motionSeries);
-  const motionMax = Math.max(...motionSeries);
+  const denseMotionSeries = buildDenseSeries(motionSeries, 320);
+  const motionValue = interpolateDenseSeries(denseMotionSeries, progress);
+
+  const motionMin = Math.min(...denseMotionSeries);
+  const motionMax = Math.max(...denseMotionSeries);
   const motionRange = Math.max(motionMax - motionMin, 1e-6);
 
   let normalized = (motionValue - motionMin) / motionRange;
@@ -692,7 +692,44 @@ function updateLongitudinalAnimation() {
   /* =========================================================
      Helpers
   ========================================================= */
+function buildDenseSeries(series, samples = 240) {
+  if (!series || series.length === 0) return [];
 
+  if (series.length === 1) return new Array(samples).fill(series[0]);
+
+  const dense = [];
+  const maxIndex = series.length - 1;
+
+  for (let i = 0; i < samples; i += 1) {
+    const t = (i / (samples - 1)) * maxIndex;
+    const low = Math.floor(t);
+    const high = Math.min(maxIndex, Math.ceil(t));
+    const frac = t - low;
+
+    const lowVal = Number(series[low]) || 0;
+    const highVal = Number(series[high]) || lowVal;
+
+    dense.push(lowVal + (highVal - lowVal) * frac);
+  }
+
+  return dense;
+}
+
+function interpolateDenseSeries(series, progress) {
+  if (!series || series.length === 0) return 0;
+  if (series.length === 1) return series[0];
+
+  const maxIndex = series.length - 1;
+  const rawIndex = Math.max(0, Math.min(1, progress)) * maxIndex;
+  const low = Math.floor(rawIndex);
+  const high = Math.min(maxIndex, Math.ceil(rawIndex));
+  const frac = rawIndex - low;
+
+  const lowVal = Number(series[low]) || 0;
+  const highVal = Number(series[high]) || lowVal;
+
+  return lowVal + (highVal - lowVal) * frac;
+}
   function interpolateLabelValue(labels, progress) {
     if (!labels || !labels.length) return 0;
     const maxIndex = labels.length - 1;
