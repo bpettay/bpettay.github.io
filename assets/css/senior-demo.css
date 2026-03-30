@@ -300,8 +300,8 @@
   top: 50%;
   width: 48px;
   height: 24px;
-  transform: translate(0, -50%);
-  transition: transform 0.08s linear;
+  transform: translate3d(0, -50%, 0);
+  will-change: transform;
 }
 
 /* =========================================================
@@ -337,9 +337,9 @@
   top: 72%;
   width: 48px;
   height: 24px;
-  transform: translate(-50%, -50%) rotate(-20deg);
+  transform: translate3d(-50%, -50%, 0) rotate(-20deg);
   transform-origin: center;
-  transition: transform 0.08s linear;
+  will-change: transform;
 }
 
 /* =========================================================
