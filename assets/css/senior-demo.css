@@ -29,7 +29,7 @@
 }
 
 .sd-demo {
-  width: min(calc(100vw - 4rem), 1800px);
+  width: min(calc(100% - 2rem), 1800px);
   margin: 0 auto;
   display: grid;
   gap: 0.95rem;
@@ -364,4 +364,15 @@
   .sd-chart-card canvas {
     height: 240px;
   }
+}
+#senior-demo.page {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 1.4rem 0 2rem;
+}
+
+#senior-demo .sd-demo {
+  width: min(calc(100% - 2rem), 1800px);
+  margin: 0 auto;
 }
