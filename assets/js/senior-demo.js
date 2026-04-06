@@ -1,6 +1,6 @@
 /* =========================================================
    Senior Project Demo
-   Temporary event-only rendering logic
+   Improved playback + more believable motion mapping
 ========================================================= */
 
 (function () {
@@ -62,12 +62,20 @@
     }
   };
 
+  const dom = {
+    longTrail: null,
+    latSvg: null,
+    latBasePath: null,
+    latProgressPath: null
+  };
+
   function initSeniorDemo() {
     populateTable("sd-longitudinal-metrics", demoData.longitudinal.metrics);
     populateTable("sd-longitudinal-secondary", demoData.longitudinal.secondary);
     populateTable("sd-lateral-metrics", demoData.lateral.metrics);
     populateTable("sd-lateral-secondary", demoData.lateral.secondary);
 
+    initStageEnhancements();
     initMainTabs();
     initSubTabs();
     initPlaybackControls();
@@ -75,6 +83,44 @@
     resetLongitudinalPlayback();
     resetLateralPlayback();
     renderVisibleCharts();
+  }
+
+  function initStageEnhancements() {
+    const track = document.querySelector("#sd-long-stage .sd-track");
+    if (track && !track.querySelector(".sd-track-progress")) {
+      const progress = document.createElement("div");
+      progress.className = "sd-track-progress";
+      track.appendChild(progress);
+      dom.longTrail = progress;
+    } else if (track) {
+      dom.longTrail = track.querySelector(".sd-track-progress");
+    }
+
+    const cornerWrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
+    if (cornerWrap && !cornerWrap.querySelector(".sd-lat-path-svg")) {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("class", "sd-lat-path-svg");
+      svg.setAttribute("preserveAspectRatio", "none");
+
+      const basePath = document.createElementNS(svgNS, "path");
+      basePath.setAttribute("class", "sd-lat-path-base");
+
+      const progressPath = document.createElementNS(svgNS, "path");
+      progressPath.setAttribute("class", "sd-lat-path-progress");
+
+      svg.appendChild(basePath);
+      svg.appendChild(progressPath);
+      cornerWrap.appendChild(svg);
+
+      dom.latSvg = svg;
+      dom.latBasePath = basePath;
+      dom.latProgressPath = progressPath;
+    } else if (cornerWrap) {
+      dom.latSvg = cornerWrap.querySelector(".sd-lat-path-svg");
+      dom.latBasePath = cornerWrap.querySelector(".sd-lat-path-base");
+      dom.latProgressPath = cornerWrap.querySelector(".sd-lat-path-progress");
+    }
   }
 
   function populateTable(tableId, rows) {
@@ -300,9 +346,9 @@
     if (el) el.textContent = text;
   }
 
-  function buildDenseSeries(series, samples = 320) {
+  function buildDenseSeries(series, samples = 360) {
     if (!series || series.length === 0) return [];
-    if (series.length === 1) return new Array(samples).fill(series[0]);
+    if (series.length === 1) return new Array(samples).fill(Number(series[0]) || 0);
 
     const dense = [];
     const maxIndex = series.length - 1;
@@ -338,6 +384,11 @@
     return lowVal + (highVal - lowVal) * frac;
   }
 
+  function getLongitudinalMotionSeries() {
+    const activeKey = chartState.longitudinal.activeView === "accel" ? "accel" : "brake";
+    return demoData.longitudinal.charts[activeKey].position.series[0]?.data || [];
+  }
+
   function updateLongitudinalAnimation() {
     const progress = playbackState.long.progress;
     const car = document.getElementById("sd-long-car");
@@ -349,30 +400,32 @@
     if (!activeChart) return;
 
     const trackRect = track.getBoundingClientRect();
-    const usableWidth = Math.max(trackRect.width - 90, 0);
+    const carWidth = car.getBoundingClientRect().width || 48;
+    const startPad = Math.max(trackRect.width * 0.06, 26);
+    const endPad = Math.max(trackRect.width * 0.06, 26);
+    const usableWidth = Math.max(trackRect.width - startPad - endPad - carWidth, 0);
 
     const time = interpolateLabelValue(activeChart.labels, progress);
     const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
 
-    let motionSeries = [];
-
-    if (chartState.longitudinal.activeView === "accel") {
-      motionSeries = demoData.longitudinal.charts.accel.position.series[0]?.data || [];
-    } else {
-      motionSeries = demoData.longitudinal.charts.brake.position.series[0]?.data || [];
-    }
-
-    const denseMotionSeries = buildDenseSeries(motionSeries, 400);
+    const motionSeries = getLongitudinalMotionSeries();
+    const denseMotionSeries = buildDenseSeries(motionSeries, 480);
     const motionValue = interpolateDenseSeries(denseMotionSeries, progress);
 
     const motionMin = Math.min(...denseMotionSeries);
     const motionMax = Math.max(...denseMotionSeries);
     const motionRange = Math.max(motionMax - motionMin, 1e-6);
 
-    const normalized = Math.max(0, Math.min(1, (motionValue - motionMin) / motionRange));
-    const xPx = usableWidth * normalized;
+    let normalized = (motionValue - motionMin) / motionRange;
+    normalized = Math.max(0, Math.min(1, normalized));
 
+    const xPx = startPad + usableWidth * normalized;
     car.style.transform = `translate3d(${xPx}px, -50%, 0)`;
+
+    if (dom.longTrail) {
+      dom.longTrail.style.left = `${startPad + 2}px`;
+      dom.longTrail.style.width = `${Math.max(0, xPx)}px`;
+    }
 
     readout.innerHTML = `
       <span>Time: ${formatPlaybackValue(time)} s</span>
@@ -380,56 +433,134 @@
     `;
   }
 
- function updateLateralAnimation() {
-  const progress = playbackState.lat.progress;
-  const car = document.getElementById("sd-lat-car");
-  const readout = document.getElementById("sd-lat-readout");
-  const wrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
-  if (!car || !readout || !wrap) return;
+  function getLateralPathState(progress) {
+    const wrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
+    if (!wrap) return null;
 
-  const activeChart = getCurrentLateralChart();
-  if (!activeChart) return;
+    const rect = wrap.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
 
-  const wrapRect = wrap.getBoundingClientRect();
-  const width = wrapRect.width;
-  const height = wrapRect.height;
+    if (chartState.lateral.activeView === "handling") {
+      const x1 = w * 0.16;
+      const y1 = h * 0.76;
+      const x2 = w * 0.30;
+      const y2 = h * 0.18;
+      const x3 = w * 0.76;
+      const y3 = h * 0.18;
+      const x4 = w * 0.86;
+      const y4 = h * 0.52;
 
-  const cx = width * 0.5;
-  const cy = height * 0.5;
+      return cubicBezierState(progress, x1, y1, x2, y2, x3, y3, x4, y4);
+    }
 
-  const rx = width * 0.34;
-  const ry = height * 0.34;
+    const x1 = w * 0.12;
+    const y1 = h * 0.82;
+    const x2 = w * 0.22;
+    const y2 = h * 0.86;
+    const x3 = w * 0.52;
+    const y3 = h * 0.22;
+    const x4 = w * 0.84;
+    const y4 = h * 0.34;
 
-  let startAngle;
-  let endAngle;
-
-  if (chartState.lateral.activeView === "handling") {
-    startAngle = -Math.PI * 0.15;
-    endAngle = Math.PI * 1.15;
-  } else {
-    startAngle = -Math.PI * 0.35;
-    endAngle = Math.PI * 0.95;
+    return cubicBezierState(progress, x1, y1, x2, y2, x3, y3, x4, y4);
   }
 
-  const angle = startAngle + (endAngle - startAngle) * progress;
+  function cubicBezierState(t, x1, y1, x2, y2, x3, y3, x4, y4) {
+    const mt = 1 - t;
 
-  const x = cx + Math.cos(angle) * rx;
-  const y = cy + Math.sin(angle) * ry;
+    const x =
+      mt * mt * mt * x1 +
+      3 * mt * mt * t * x2 +
+      3 * mt * t * t * x3 +
+      t * t * t * x4;
 
-  const tangentAngle = angle + Math.PI / 2;
+    const y =
+      mt * mt * mt * y1 +
+      3 * mt * mt * t * y2 +
+      3 * mt * t * t * y3 +
+      t * t * t * y4;
 
-  car.style.left = `${x}px`;
-  car.style.top = `${y}px`;
-  car.style.transform = `translate3d(-50%, -50%, 0) rotate(${tangentAngle}rad)`;
+    const dx =
+      3 * mt * mt * (x2 - x1) +
+      6 * mt * t * (x3 - x2) +
+      3 * t * t * (x4 - x3);
 
-  const time = interpolateLabelValue(activeChart.labels, progress);
-  const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
+    const dy =
+      3 * mt * mt * (y2 - y1) +
+      6 * mt * t * (y3 - y2) +
+      3 * t * t * (y4 - y3);
 
-  readout.innerHTML = `
-    <span>Time: ${formatPlaybackValue(time)} s</span>
-    <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
-  `;
-}
+    return {
+      x,
+      y,
+      angle: Math.atan2(dy, dx),
+      path: `M ${x1} ${y1} C ${x2} ${y2}, ${x3} ${y3}, ${x4} ${y4}`
+    };
+  }
+
+  function updateLateralSvgPath(progress) {
+    if (!dom.latSvg || !dom.latBasePath || !dom.latProgressPath) return;
+
+    const pathState = getLateralPathState(progress);
+    if (!pathState) return;
+
+    const wrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
+    if (!wrap) return;
+
+    const rect = wrap.getBoundingClientRect();
+    dom.latSvg.setAttribute("viewBox", `0 0 ${rect.width} ${rect.height}`);
+    dom.latBasePath.setAttribute("d", pathState.path);
+    dom.latProgressPath.setAttribute("d", pathState.path);
+
+    const totalLength = dom.latProgressPath.getTotalLength();
+    const visibleLength = totalLength * Math.max(0, Math.min(1, progress));
+
+    dom.latProgressPath.style.strokeDasharray = `${visibleLength} ${Math.max(totalLength - visibleLength, 0.1)}`;
+    dom.latProgressPath.style.strokeDashoffset = "0";
+  }
+
+  function updateLateralAnimation() {
+    const progress = playbackState.lat.progress;
+    const car = document.getElementById("sd-lat-car");
+    const readout = document.getElementById("sd-lat-readout");
+    if (!car || !readout) return;
+
+    const activeChart = getCurrentLateralChart();
+    if (!activeChart) return;
+
+    const pathState = getLateralPathState(progress);
+    if (!pathState) return;
+
+    updateLateralSvgPath(progress);
+
+    const time = interpolateLabelValue(activeChart.labels, progress);
+    const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
+
+    const yawSource = demoData.lateral.charts.sweep.yaw.series[0]?.data || [];
+    const yawDense = buildDenseSeries(yawSource, 360);
+    const yawValue = interpolateDenseSeries(yawDense, progress);
+
+    const tangentAngle = pathState.angle;
+    const yawInfluence = chartState.lateral.activeView === "handling"
+      ? 0.06 * Math.sign(tangentAngle)
+      : clamp((yawValue / 26) * 0.08, -0.08, 0.08);
+
+    const finalAngle = tangentAngle + yawInfluence;
+
+    car.style.left = `${pathState.x}px`;
+    car.style.top = `${pathState.y}px`;
+    car.style.transform = `translate3d(-50%, -50%, 0) rotate(${finalAngle}rad)`;
+
+    readout.innerHTML = `
+      <span>Time: ${formatPlaybackValue(time)} s</span>
+      <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
+    `;
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
 
   function renderVisibleCharts() {
     renderLongitudinalAccelChart();
