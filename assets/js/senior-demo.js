@@ -69,6 +69,11 @@
     latProgressPath: null
   };
 
+  function round(value, digits = 3) {
+    const factor = 10 ** digits;
+    return Math.round(value * factor) / factor;
+  }
+
   function initSeniorDemo() {
     populateTable("sd-longitudinal-metrics", demoData.longitudinal.metrics);
     populateTable("sd-longitudinal-secondary", demoData.longitudinal.secondary);
