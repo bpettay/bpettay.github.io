@@ -433,38 +433,94 @@
     `;
   }
 
-  function getLateralPathState(progress) {
-    const wrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
-    if (!wrap) return null;
+function getPrimaryLateralPath() {
+  return demoData?.lateral?.pathStates?.zr26Base || null;
+}
 
-    const rect = wrap.getBoundingClientRect();
-    const w = rect.width;
-    const h = rect.height;
+function interpolatePathArray(arr, progress) {
+  if (!arr || !arr.length) return 0;
+  if (arr.length === 1) return arr[0];
 
-    if (chartState.lateral.activeView === "handling") {
-      const x1 = w * 0.16;
-      const y1 = h * 0.76;
-      const x2 = w * 0.30;
-      const y2 = h * 0.18;
-      const x3 = w * 0.76;
-      const y3 = h * 0.18;
-      const x4 = w * 0.86;
-      const y4 = h * 0.52;
+  const maxIndex = arr.length - 1;
+  const rawIndex = Math.max(0, Math.min(1, progress)) * maxIndex;
+  const low = Math.floor(rawIndex);
+  const high = Math.min(maxIndex, Math.ceil(rawIndex));
+  const frac = rawIndex - low;
 
-      return cubicBezierState(progress, x1, y1, x2, y2, x3, y3, x4, y4);
-    }
+  const a = Number(arr[low]) || 0;
+  const b = Number(arr[high]) || a;
 
-    const x1 = w * 0.12;
-    const y1 = h * 0.82;
-    const x2 = w * 0.22;
-    const y2 = h * 0.86;
-    const x3 = w * 0.52;
-    const y3 = h * 0.22;
-    const x4 = w * 0.84;
-    const y4 = h * 0.34;
+  return a + (b - a) * frac;
+}
 
-    return cubicBezierState(progress, x1, y1, x2, y2, x3, y3, x4, y4);
-  }
+function buildSvgPathFromXY(xArr, yArr, width, height, padding = 18) {
+  if (!xArr || !yArr || !xArr.length || !yArr.length) return "";
+
+  const minX = Math.min(...xArr);
+  const maxX = Math.max(...xArr);
+  const minY = Math.min(...yArr);
+  const maxY = Math.max(...yArr);
+
+  const spanX = Math.max(maxX - minX, 1e-6);
+  const spanY = Math.max(maxY - minY, 1e-6);
+
+  const usableW = Math.max(width - 2 * padding, 1);
+  const usableH = Math.max(height - 2 * padding, 1);
+
+  const scale = Math.min(usableW / spanX, usableH / spanY);
+
+  const pts = xArr.map((x, i) => {
+    const sx = padding + (x - minX) * scale;
+    const sy = height - padding - (yArr[i] - minY) * scale;
+    return [round(sx, 3), round(sy, 3)];
+  });
+
+  return pts
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${p[0]} ${p[1]}`)
+    .join(" ");
+}
+
+function getLateralPathState(progress) {
+  const wrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
+  const basePath = getPrimaryLateralPath();
+  if (!wrap || !basePath) return null;
+
+  const rect = wrap.getBoundingClientRect();
+  const width = rect.width;
+  const height = rect.height;
+  const padding = 18;
+
+  const xArr = basePath.x;
+  const yArr = basePath.y;
+
+  const minX = Math.min(...xArr);
+  const maxX = Math.max(...xArr);
+  const minY = Math.min(...yArr);
+  const maxY = Math.max(...yArr);
+
+  const spanX = Math.max(maxX - minX, 1e-6);
+  const spanY = Math.max(maxY - minY, 1e-6);
+
+  const usableW = Math.max(width - 2 * padding, 1);
+  const usableH = Math.max(height - 2 * padding, 1);
+  const scale = Math.min(usableW / spanX, usableH / spanY);
+
+  const xNow = interpolatePathArray(xArr, progress);
+  const yNow = interpolatePathArray(yArr, progress);
+  const yawNow = interpolatePathArray(basePath.yaw_deg, progress) * (Math.PI / 180);
+
+  const sx = padding + (xNow - minX) * scale;
+  const sy = height - padding - (yNow - minY) * scale;
+
+  const pathD = buildSvgPathFromXY(xArr, yArr, width, height, padding);
+
+  return {
+    x: sx,
+    y: sy,
+    angle: yawNow,
+    path: pathD
+  };
+}
 
   function cubicBezierState(t, x1, y1, x2, y2, x3, y3, x4, y4) {
     const mt = 1 - t;
