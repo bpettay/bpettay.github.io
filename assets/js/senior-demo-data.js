@@ -536,7 +536,11 @@ function deriveLateralPathFromSweep(sweep) {
     zr26Aero: runLateralSweep(lateralVehicles.zr26Aero),
     zr25Aero: runLateralSweep(lateralVehicles.zr25Aero)
   };
-
+const latPathResults = {
+  zr26Base: deriveLateralPathFromSweep(latSweepResults.zr26Base),
+  zr26Aero: deriveLateralPathFromSweep(latSweepResults.zr26Aero),
+  zr25Aero: deriveLateralPathFromSweep(latSweepResults.zr25Aero)
+};
   const latHandlingResults = {
     zr26Base: runHandlingCurve(lateralVehicles.zr26Base),
     zr26Aero: runHandlingCurve(lateralVehicles.zr26Aero),
@@ -919,7 +923,11 @@ function deriveLateralPathFromSweep(sweep) {
           zr25Aero: round(latSummary.zr25Aero.aeroDownforceSkidN, 1).toFixed(1)
         })
       ],
-
+pathStates: {
+  zr26Base: latPathResults.zr26Base,
+  zr26Aero: latPathResults.zr26Aero,
+  zr25Aero: latPathResults.zr25Aero
+},
       charts: {
         sweep: {
           steer: {
@@ -1017,7 +1025,101 @@ function deriveLateralPathFromSweep(sweep) {
               }
             ]
           },
+pathX: {
+  title: "Global X Position vs Time",
+  xLabel: "Time (s)",
+  yLabel: "X Position (m)",
+  labels: toLabelArray(latSweepResults.zr26Base.time, 2),
+  series: [
+    {
+      key: "zr26Base",
+      label: "ZR26 Base",
+      data: latPathResults.zr26Base.x
+    },
+    {
+      key: "zr26Aero",
+      label: "ZR26 Aero",
+      data: latPathResults.zr26Aero.x
+    },
+    {
+      key: "zr25Aero",
+      label: "ZR25 Aero",
+      data: latPathResults.zr25Aero.x
+    }
+  ]
+},
 
+pathY: {
+  title: "Global Y Position vs Time",
+  xLabel: "Time (s)",
+  yLabel: "Y Position (m)",
+  labels: toLabelArray(latSweepResults.zr26Base.time, 2),
+  series: [
+    {
+      key: "zr26Base",
+      label: "ZR26 Base",
+      data: latPathResults.zr26Base.y
+    },
+    {
+      key: "zr26Aero",
+      label: "ZR26 Aero",
+      data: latPathResults.zr26Aero.y
+    },
+    {
+      key: "zr25Aero",
+      label: "ZR25 Aero",
+      data: latPathResults.zr25Aero.y
+    }
+  ]
+},
+
+yawAngle: {
+  title: "Yaw Angle vs Time",
+  xLabel: "Time (s)",
+  yLabel: "Yaw Angle (deg)",
+  labels: toLabelArray(latSweepResults.zr26Base.time, 2),
+  series: [
+    {
+      key: "zr26Base",
+      label: "ZR26 Base",
+      data: latPathResults.zr26Base.yaw_deg
+    },
+    {
+      key: "zr26Aero",
+      label: "ZR26 Aero",
+      data: latPathResults.zr26Aero.yaw_deg
+    },
+    {
+      key: "zr25Aero",
+      label: "ZR25 Aero",
+      data: latPathResults.zr25Aero.yaw_deg
+    }
+  ]
+},
+
+heading: {
+  title: "Velocity Heading vs Time",
+  xLabel: "Time (s)",
+  yLabel: "Heading (deg)",
+  labels: toLabelArray(latSweepResults.zr26Base.time, 2),
+  series: [
+    {
+      key: "zr26Base",
+      label: "ZR26 Base",
+      data: latPathResults.zr26Base.heading_deg
+    },
+    {
+      key: "zr26Aero",
+      label: "ZR26 Aero",
+      data: latPathResults.zr26Aero.heading_deg
+    },
+    {
+      key: "zr25Aero",
+      label: "ZR25 Aero",
+      data: latPathResults.zr25Aero.heading_deg
+    }
+  ]
+}
           loads: {
             title: "Vertical Tire Loads vs Time",
             xLabel: "Time (s)",
