@@ -475,7 +475,52 @@
 
     return { slope, intercept };
   }
+function deriveLateralPathFromSweep(sweep) {
+  const n = sweep.time.length;
+  const x = new Array(n).fill(0);
+  const y = new Array(n).fill(0);
+  const yaw_deg = new Array(n).fill(0);
+  const heading_deg = new Array(n).fill(0);
 
+  for (let i = 1; i < n; i += 1) {
+    const dt = sweep.time[i] - sweep.time[i - 1];
+
+    const r1 = (sweep.r_degps[i - 1] * Math.PI) / 180;
+    const r2 = (sweep.r_degps[i] * Math.PI) / 180;
+    const yawPrev = (yaw_deg[i - 1] * Math.PI) / 180;
+    const yawNow = yawPrev + 0.5 * (r1 + r2) * dt;
+
+    yaw_deg[i] = yawNow * (180 / Math.PI);
+
+    const beta1 = (sweep.beta_deg[i - 1] * Math.PI) / 180;
+    const beta2 = (sweep.beta_deg[i] * Math.PI) / 180;
+    const v1 = sweep.V_max[i - 1];
+    const v2 = sweep.V_max[i];
+
+    const h1 = yawPrev + beta1;
+    const h2 = yawNow + beta2;
+
+    heading_deg[i] = h2 * (180 / Math.PI);
+
+    const vx1 = v1 * Math.cos(h1);
+    const vy1 = v1 * Math.sin(h1);
+    const vx2 = v2 * Math.cos(h2);
+    const vy2 = v2 * Math.sin(h2);
+
+    x[i] = x[i - 1] + 0.5 * (vx1 + vx2) * dt;
+    y[i] = y[i - 1] + 0.5 * (vy1 + vy2) * dt;
+  }
+
+  const minX = Math.min(...x);
+  const minY = Math.min(...y);
+
+  return {
+    x: x.map((v) => round(v - minX, 4)),
+    y: y.map((v) => round(v - minY, 4)),
+    yaw_deg: yaw_deg.map((v) => round(v, 4)),
+    heading_deg: heading_deg.map((v) => round(v, 4))
+  };
+}
   /* =========================================================
      Run Models
   ========================================================= */
