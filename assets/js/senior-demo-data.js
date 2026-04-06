@@ -1,567 +1,914 @@
 /* =========================================================
-   Senior Project Demo Data
-   Temporary event-only demo dataset
+   Senior Project Demo
+   Improved playback + more believable motion mapping
 ========================================================= */
 
-window.seniorDemoData = {
-  vehicles: {
-    zr26Base: {
-      key: "zr26Base",
-      name: "ZR26 Base"
+(function () {
+  const demoData = window.seniorDemoData;
+
+  if (!demoData) {
+    console.warn("seniorDemoData is not available.");
+    return;
+  }
+
+  const vehicleOrder = ["zr26Base", "zr26Aero", "zr25Aero"];
+
+  const seriesStyles = {
+    zr26Base: { color: "#87b8ff", lineWidth: 2.4, dash: [] },
+    zr26Aero: { color: "#8fe0b2", lineWidth: 2.6, dash: [] },
+    zr25Aero: { color: "#b69cff", lineWidth: 2.2, dash: [6, 4] },
+
+    "zr26Base-front": { color: "#87b8ff", lineWidth: 2.2, dash: [] },
+    "zr26Base-rear": { color: "#87b8ff", lineWidth: 1.9, dash: [6, 4] },
+    "zr26Aero-front": { color: "#8fe0b2", lineWidth: 2.2, dash: [] },
+    "zr26Aero-rear": { color: "#8fe0b2", lineWidth: 1.9, dash: [6, 4] },
+    "zr25Aero-front": { color: "#b69cff", lineWidth: 2.2, dash: [] },
+    "zr25Aero-rear": { color: "#b69cff", lineWidth: 1.9, dash: [6, 4] },
+
+    "zr26Base-fit": { color: "#87b8ff", lineWidth: 1.8, dash: [3, 3] },
+    "zr26Aero-fit": { color: "#8fe0b2", lineWidth: 1.8, dash: [3, 3] },
+    "zr25Aero-fit": { color: "#b69cff", lineWidth: 1.8, dash: [3, 3] },
+
+    ackermann: { color: "#eaf1ff", lineWidth: 1.4, dash: [8, 6] }
+  };
+
+  const chartState = {
+    longitudinal: {
+      activeView: "accel",
+      accel: "position",
+      brake: "position"
     },
-    zr26Aero: {
-      key: "zr26Aero",
-      name: "ZR26 Aero"
+    lateral: {
+      activeView: "sweep",
+      sweep: "steer",
+      handling: "main"
+    }
+  };
+
+  const playbackState = {
+    long: {
+      isPlaying: false,
+      progress: 0,
+      frameId: null,
+      durationMs: 6500,
+      startTime: 0
     },
-    zr25Aero: {
-      key: "zr25Aero",
-      name: "ZR25 Aero"
+    lat: {
+      isPlaying: false,
+      progress: 0,
+      frameId: null,
+      durationMs: 7000,
+      startTime: 0
     }
-  },
+  };
 
-  longitudinal: {
-    metrics: [
-      {
-        label: "0–30 mph Time",
-        unit: "s",
-        values: {
-          zr26Base: "2.31",
-          zr26Aero: "2.18",
-          zr25Aero: "2.42"
-        }
-      },
-      {
-        label: "30–0 mph Distance",
-        unit: "m",
-        values: {
-          zr26Base: "8.94",
-          zr26Aero: "7.88",
-          zr25Aero: "8.21"
-        }
-      },
-      {
-        label: "Peak Acceleration",
-        unit: "G",
-        values: {
-          zr26Base: "1.24",
-          zr26Aero: "1.31",
-          zr25Aero: "1.19"
-        }
-      },
-      {
-        label: "Peak Deceleration",
-        unit: "G",
-        values: {
-          zr26Base: "1.39",
-          zr26Aero: "1.56",
-          zr25Aero: "1.48"
-        }
-      }
-    ],
+  const dom = {
+    longTrail: null,
+    latSvg: null,
+    latBasePath: null,
+    latProgressPath: null
+  };
 
-    secondary: [
-      {
-        label: "Max Downforce",
-        unit: "N",
-        values: {
-          zr26Base: "13.2",
-          zr26Aero: "161.4",
-          zr25Aero: "116.5"
-        }
-      },
-      {
-        label: "Max Drag",
-        unit: "N",
-        values: {
-          zr26Base: "21.0",
-          zr26Aero: "72.0",
-          zr25Aero: "68.2"
-        }
-      },
-      {
-        label: "Max Weight Transfer Gain",
-        unit: "N",
-        values: {
-          zr26Base: "294.8",
-          zr26Aero: "351.4",
-          zr25Aero: "338.2"
-        }
-      }
-    ],
+  function initSeniorDemo() {
+    populateTable("sd-longitudinal-metrics", demoData.longitudinal.metrics);
+    populateTable("sd-longitudinal-secondary", demoData.longitudinal.secondary);
+    populateTable("sd-lateral-metrics", demoData.lateral.metrics);
+    populateTable("sd-lateral-secondary", demoData.lateral.secondary);
 
-    charts: {
-      accel: {
-        position: {
-          title: "Position vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Distance (m)",
-          labels: ["0.0", "0.4", "0.8", "1.2", "1.6", "2.0", "2.4"],
-          series: [
-            {
-              key: "zr26Base",
-              label: "ZR26 Base",
-              data: [0.0, 0.3, 1.2, 2.8, 5.2, 8.3, 12.0]
-            },
-            {
-              key: "zr26Aero",
-              label: "ZR26 Aero",
-              data: [0.0, 0.35, 1.35, 3.05, 5.7, 9.0, 12.9]
-            },
-            {
-              key: "zr25Aero",
-              label: "ZR25 Aero",
-              data: [0.0, 0.25, 1.0, 2.45, 4.75, 7.65, 11.1]
-            }
-          ]
-        },
+    initStageEnhancements();
+    initMainTabs();
+    initSubTabs();
+    initPlaybackControls();
 
-        velocity: {
-          title: "Velocity vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Velocity (m/s)",
-          labels: ["0.0", "0.4", "0.8", "1.2", "1.6", "2.0", "2.4"],
-          series: [
-            {
-              key: "zr26Base",
-              label: "ZR26 Base",
-              data: [0.0, 2.7, 5.5, 8.1, 10.6, 12.6, 13.4]
-            },
-            {
-              key: "zr26Aero",
-              label: "ZR26 Aero",
-              data: [0.0, 2.9, 5.9, 8.7, 11.2, 13.0, 13.4]
-            },
-            {
-              key: "zr25Aero",
-              label: "ZR25 Aero",
-              data: [0.0, 2.5, 5.0, 7.5, 9.8, 11.8, 13.1]
-            }
-          ]
-        },
+    resetLongitudinalPlayback();
+    resetLateralPlayback();
+    renderVisibleCharts();
+  }
 
-        acceleration: {
-          title: "Acceleration vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Acceleration (m/s²)",
-          labels: ["0.0", "0.4", "0.8", "1.2", "1.6", "2.0", "2.4"],
-          series: [
-            {
-              key: "zr26Base",
-              label: "ZR26 Base",
-              data: [12.2, 11.8, 11.1, 10.0, 8.6, 6.8, 3.2]
-            },
-            {
-              key: "zr26Aero",
-              label: "ZR26 Aero",
-              data: [12.8, 12.4, 11.7, 10.8, 9.4, 7.4, 3.4]
-            },
-            {
-              key: "zr25Aero",
-              label: "ZR25 Aero",
-              data: [11.7, 11.1, 10.3, 9.4, 8.1, 6.2, 3.0]
-            }
-          ]
-        },
-
-        loads: {
-          title: "Axle Loads vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Normal Load (kN)",
-          labels: ["0.0", "0.4", "0.8", "1.2", "1.6", "2.0", "2.4"],
-          series: [
-            {
-              key: "zr26Base-front",
-              label: "ZR26 Base Front",
-              data: [1.30, 1.26, 1.23, 1.20, 1.18, 1.16, 1.15]
-            },
-            {
-              key: "zr26Base-rear",
-              label: "ZR26 Base Rear",
-              data: [1.41, 1.46, 1.49, 1.52, 1.54, 1.56, 1.57]
-            },
-            {
-              key: "zr26Aero-front",
-              label: "ZR26 Aero Front",
-              data: [1.35, 1.34, 1.33, 1.31, 1.30, 1.30, 1.29]
-            },
-            {
-              key: "zr26Aero-rear",
-              label: "ZR26 Aero Rear",
-              data: [1.46, 1.51, 1.55, 1.60, 1.64, 1.67, 1.69]
-            },
-            {
-              key: "zr25Aero-front",
-              label: "ZR25 Aero Front",
-              data: [1.46, 1.43, 1.40, 1.38, 1.36, 1.35, 1.34]
-            },
-            {
-              key: "zr25Aero-rear",
-              label: "ZR25 Aero Rear",
-              data: [1.58, 1.63, 1.67, 1.70, 1.73, 1.75, 1.76]
-            }
-          ]
-        }
-      },
-
-      brake: {
-        position: {
-          title: "Distance vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Distance (m)",
-          labels: ["0.0", "0.2", "0.4", "0.6", "0.8", "1.0", "1.2"],
-          series: [
-            {
-              key: "zr26Base",
-              label: "ZR26 Base",
-              data: [0.0, 2.4, 4.6, 6.5, 7.8, 8.6, 8.9]
-            },
-            {
-              key: "zr26Aero",
-              label: "ZR26 Aero",
-              data: [0.0, 2.2, 4.1, 5.7, 6.8, 7.5, 7.9]
-            },
-            {
-              key: "zr25Aero",
-              label: "ZR25 Aero",
-              data: [0.0, 2.3, 4.3, 6.0, 7.2, 8.0, 8.2]
-            }
-          ]
-        },
-
-        velocity: {
-          title: "Velocity vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Velocity (m/s)",
-          labels: ["0.0", "0.2", "0.4", "0.6", "0.8", "1.0", "1.2"],
-          series: [
-            {
-              key: "zr26Base",
-              label: "ZR26 Base",
-              data: [13.4, 11.0, 8.6, 6.1, 3.8, 1.7, 0.0]
-            },
-            {
-              key: "zr26Aero",
-              label: "ZR26 Aero",
-              data: [13.4, 10.7, 8.0, 5.3, 2.9, 0.9, 0.0]
-            },
-            {
-              key: "zr25Aero",
-              label: "ZR25 Aero",
-              data: [13.4, 10.8, 8.2, 5.7, 3.3, 1.2, 0.0]
-            }
-          ]
-        },
-
-        acceleration: {
-          title: "Acceleration vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Acceleration (m/s²)",
-          labels: ["0.0", "0.2", "0.4", "0.6", "0.8", "1.0", "1.2"],
-          series: [
-            {
-              key: "zr26Base",
-              label: "ZR26 Base",
-              data: [-13.2, -13.0, -12.8, -12.4, -11.8, -10.7, -8.3]
-            },
-            {
-              key: "zr26Aero",
-              label: "ZR26 Aero",
-              data: [-15.0, -14.7, -14.3, -13.7, -12.8, -11.0, -8.8]
-            },
-            {
-              key: "zr25Aero",
-              label: "ZR25 Aero",
-              data: [-14.3, -14.0, -13.6, -13.0, -12.2, -10.8, -8.5]
-            }
-          ]
-        },
-
-        loads: {
-          title: "Axle Loads vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Normal Load (kN)",
-          labels: ["0.0", "0.2", "0.4", "0.6", "0.8", "1.0", "1.2"],
-          series: [
-            {
-              key: "zr26Base-front",
-              label: "ZR26 Base Front",
-              data: [1.30, 1.55, 1.60, 1.63, 1.65, 1.62, 1.58]
-            },
-            {
-              key: "zr26Base-rear",
-              label: "ZR26 Base Rear",
-              data: [1.41, 1.18, 1.13, 1.10, 1.08, 1.10, 1.13]
-            },
-            {
-              key: "zr26Aero-front",
-              label: "ZR26 Aero Front",
-              data: [1.35, 1.68, 1.74, 1.79, 1.82, 1.78, 1.71]
-            },
-            {
-              key: "zr26Aero-rear",
-              label: "ZR26 Aero Rear",
-              data: [1.46, 1.24, 1.20, 1.17, 1.15, 1.19, 1.24]
-            },
-            {
-              key: "zr25Aero-front",
-              label: "ZR25 Aero Front",
-              data: [1.46, 1.74, 1.79, 1.83, 1.86, 1.82, 1.76]
-            },
-            {
-              key: "zr25Aero-rear",
-              label: "ZR25 Aero Rear",
-              data: [1.58, 1.33, 1.29, 1.26, 1.23, 1.27, 1.31]
-            }
-          ]
-        }
-      }
+  function initStageEnhancements() {
+    const track = document.querySelector("#sd-long-stage .sd-track");
+    if (track && !track.querySelector(".sd-track-progress")) {
+      const progress = document.createElement("div");
+      progress.className = "sd-track-progress";
+      track.appendChild(progress);
+      dom.longTrail = progress;
+    } else if (track) {
+      dom.longTrail = track.querySelector(".sd-track-progress");
     }
-  },
 
-  lateral: {
-    metrics: [
-      {
-        label: "Peak High-Speed G",
-        unit: "G",
-        values: {
-          zr26Base: "1.48",
-          zr26Aero: "1.92",
-          zr25Aero: "1.73"
-        }
-      },
-      {
-        label: "FSAE Skidpad G",
-        unit: "G",
-        values: {
-          zr26Base: "1.36",
-          zr26Aero: "1.71",
-          zr25Aero: "1.59"
-        }
-      },
-      {
-        label: "Speed @ R = 15.25 m",
-        unit: "mph",
-        values: {
-          zr26Base: "31.4",
-          zr26Aero: "35.1",
-          zr25Aero: "33.8"
-        }
-      },
-      {
-        label: "K @ 1.0 G",
-        unit: "deg/G",
-        values: {
-          zr26Base: "0.82",
-          zr26Aero: "0.57",
-          zr25Aero: "0.64"
-        }
-      }
-    ],
+    const cornerWrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
+    if (cornerWrap && !cornerWrap.querySelector(".sd-lat-path-svg")) {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("class", "sd-lat-path-svg");
+      svg.setAttribute("preserveAspectRatio", "none");
 
-    secondary: [
-      {
-        label: "K Fit Avg",
-        unit: "deg/G",
-        values: {
-          zr26Base: "0.88",
-          zr26Aero: "0.60",
-          zr25Aero: "0.69"
-        }
-      },
-      {
-        label: "Aero Downforce @ Skidpad",
-        unit: "N",
-        values: {
-          zr26Base: "16.4",
-          zr26Aero: "196.2",
-          zr25Aero: "149.8"
-        }
-      }
-    ],
+      const basePath = document.createElementNS(svgNS, "path");
+      basePath.setAttribute("class", "sd-lat-path-base");
 
-    charts: {
-      sweep: {
-        steer: {
-          title: "Steering Input vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Steer Angle (deg)",
-          labels: ["0", "2", "4", "6", "8", "10"],
-          series: [
-            {
-              key: "zr26Base",
-              label: "ZR26 Base",
-              data: [2.9, 5.0, 7.2, 9.4, 11.5, 13.7]
-            },
-            {
-              key: "zr26Aero",
-              label: "ZR26 Aero",
-              data: [2.9, 5.0, 7.2, 9.4, 11.5, 13.7]
-            },
-            {
-              key: "zr25Aero",
-              label: "ZR25 Aero",
-              data: [2.9, 5.0, 7.2, 9.4, 11.5, 13.7]
-            }
-          ]
-        },
+      const progressPath = document.createElementNS(svgNS, "path");
+      progressPath.setAttribute("class", "sd-lat-path-progress");
 
-        accel: {
-          title: "Lateral Acceleration vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Lat Accel (G)",
-          labels: ["0", "2", "4", "6", "8", "10"],
-          series: [
-            {
-              key: "zr26Base",
-              label: "ZR26 Base",
-              data: [0.20, 0.52, 0.85, 1.10, 1.31, 1.48]
-            },
-            {
-              key: "zr26Aero",
-              label: "ZR26 Aero",
-              data: [0.21, 0.58, 0.99, 1.34, 1.66, 1.92]
-            },
-            {
-              key: "zr25Aero",
-              label: "ZR25 Aero",
-              data: [0.20, 0.56, 0.93, 1.23, 1.50, 1.73]
-            }
-          ]
-        },
+      svg.appendChild(basePath);
+      svg.appendChild(progressPath);
+      cornerWrap.appendChild(svg);
 
-        sideslip: {
-          title: "Body Sideslip vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Sideslip (deg)",
-          labels: ["0", "2", "4", "6", "8", "10"],
-          series: [
-            {
-              key: "zr26Base",
-              label: "ZR26 Base",
-              data: [0.10, 0.28, 0.44, 0.60, 0.74, 0.89]
-            },
-            {
-              key: "zr26Aero",
-              label: "ZR26 Aero",
-              data: [0.08, 0.22, 0.34, 0.45, 0.55, 0.64]
-            },
-            {
-              key: "zr25Aero",
-              label: "ZR25 Aero",
-              data: [0.09, 0.25, 0.39, 0.52, 0.63, 0.74]
-            }
-          ]
-        },
-
-        yaw: {
-          title: "Yaw Rate vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Yaw Rate (deg/s)",
-          labels: ["0", "2", "4", "6", "8", "10"],
-          series: [
-            {
-              key: "zr26Base",
-              label: "ZR26 Base",
-              data: [2.4, 5.8, 9.6, 13.4, 17.2, 21.0]
-            },
-            {
-              key: "zr26Aero",
-              label: "ZR26 Aero",
-              data: [2.6, 6.4, 10.8, 15.1, 19.5, 23.8]
-            },
-            {
-              key: "zr25Aero",
-              label: "ZR25 Aero",
-              data: [2.5, 6.1, 10.1, 14.2, 18.2, 22.1]
-            }
-          ]
-        },
-
-        loads: {
-          title: "Vertical Tire Loads vs Time",
-          xLabel: "Time (s)",
-          yLabel: "Vertical Load (N)",
-          labels: ["0", "2", "4", "6", "8", "10"],
-          series: [
-            {
-              key: "zr26Base-front",
-              label: "ZR26 Base Fzf",
-              data: [1320, 1330, 1342, 1354, 1365, 1374]
-            },
-            {
-              key: "zr26Base-rear",
-              label: "ZR26 Base Fzr",
-              data: [1430, 1442, 1455, 1468, 1480, 1490]
-            },
-            {
-              key: "zr26Aero-front",
-              label: "ZR26 Aero Fzf",
-              data: [1370, 1420, 1485, 1560, 1640, 1725]
-            },
-            {
-              key: "zr26Aero-rear",
-              label: "ZR26 Aero Fzr",
-              data: [1480, 1540, 1620, 1710, 1810, 1915]
-            },
-            {
-              key: "zr25Aero-front",
-              label: "ZR25 Aero Fzf",
-              data: [1480, 1525, 1585, 1650, 1720, 1790]
-            },
-            {
-              key: "zr25Aero-rear",
-              label: "ZR25 Aero Fzr",
-              data: [1590, 1655, 1735, 1820, 1910, 2005]
-            }
-          ]
-        }
-      },
-
-      handling: {
-        main: {
-          title: "Handling Curve",
-          xLabel: "Lateral Acceleration (G)",
-          yLabel: "Steering Wheel Angle (deg)",
-          labels: ["0.2", "0.5", "0.8", "1.1", "1.4", "1.7"],
-          series: [
-            {
-              key: "zr26Base",
-              label: "ZR26 Base",
-              data: [5.9, 6.4, 7.0, 7.8, 8.8, 10.1]
-            },
-            {
-              key: "zr26Aero",
-              label: "ZR26 Aero",
-              data: [5.8, 6.1, 6.5, 7.0, 7.6, 8.4]
-            },
-            {
-              key: "zr25Aero",
-              label: "ZR25 Aero",
-              data: [5.8, 6.2, 6.7, 7.3, 8.0, 8.9]
-            },
-            {
-              key: "zr26Base-fit",
-              label: "ZR26 Base Fit",
-              data: [5.85, 6.45, 7.05, 7.75, 8.65, 9.85]
-            },
-            {
-              key: "zr26Aero-fit",
-              label: "ZR26 Aero Fit",
-              data: [5.78, 6.12, 6.52, 7.02, 7.62, 8.32]
-            },
-            {
-              key: "zr25Aero-fit",
-              label: "ZR25 Aero Fit",
-              data: [5.80, 6.22, 6.72, 7.30, 7.98, 8.80]
-            },
-            {
-              key: "ackermann",
-              label: "Ackerman Reference",
-              data: [5.7, 5.7, 5.7, 5.7, 5.7, 5.7]
-            }
-          ]
-        }
-      }
+      dom.latSvg = svg;
+      dom.latBasePath = basePath;
+      dom.latProgressPath = progressPath;
+    } else if (cornerWrap) {
+      dom.latSvg = cornerWrap.querySelector(".sd-lat-path-svg");
+      dom.latBasePath = cornerWrap.querySelector(".sd-lat-path-base");
+      dom.latProgressPath = cornerWrap.querySelector(".sd-lat-path-progress");
     }
   }
-};
+
+  function populateTable(tableId, rows) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    const tbody = table.querySelector("tbody");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    rows.forEach((rowData) => {
+      const tr = document.createElement("tr");
+
+      const metricCell = document.createElement("td");
+      metricCell.textContent = rowData.label;
+      tr.appendChild(metricCell);
+
+      vehicleOrder.forEach((vehicleKey) => {
+        const td = document.createElement("td");
+        const value = rowData.values[vehicleKey] ?? "—";
+        td.textContent = `${value} ${rowData.unit}`;
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function initMainTabs() {
+    const tabs = document.querySelectorAll(".sd-tab");
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const group = tab.dataset.sdGroup;
+        const target = tab.dataset.sdTab;
+
+        document
+          .querySelectorAll(`.sd-tab[data-sd-group="${group}"]`)
+          .forEach((btn) => btn.classList.remove("active"));
+
+        tab.classList.add("active");
+
+        document
+          .querySelectorAll(`.sd-chart-view[data-sd-panel="${group}"]`)
+          .forEach((view) => view.classList.remove("active"));
+
+        const targetView = document.querySelector(
+          `.sd-chart-view[data-sd-panel="${group}"][data-sd-content="${target}"]`
+        );
+
+        if (targetView) targetView.classList.add("active");
+
+        if (group === "longitudinal") {
+          chartState.longitudinal.activeView = target;
+          stopLongitudinalPlayback();
+          resetLongitudinalPlayback();
+        } else if (group === "lateral") {
+          chartState.lateral.activeView = target;
+          stopLateralPlayback();
+          resetLateralPlayback();
+        }
+
+        renderVisibleCharts();
+      });
+    });
+  }
+
+  function initSubTabs() {
+    const subtabs = document.querySelectorAll(".sd-subtab");
+
+    subtabs.forEach((subtab) => {
+      subtab.addEventListener("click", () => {
+        const subgroup = subtab.dataset.sdSubgroup;
+        const target = subtab.dataset.sdSubtab;
+
+        document
+          .querySelectorAll(`.sd-subtab[data-sd-subgroup="${subgroup}"]`)
+          .forEach((btn) => btn.classList.remove("active"));
+
+        subtab.classList.add("active");
+
+        if (subgroup === "longitudinal-accel") {
+          chartState.longitudinal.accel = target;
+          stopLongitudinalPlayback();
+          resetLongitudinalPlayback();
+        } else if (subgroup === "longitudinal-brake") {
+          chartState.longitudinal.brake = target;
+          stopLongitudinalPlayback();
+          resetLongitudinalPlayback();
+        } else if (subgroup === "lateral-sweep") {
+          chartState.lateral.sweep = target;
+          stopLateralPlayback();
+          resetLateralPlayback();
+        }
+
+        renderVisibleCharts();
+      });
+    });
+  }
+
+  function initPlaybackControls() {
+    const longPlay = document.getElementById("sd-long-play");
+    const longReset = document.getElementById("sd-long-reset");
+    const latPlay = document.getElementById("sd-lat-play");
+    const latReset = document.getElementById("sd-lat-reset");
+
+    if (longPlay) {
+      longPlay.addEventListener("click", () => {
+        if (playbackState.long.isPlaying) return;
+        startLongitudinalPlayback();
+      });
+    }
+
+    if (longReset) {
+      longReset.addEventListener("click", () => {
+        stopLongitudinalPlayback();
+        resetLongitudinalPlayback();
+        renderVisibleCharts();
+      });
+    }
+
+    if (latPlay) {
+      latPlay.addEventListener("click", () => {
+        if (playbackState.lat.isPlaying) return;
+        startLateralPlayback();
+      });
+    }
+
+    if (latReset) {
+      latReset.addEventListener("click", () => {
+        stopLateralPlayback();
+        resetLateralPlayback();
+        renderVisibleCharts();
+      });
+    }
+  }
+
+  function startLongitudinalPlayback() {
+    const state = playbackState.long;
+    state.isPlaying = true;
+    state.startTime = performance.now() - state.progress * state.durationMs;
+    setStatus("sd-long-status", "Playing");
+    tickLongitudinal();
+  }
+
+  function tickLongitudinal() {
+    const state = playbackState.long;
+    if (!state.isPlaying) return;
+
+    const now = performance.now();
+    state.progress = Math.min((now - state.startTime) / state.durationMs, 1);
+
+    updateLongitudinalAnimation();
+    renderActiveLongitudinalChartOnly();
+
+    if (state.progress >= 1) {
+      state.isPlaying = false;
+      state.frameId = null;
+      setStatus("sd-long-status", "Complete");
+      return;
+    }
+
+    state.frameId = requestAnimationFrame(tickLongitudinal);
+  }
+
+  function stopLongitudinalPlayback() {
+    const state = playbackState.long;
+    state.isPlaying = false;
+    if (state.frameId) cancelAnimationFrame(state.frameId);
+    state.frameId = null;
+  }
+
+  function resetLongitudinalPlayback() {
+    playbackState.long.progress = 0;
+    updateLongitudinalAnimation();
+    setStatus("sd-long-status", "Ready");
+  }
+
+  function startLateralPlayback() {
+    const state = playbackState.lat;
+    state.isPlaying = true;
+    state.startTime = performance.now() - state.progress * state.durationMs;
+    setStatus("sd-lat-status", "Playing");
+    tickLateral();
+  }
+
+  function tickLateral() {
+    const state = playbackState.lat;
+    if (!state.isPlaying) return;
+
+    const now = performance.now();
+    state.progress = Math.min((now - state.startTime) / state.durationMs, 1);
+
+    updateLateralAnimation();
+    renderActiveLateralChartOnly();
+
+    if (state.progress >= 1) {
+      state.isPlaying = false;
+      state.frameId = null;
+      setStatus("sd-lat-status", "Complete");
+      return;
+    }
+
+    state.frameId = requestAnimationFrame(tickLateral);
+  }
+
+  function stopLateralPlayback() {
+    const state = playbackState.lat;
+    state.isPlaying = false;
+    if (state.frameId) cancelAnimationFrame(state.frameId);
+    state.frameId = null;
+  }
+
+  function resetLateralPlayback() {
+    playbackState.lat.progress = 0;
+    updateLateralAnimation();
+    setStatus("sd-lat-status", "Ready");
+  }
+
+  function setStatus(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+
+  function buildDenseSeries(series, samples = 360) {
+    if (!series || series.length === 0) return [];
+    if (series.length === 1) return new Array(samples).fill(Number(series[0]) || 0);
+
+    const dense = [];
+    const maxIndex = series.length - 1;
+
+    for (let i = 0; i < samples; i += 1) {
+      const t = (i / (samples - 1)) * maxIndex;
+      const low = Math.floor(t);
+      const high = Math.min(maxIndex, Math.ceil(t));
+      const frac = t - low;
+
+      const lowVal = Number(series[low]) || 0;
+      const highVal = Number(series[high]) || lowVal;
+
+      dense.push(lowVal + (highVal - lowVal) * frac);
+    }
+
+    return dense;
+  }
+
+  function interpolateDenseSeries(series, progress) {
+    if (!series || series.length === 0) return 0;
+    if (series.length === 1) return series[0];
+
+    const maxIndex = series.length - 1;
+    const rawIndex = Math.max(0, Math.min(1, progress)) * maxIndex;
+    const low = Math.floor(rawIndex);
+    const high = Math.min(maxIndex, Math.ceil(rawIndex));
+    const frac = rawIndex - low;
+
+    const lowVal = Number(series[low]) || 0;
+    const highVal = Number(series[high]) || lowVal;
+
+    return lowVal + (highVal - lowVal) * frac;
+  }
+
+  function getLongitudinalMotionSeries() {
+    const activeKey = chartState.longitudinal.activeView === "accel" ? "accel" : "brake";
+    return demoData.longitudinal.charts[activeKey].position.series[0]?.data || [];
+  }
+
+  function updateLongitudinalAnimation() {
+    const progress = playbackState.long.progress;
+    const car = document.getElementById("sd-long-car");
+    const readout = document.getElementById("sd-long-readout");
+    const track = document.querySelector("#sd-long-stage .sd-track");
+    if (!car || !readout || !track) return;
+
+    const activeChart = getCurrentLongitudinalChart();
+    if (!activeChart) return;
+
+    const trackRect = track.getBoundingClientRect();
+    const carWidth = car.getBoundingClientRect().width || 48;
+    const startPad = Math.max(trackRect.width * 0.06, 26);
+    const endPad = Math.max(trackRect.width * 0.06, 26);
+    const usableWidth = Math.max(trackRect.width - startPad - endPad - carWidth, 0);
+
+    const time = interpolateLabelValue(activeChart.labels, progress);
+    const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
+
+    const motionSeries = getLongitudinalMotionSeries();
+    const denseMotionSeries = buildDenseSeries(motionSeries, 480);
+    const motionValue = interpolateDenseSeries(denseMotionSeries, progress);
+
+    const motionMin = Math.min(...denseMotionSeries);
+    const motionMax = Math.max(...denseMotionSeries);
+    const motionRange = Math.max(motionMax - motionMin, 1e-6);
+
+    let normalized = (motionValue - motionMin) / motionRange;
+    normalized = Math.max(0, Math.min(1, normalized));
+
+    const xPx = startPad + usableWidth * normalized;
+    car.style.transform = `translate3d(${xPx}px, -50%, 0)`;
+
+    if (dom.longTrail) {
+      dom.longTrail.style.left = `${startPad + 2}px`;
+      dom.longTrail.style.width = `${Math.max(0, xPx)}px`;
+    }
+
+    readout.innerHTML = `
+      <span>Time: ${formatPlaybackValue(time)} s</span>
+      <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
+    `;
+  }
+
+  function getLateralPathState(progress) {
+    const wrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
+    if (!wrap) return null;
+
+    const rect = wrap.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+
+    if (chartState.lateral.activeView === "handling") {
+      const x1 = w * 0.16;
+      const y1 = h * 0.76;
+      const x2 = w * 0.30;
+      const y2 = h * 0.18;
+      const x3 = w * 0.76;
+      const y3 = h * 0.18;
+      const x4 = w * 0.86;
+      const y4 = h * 0.52;
+
+      return cubicBezierState(progress, x1, y1, x2, y2, x3, y3, x4, y4);
+    }
+
+    const x1 = w * 0.12;
+    const y1 = h * 0.82;
+    const x2 = w * 0.22;
+    const y2 = h * 0.86;
+    const x3 = w * 0.52;
+    const y3 = h * 0.22;
+    const x4 = w * 0.84;
+    const y4 = h * 0.34;
+
+    return cubicBezierState(progress, x1, y1, x2, y2, x3, y3, x4, y4);
+  }
+
+  function cubicBezierState(t, x1, y1, x2, y2, x3, y3, x4, y4) {
+    const mt = 1 - t;
+
+    const x =
+      mt * mt * mt * x1 +
+      3 * mt * mt * t * x2 +
+      3 * mt * t * t * x3 +
+      t * t * t * x4;
+
+    const y =
+      mt * mt * mt * y1 +
+      3 * mt * mt * t * y2 +
+      3 * mt * t * t * y3 +
+      t * t * t * y4;
+
+    const dx =
+      3 * mt * mt * (x2 - x1) +
+      6 * mt * t * (x3 - x2) +
+      3 * t * t * (x4 - x3);
+
+    const dy =
+      3 * mt * mt * (y2 - y1) +
+      6 * mt * t * (y3 - y2) +
+      3 * t * t * (y4 - y3);
+
+    return {
+      x,
+      y,
+      angle: Math.atan2(dy, dx),
+      path: `M ${x1} ${y1} C ${x2} ${y2}, ${x3} ${y3}, ${x4} ${y4}`
+    };
+  }
+
+  function updateLateralSvgPath(progress) {
+    if (!dom.latSvg || !dom.latBasePath || !dom.latProgressPath) return;
+
+    const pathState = getLateralPathState(progress);
+    if (!pathState) return;
+
+    const wrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
+    if (!wrap) return;
+
+    const rect = wrap.getBoundingClientRect();
+    dom.latSvg.setAttribute("viewBox", `0 0 ${rect.width} ${rect.height}`);
+    dom.latBasePath.setAttribute("d", pathState.path);
+    dom.latProgressPath.setAttribute("d", pathState.path);
+
+    const totalLength = dom.latProgressPath.getTotalLength();
+    const visibleLength = totalLength * Math.max(0, Math.min(1, progress));
+
+    dom.latProgressPath.style.strokeDasharray = `${visibleLength} ${Math.max(totalLength - visibleLength, 0.1)}`;
+    dom.latProgressPath.style.strokeDashoffset = "0";
+  }
+
+  function updateLateralAnimation() {
+    const progress = playbackState.lat.progress;
+    const car = document.getElementById("sd-lat-car");
+    const readout = document.getElementById("sd-lat-readout");
+    if (!car || !readout) return;
+
+    const activeChart = getCurrentLateralChart();
+    if (!activeChart) return;
+
+    const pathState = getLateralPathState(progress);
+    if (!pathState) return;
+
+    updateLateralSvgPath(progress);
+
+    const time = interpolateLabelValue(activeChart.labels, progress);
+    const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
+
+    const yawSource = demoData.lateral.charts.sweep.yaw.series[0]?.data || [];
+    const yawDense = buildDenseSeries(yawSource, 360);
+    const yawValue = interpolateDenseSeries(yawDense, progress);
+
+    const tangentAngle = pathState.angle;
+    const yawInfluence = chartState.lateral.activeView === "handling"
+      ? 0.06 * Math.sign(tangentAngle)
+      : clamp((yawValue / 26) * 0.08, -0.08, 0.08);
+
+    const finalAngle = tangentAngle + yawInfluence;
+
+    car.style.left = `${pathState.x}px`;
+    car.style.top = `${pathState.y}px`;
+    car.style.transform = `translate3d(-50%, -50%, 0) rotate(${finalAngle}rad)`;
+
+    readout.innerHTML = `
+      <span>Time: ${formatPlaybackValue(time)} s</span>
+      <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
+    `;
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function renderVisibleCharts() {
+    renderLongitudinalAccelChart();
+    renderLongitudinalBrakeChart();
+    renderLateralSweepChart();
+    renderLateralHandlingChart();
+  }
+
+  function renderActiveLongitudinalChartOnly() {
+    if (chartState.longitudinal.activeView === "accel") {
+      renderLongitudinalAccelChart();
+    } else {
+      renderLongitudinalBrakeChart();
+    }
+  }
+
+  function renderActiveLateralChartOnly() {
+    if (chartState.lateral.activeView === "sweep") {
+      renderLateralSweepChart();
+    } else {
+      renderLateralHandlingChart();
+    }
+  }
+
+  function renderLongitudinalAccelChart() {
+    const titleEl = document.getElementById("sd-longitudinal-chart-title");
+    const canvasId = "sd-longitudinal-main-chart";
+    const key = chartState.longitudinal.accel;
+    const chartData = demoData.longitudinal.charts.accel[key];
+
+    if (titleEl && chartData) titleEl.textContent = chartData.title;
+    renderChartById(
+      canvasId,
+      chartData,
+      chartState.longitudinal.activeView === "accel" ? playbackState.long.progress : 1
+    );
+  }
+
+  function renderLongitudinalBrakeChart() {
+    const titleEl = document.getElementById("sd-longitudinal-brake-chart-title");
+    const canvasId = "sd-longitudinal-brake-main-chart";
+    const key = chartState.longitudinal.brake;
+    const chartData = demoData.longitudinal.charts.brake[key];
+
+    if (titleEl && chartData) titleEl.textContent = chartData.title;
+    renderChartById(
+      canvasId,
+      chartData,
+      chartState.longitudinal.activeView === "brake" ? playbackState.long.progress : 1
+    );
+  }
+
+  function renderLateralSweepChart() {
+    const titleEl = document.getElementById("sd-lateral-chart-title");
+    const canvasId = "sd-lateral-main-chart";
+    const key = chartState.lateral.sweep;
+    const chartData = demoData.lateral.charts.sweep[key];
+
+    if (titleEl && chartData) titleEl.textContent = chartData.title;
+    renderChartById(
+      canvasId,
+      chartData,
+      chartState.lateral.activeView === "sweep" ? playbackState.lat.progress : 1
+    );
+  }
+
+  function renderLateralHandlingChart() {
+    const titleEl = document.getElementById("sd-lateral-handling-chart-title");
+    const canvasId = "sd-lateral-handling-chart";
+    const chartData = demoData.lateral.charts.handling.main;
+
+    if (titleEl && chartData) titleEl.textContent = chartData.title;
+    renderChartById(
+      canvasId,
+      chartData,
+      chartState.lateral.activeView === "handling" ? playbackState.lat.progress : 1
+    );
+  }
+
+  function getCurrentLongitudinalChart() {
+    const view = chartState.longitudinal.activeView;
+    const key = chartState.longitudinal[view];
+    return demoData.longitudinal.charts[view]?.[key];
+  }
+
+  function getCurrentLateralChart() {
+    const view = chartState.lateral.activeView;
+    if (view === "handling") return demoData.lateral.charts.handling.main;
+    const key = chartState.lateral.sweep;
+    return demoData.lateral.charts.sweep[key];
+  }
+
+  function renderChartById(canvasId, chartData, progress = 1) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !chartData) return;
+
+    setupCanvasForDisplay(canvas);
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    drawLineChart(ctx, canvas, chartData, progress);
+  }
+
+  function setupCanvasForDisplay(canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+
+    const displayWidth = Math.max(Math.floor(rect.width * dpr), 300);
+    const displayHeight = Math.max(Math.floor(rect.height * dpr), 180);
+
+    if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+      canvas.width = displayWidth;
+      canvas.height = displayHeight;
+    }
+  }
+
+  function drawLineChart(ctx, canvas, chartData, progress = 1) {
+    const w = canvas.width;
+    const h = canvas.height;
+
+    const padding = {
+      top: 48,
+      right: 18,
+      bottom: 46,
+      left: 58
+    };
+
+    const plotW = w - padding.left - padding.right;
+    const plotH = h - padding.top - padding.bottom;
+
+    const allValues = chartData.series.flatMap((series) => series.data);
+    const minValue = Math.min(...allValues);
+    const maxValue = Math.max(...allValues);
+
+    const flatRange = Math.abs(maxValue - minValue) < 1e-9;
+    const rangePadding = flatRange ? 1 : (maxValue - minValue) * 0.12;
+
+    const yMin = minValue - rangePadding;
+    const yMax = maxValue + rangePadding;
+
+    const count = chartData.labels.length;
+    const xStep = count > 1 ? plotW / (count - 1) : plotW;
+
+    const visibleCount = Math.max(1, Math.ceil(progress * count));
+
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.fillStyle = "rgba(5, 9, 18, 0.72)";
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = "rgba(135, 184, 255, 0.10)";
+    ctx.lineWidth = 1;
+
+    const horizontalLines = 4;
+    for (let i = 0; i <= horizontalLines; i += 1) {
+      const y = padding.top + (plotH / horizontalLines) * i;
+      ctx.beginPath();
+      ctx.moveTo(padding.left, y);
+      ctx.lineTo(w - padding.right, y);
+      ctx.stroke();
+    }
+
+    const verticalLines = Math.min(count - 1, 5);
+    for (let i = 0; i <= verticalLines; i += 1) {
+      const x = padding.left + (plotW / Math.max(verticalLines, 1)) * i;
+      ctx.beginPath();
+      ctx.moveTo(x, padding.top);
+      ctx.lineTo(x, h - padding.bottom);
+      ctx.stroke();
+    }
+
+    ctx.strokeStyle = "rgba(234, 241, 255, 0.22)";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, padding.top);
+    ctx.lineTo(padding.left, h - padding.bottom);
+    ctx.lineTo(w - padding.right, h - padding.bottom);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(168, 186, 219, 0.95)";
+    ctx.font = `${Math.max(11, Math.floor(h * 0.038))}px Inter, Arial, sans-serif`;
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+
+    for (let i = 0; i <= horizontalLines; i += 1) {
+      const value = yMax - ((yMax - yMin) / horizontalLines) * i;
+      const y = padding.top + (plotH / horizontalLines) * i;
+      ctx.fillText(formatAxisValue(value), padding.left - 8, y);
+    }
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+
+    const xLabelStep = Math.ceil(count / 5);
+    chartData.labels.forEach((label, index) => {
+      if (index % xLabelStep !== 0 && index !== count - 1) return;
+      const x = padding.left + xStep * index;
+      ctx.fillText(label, x, h - padding.bottom + 8);
+    });
+
+    chartData.series.forEach((series) => {
+      const style = seriesStyles[series.key] || {
+        color: "#eaf1ff",
+        lineWidth: 2,
+        dash: []
+      };
+
+      ctx.beginPath();
+      ctx.strokeStyle = style.color;
+      ctx.lineWidth = style.lineWidth;
+      ctx.setLineDash(style.dash || []);
+
+      series.data.slice(0, visibleCount).forEach((value, index) => {
+        const x = padding.left + xStep * index;
+        const y = padding.top + ((yMax - value) / (yMax - yMin)) * plotH;
+
+        if (index === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      series.data.slice(0, visibleCount).forEach((value, index) => {
+        const x = padding.left + xStep * index;
+        const y = padding.top + ((yMax - value) / (yMax - yMin)) * plotH;
+
+        ctx.beginPath();
+        ctx.fillStyle = style.color;
+        ctx.arc(x, y, 2.6, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    });
+
+    ctx.save();
+    ctx.fillStyle = "rgba(168, 186, 219, 0.92)";
+    ctx.font = `${Math.max(11, Math.floor(h * 0.04))}px Inter, Arial, sans-serif`;
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText(chartData.xLabel || "", padding.left + plotW / 2, h - 4);
+
+    ctx.translate(16, padding.top + plotH / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(chartData.yLabel || "", 0, 0);
+    ctx.restore();
+
+    drawLegend(ctx, canvas, chartData.series);
+  }
+
+  function drawLegend(ctx, canvas, seriesList) {
+    const filteredSeries = seriesList.slice(0, 7);
+    const startX = 14;
+    let x = startX;
+    let y = 18;
+    const maxWidth = canvas.width - 20;
+
+    ctx.font = `${Math.max(10, Math.floor(canvas.height * 0.032))}px Inter, Arial, sans-serif`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    filteredSeries.forEach((series) => {
+      const style = seriesStyles[series.key] || {
+        color: "#eaf1ff",
+        dash: [],
+        lineWidth: 2
+      };
+
+      const labelWidth = ctx.measureText(series.label).width;
+      const itemWidth = 22 + labelWidth + 16;
+
+      if (x + itemWidth > maxWidth) {
+        x = startX;
+        y += 16;
+      }
+
+      ctx.strokeStyle = style.color;
+      ctx.lineWidth = style.lineWidth;
+      ctx.setLineDash(style.dash || []);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + 14, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = "rgba(234, 241, 255, 0.88)";
+      ctx.fillText(series.label, x + 18, y);
+
+      x += itemWidth;
+    });
+  }
+
+  function interpolateLabelValue(labels, progress) {
+    if (!labels || !labels.length) return 0;
+    const maxIndex = labels.length - 1;
+    const rawIndex = progress * maxIndex;
+    const low = Math.floor(rawIndex);
+    const high = Math.min(maxIndex, Math.ceil(rawIndex));
+
+    const lowVal = parseFloat(labels[low]) || 0;
+    const highVal = parseFloat(labels[high]) || lowVal;
+    const frac = rawIndex - low;
+
+    return lowVal + (highVal - lowVal) * frac;
+  }
+
+  function interpolateSeriesValue(series, progress) {
+    if (!series || !series.length) return 0;
+    const maxIndex = series.length - 1;
+    const rawIndex = progress * maxIndex;
+    const low = Math.floor(rawIndex);
+    const high = Math.min(maxIndex, Math.ceil(rawIndex));
+    const lowVal = Number(series[low]) || 0;
+    const highVal = Number(series[high]) || lowVal;
+    const frac = rawIndex - low;
+
+    return lowVal + (highVal - lowVal) * frac;
+  }
+
+  function formatPlaybackValue(value) {
+    if (!Number.isFinite(value)) return "—";
+    return Math.abs(value) >= 100 ? value.toFixed(1) : value.toFixed(2);
+  }
+
+  function formatAxisValue(value) {
+    if (Math.abs(value) >= 1000) return Math.round(value).toString();
+    if (Math.abs(value) >= 100) return value.toFixed(0);
+    if (Math.abs(value) >= 10) return value.toFixed(1);
+    return value.toFixed(2);
+  }
+
+  let resizeTimer = null;
+
+  window.addEventListener("resize", () => {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      updateLongitudinalAnimation();
+      updateLateralAnimation();
+      renderVisibleCharts();
+    }, 120);
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initSeniorDemo);
+  } else {
+    initSeniorDemo();
+  }
+})();
