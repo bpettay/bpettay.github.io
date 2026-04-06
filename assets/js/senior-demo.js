@@ -1,6 +1,6 @@
 /* =========================================================
    Senior Project Demo
-   Improved playback + more believable motion mapping
+   Uses real MATLAB-based charts + derived lateral path states
 ========================================================= */
 
 (function () {
@@ -433,125 +433,92 @@
     `;
   }
 
-function getPrimaryLateralPath() {
-  return demoData?.lateral?.pathStates?.zr26Base || null;
-}
+  function getPrimaryLateralPath() {
+    return demoData?.lateral?.pathStates?.zr26Base || null;
+  }
 
-function interpolatePathArray(arr, progress) {
-  if (!arr || !arr.length) return 0;
-  if (arr.length === 1) return arr[0];
+  function interpolatePathArray(arr, progress) {
+    if (!arr || !arr.length) return 0;
+    if (arr.length === 1) return arr[0];
 
-  const maxIndex = arr.length - 1;
-  const rawIndex = Math.max(0, Math.min(1, progress)) * maxIndex;
-  const low = Math.floor(rawIndex);
-  const high = Math.min(maxIndex, Math.ceil(rawIndex));
-  const frac = rawIndex - low;
+    const maxIndex = arr.length - 1;
+    const rawIndex = Math.max(0, Math.min(1, progress)) * maxIndex;
+    const low = Math.floor(rawIndex);
+    const high = Math.min(maxIndex, Math.ceil(rawIndex));
+    const frac = rawIndex - low;
 
-  const a = Number(arr[low]) || 0;
-  const b = Number(arr[high]) || a;
+    const a = Number(arr[low]) || 0;
+    const b = Number(arr[high]) || a;
 
-  return a + (b - a) * frac;
-}
+    return a + (b - a) * frac;
+  }
 
-function buildSvgPathFromXY(xArr, yArr, width, height, padding = 18) {
-  if (!xArr || !yArr || !xArr.length || !yArr.length) return "";
+  function buildSvgPathFromXY(xArr, yArr, width, height, padding = 18) {
+    if (!xArr || !yArr || !xArr.length || !yArr.length) return "";
 
-  const minX = Math.min(...xArr);
-  const maxX = Math.max(...xArr);
-  const minY = Math.min(...yArr);
-  const maxY = Math.max(...yArr);
+    const minX = Math.min(...xArr);
+    const maxX = Math.max(...xArr);
+    const minY = Math.min(...yArr);
+    const maxY = Math.max(...yArr);
 
-  const spanX = Math.max(maxX - minX, 1e-6);
-  const spanY = Math.max(maxY - minY, 1e-6);
+    const spanX = Math.max(maxX - minX, 1e-6);
+    const spanY = Math.max(maxY - minY, 1e-6);
 
-  const usableW = Math.max(width - 2 * padding, 1);
-  const usableH = Math.max(height - 2 * padding, 1);
+    const usableW = Math.max(width - 2 * padding, 1);
+    const usableH = Math.max(height - 2 * padding, 1);
 
-  const scale = Math.min(usableW / spanX, usableH / spanY);
+    const scale = Math.min(usableW / spanX, usableH / spanY);
 
-  const pts = xArr.map((x, i) => {
-    const sx = padding + (x - minX) * scale;
-    const sy = height - padding - (yArr[i] - minY) * scale;
-    return [round(sx, 3), round(sy, 3)];
-  });
+    const pts = xArr.map((x, i) => {
+      const sx = padding + (x - minX) * scale;
+      const sy = height - padding - (yArr[i] - minY) * scale;
+      return [round(sx, 3), round(sy, 3)];
+    });
 
-  return pts
-    .map((p, i) => `${i === 0 ? "M" : "L"} ${p[0]} ${p[1]}`)
-    .join(" ");
-}
+    return pts
+      .map((p, i) => `${i === 0 ? "M" : "L"} ${p[0]} ${p[1]}`)
+      .join(" ");
+  }
 
-function getLateralPathState(progress) {
-  const wrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
-  const basePath = getPrimaryLateralPath();
-  if (!wrap || !basePath) return null;
+  function getLateralPathState(progress) {
+    const wrap = document.querySelector("#sd-lat-stage .sd-corner-wrap");
+    const basePath = getPrimaryLateralPath();
+    if (!wrap || !basePath) return null;
 
-  const rect = wrap.getBoundingClientRect();
-  const width = rect.width;
-  const height = rect.height;
-  const padding = 18;
+    const rect = wrap.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const padding = 18;
 
-  const xArr = basePath.x;
-  const yArr = basePath.y;
+    const xArr = basePath.x;
+    const yArr = basePath.y;
 
-  const minX = Math.min(...xArr);
-  const maxX = Math.max(...xArr);
-  const minY = Math.min(...yArr);
-  const maxY = Math.max(...yArr);
+    const minX = Math.min(...xArr);
+    const maxX = Math.max(...xArr);
+    const minY = Math.min(...yArr);
+    const maxY = Math.max(...yArr);
 
-  const spanX = Math.max(maxX - minX, 1e-6);
-  const spanY = Math.max(maxY - minY, 1e-6);
+    const spanX = Math.max(maxX - minX, 1e-6);
+    const spanY = Math.max(maxY - minY, 1e-6);
 
-  const usableW = Math.max(width - 2 * padding, 1);
-  const usableH = Math.max(height - 2 * padding, 1);
-  const scale = Math.min(usableW / spanX, usableH / spanY);
+    const usableW = Math.max(width - 2 * padding, 1);
+    const usableH = Math.max(height - 2 * padding, 1);
+    const scale = Math.min(usableW / spanX, usableH / spanY);
 
-  const xNow = interpolatePathArray(xArr, progress);
-  const yNow = interpolatePathArray(yArr, progress);
-  const yawNow = interpolatePathArray(basePath.yaw_deg, progress) * (Math.PI / 180);
+    const xNow = interpolatePathArray(xArr, progress);
+    const yNow = interpolatePathArray(yArr, progress);
+    const yawNow = interpolatePathArray(basePath.yaw_deg, progress) * (Math.PI / 180);
 
-  const sx = padding + (xNow - minX) * scale;
-  const sy = height - padding - (yNow - minY) * scale;
+    const sx = padding + (xNow - minX) * scale;
+    const sy = height - padding - (yNow - minY) * scale;
 
-  const pathD = buildSvgPathFromXY(xArr, yArr, width, height, padding);
-
-  return {
-    x: sx,
-    y: sy,
-    angle: yawNow,
-    path: pathD
-  };
-}
-
-  function cubicBezierState(t, x1, y1, x2, y2, x3, y3, x4, y4) {
-    const mt = 1 - t;
-
-    const x =
-      mt * mt * mt * x1 +
-      3 * mt * mt * t * x2 +
-      3 * mt * t * t * x3 +
-      t * t * t * x4;
-
-    const y =
-      mt * mt * mt * y1 +
-      3 * mt * mt * t * y2 +
-      3 * mt * t * t * y3 +
-      t * t * t * y4;
-
-    const dx =
-      3 * mt * mt * (x2 - x1) +
-      6 * mt * t * (x3 - x2) +
-      3 * t * t * (x4 - x3);
-
-    const dy =
-      3 * mt * mt * (y2 - y1) +
-      6 * mt * t * (y3 - y2) +
-      3 * t * t * (y4 - y3);
+    const pathD = buildSvgPathFromXY(xArr, yArr, width, height, padding);
 
     return {
-      x,
-      y,
-      angle: Math.atan2(dy, dx),
-      path: `M ${x1} ${y1} C ${x2} ${y2}, ${x3} ${y3}, ${x4} ${y4}`
+      x: sx,
+      y: sy,
+      angle: yawNow,
+      path: pathD
     };
   }
 
@@ -593,29 +560,14 @@ function getLateralPathState(progress) {
     const time = interpolateLabelValue(activeChart.labels, progress);
     const value = interpolateSeriesValue(activeChart.series[0]?.data || [], progress);
 
-    const yawSource = demoData.lateral.charts.sweep.yaw.series[0]?.data || [];
-    const yawDense = buildDenseSeries(yawSource, 360);
-    const yawValue = interpolateDenseSeries(yawDense, progress);
-
-    const tangentAngle = pathState.angle;
-    const yawInfluence = chartState.lateral.activeView === "handling"
-      ? 0.06 * Math.sign(tangentAngle)
-      : clamp((yawValue / 26) * 0.08, -0.08, 0.08);
-
-    const finalAngle = tangentAngle + yawInfluence;
-
     car.style.left = `${pathState.x}px`;
     car.style.top = `${pathState.y}px`;
-    car.style.transform = `translate3d(-50%, -50%, 0) rotate(${finalAngle}rad)`;
+    car.style.transform = `translate3d(-50%, -50%, 0) rotate(${pathState.angle}rad)`;
 
     readout.innerHTML = `
       <span>Time: ${formatPlaybackValue(time)} s</span>
       <span>${activeChart.yLabel}: ${formatPlaybackValue(value)}</span>
     `;
-  }
-
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
   }
 
   function renderVisibleCharts() {
