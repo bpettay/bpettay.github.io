@@ -1,6 +1,6 @@
 /* =========================================================
    Senior Project Demo
-   Temporary event-only demo styles
+   Improved animation styling
 ========================================================= */
 
 :root {
@@ -252,7 +252,7 @@
 
 .sd-track {
   position: relative;
-  height: 88px;
+  height: 96px;
   border-radius: 14px;
   background:
     linear-gradient(180deg, rgba(10, 16, 28, 0.88), rgba(5, 9, 18, 0.92));
@@ -261,10 +261,10 @@
 
 .sd-track-line {
   position: absolute;
-  left: 3.5%;
-  right: 3.5%;
+  left: 6%;
+  right: 6%;
   top: 50%;
-  height: 6px;
+  height: 8px;
   transform: translateY(-50%);
   border-radius: 999px;
   background:
@@ -277,6 +277,25 @@
   box-shadow: 0 0 0 1px rgba(135, 184, 255, 0.08) inset;
 }
 
+.sd-track-progress {
+  position: absolute;
+  top: 50%;
+  height: 10px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(135, 184, 255, 0.34),
+      rgba(143, 224, 178, 0.26),
+      rgba(182, 156, 255, 0.22)
+    );
+  box-shadow:
+    0 0 22px rgba(135, 184, 255, 0.16),
+    0 0 0 1px rgba(135, 184, 255, 0.10) inset;
+  pointer-events: none;
+}
+
 .sd-stage-marker {
   position: absolute;
   top: 13px;
@@ -287,21 +306,22 @@
 }
 
 .sd-stage-marker.start {
-  left: 3.5%;
+  left: 6%;
 }
 
 .sd-stage-marker.end {
-  right: 3.5%;
+  right: 6%;
 }
 
 .sd-long-car {
   position: absolute;
-  left: 3.5%;
+  left: 0;
   top: 50%;
-  width: 48px;
-  height: 24px;
+  width: 54px;
+  height: 26px;
   transform: translate3d(0, -50%, 0);
   will-change: transform;
+  z-index: 3;
 }
 
 /* =========================================================
@@ -310,7 +330,7 @@
 
 .sd-corner-wrap {
   position: relative;
-  height: 180px;
+  height: 220px;
   border-radius: 14px;
   background:
     radial-gradient(circle at 50% 50%, rgba(135, 184, 255, 0.05), transparent 48%),
@@ -319,25 +339,43 @@
 }
 
 .sd-corner-path {
+  display: none;
+}
+
+.sd-lat-path-svg {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 68%;
-  height: 68%;
-  transform: translate(-50%, -50%);
-  border: 6px solid rgba(135, 184, 255, 0.16);
-  border-radius: 50%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.sd-lat-path-base {
+  fill: none;
+  stroke: rgba(135, 184, 255, 0.16);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.sd-lat-path-progress {
+  fill: none;
+  stroke: rgba(182, 156, 255, 0.72);
+  stroke-width: 5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 10px rgba(182, 156, 255, 0.25));
 }
 
 .sd-lat-car {
   position: absolute;
-  left: 22%;
-  top: 72%;
-  width: 48px;
-  height: 24px;
-  transform: translate3d(-50%, -50%, 0) rotate(-20deg);
+  left: 12%;
+  top: 82%;
+  width: 54px;
+  height: 26px;
+  transform: translate3d(-50%, -50%, 0) rotate(0deg);
   transform-origin: center;
-  will-change: transform;
+  will-change: transform, left, top;
+  z-index: 3;
 }
 
 /* =========================================================
@@ -547,7 +585,7 @@
   }
 
   .sd-corner-wrap {
-    height: 150px;
+    height: 180px;
   }
 }
 
@@ -578,11 +616,11 @@
   }
 
   .sd-track {
-    height: 72px;
+    height: 78px;
   }
 
   .sd-corner-wrap {
-    height: 132px;
+    height: 148px;
   }
 
   .sd-live-readout {
