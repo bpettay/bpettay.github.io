@@ -1,22 +1,50 @@
 function initializeNavigation() {
-  const tabs = document.querySelectorAll(".nav-link");
-  const pages = document.querySelectorAll(".page");
-  const pageButtons = document.querySelectorAll("[data-page-target]");
+  const tabs = Array.from(document.querySelectorAll(".nav-link"));
+  const pages = Array.from(document.querySelectorAll(".page"));
+  const pageButtons = Array.from(document.querySelectorAll("[data-page-target]"));
 
-  function openPage(target) {
+  if (!tabs.length || !pages.length) {
+    return { openPage: () => null, pages: [] };
+  }
+
+  const validPages = pages.map((page) => page.id);
+  const defaultPage = validPages.includes("home") ? "home" : validPages[0];
+
+  function normalizePage(target) {
+    return validPages.includes(target) ? target : defaultPage;
+  }
+
+  function getCurrentPageFromUrl() {
+    return normalizePage(window.location.hash.replace("#", ""));
+  }
+
+  function syncUrl(pageId, replaceState = false) {
+    const nextUrl = `${window.location.pathname}${window.location.search}#${pageId}`;
+    const method = replaceState ? "replaceState" : "pushState";
+    window.history[method](null, "", nextUrl);
+  }
+
+  function openPage(target, options = {}) {
+    const { updateUrl = true, replaceState = false } = options;
+    const pageId = normalizePage(target);
+
     tabs.forEach((item) => {
-      item.classList.remove("active");
-      if (item.dataset.page === target) {
-        item.classList.add("active");
-      }
+      const isActive = item.dataset.page === pageId;
+      item.classList.toggle("active", isActive);
+      item.setAttribute("aria-current", isActive ? "page" : "false");
     });
 
     pages.forEach((page) => {
-      page.classList.remove("active");
-      if (page.id === target) {
-        page.classList.add("active");
-      }
+      const isActive = page.id === pageId;
+      page.classList.toggle("active", isActive);
+      page.hidden = !isActive;
     });
+
+    if (updateUrl) {
+      syncUrl(pageId, replaceState);
+    }
+
+    return pageId;
   }
 
   tabs.forEach((tab) => {
@@ -31,7 +59,17 @@ function initializeNavigation() {
     });
   });
 
+  window.addEventListener("popstate", () => {
+    openPage(getCurrentPageFromUrl(), { updateUrl: false });
+  });
+
+  const initialPage = getCurrentPageFromUrl();
+  openPage(initialPage, { updateUrl: true, replaceState: true });
+
   window.siteNavigation = {
-    openPage
+    openPage,
+    pages: validPages.slice()
   };
+
+  return window.siteNavigation;
 }
