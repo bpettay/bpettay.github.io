@@ -14,6 +14,12 @@
   --glass-shadow-inner: rgba(0, 0, 0, 0.18);
   --max-width: 1240px;
   --radius: 14px;
+  --space-1: 0.5rem;
+  --space-2: 0.75rem;
+  --space-3: 1rem;
+  --space-4: 1.25rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
 }
 
 * {
@@ -39,7 +45,7 @@ body {
   display: none;
   width: min(calc(100% - 2rem), var(--max-width));
   margin: 0 auto;
-  padding: 2.4rem 0 3.75rem;
+  padding: var(--space-6) 0 calc(var(--space-6) * 1.5);
   animation: page-enter 360ms ease-out;
 }
 
@@ -163,7 +169,7 @@ select:focus {
 .section-heading {
   display: grid;
   gap: 0.35rem;
-  margin-bottom: 0.9rem;
+  margin-bottom: var(--space-3);
 }
 
 .section-label {
@@ -183,7 +189,7 @@ select:focus {
   align-items: center;
   justify-content: space-between;
   width: min(calc(100% - 2rem), var(--max-width));
-  margin: 1rem auto 0;
+  margin: var(--space-3) auto 0;
   padding: 0.85rem 1rem;
   border: 1px solid var(--line);
   border-radius: 14px;
