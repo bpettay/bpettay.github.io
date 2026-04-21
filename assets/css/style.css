@@ -73,7 +73,7 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.03),
     0 16px 32px rgba(0, 0, 0, 0.22);
   transform: perspective(1100px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateZ(var(--lift-z));
-  transition: background 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease, transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background 0.28s ease, border-color 0.4s ease, box-shadow 0.45s ease;
 }
 
 .surface::before,
