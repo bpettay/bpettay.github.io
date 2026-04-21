@@ -1,14 +1,18 @@
 :root {
-  --bg: #0b0f17;
-  --panel: #121927;
-  --panel-2: #161f30;
-  --border: #273247;
-  --border-soft: #202a3d;
-  --text: #e8eef8;
-  --text-muted: #9aa8bf;
-  --accent: #dbe6ff;
-  --max-width: 960px;
-  --radius: 14px;
+  --bg: #07111b;
+  --bg-deep: #041019;
+  --panel: rgba(13, 24, 37, 0.82);
+  --panel-2: rgba(18, 31, 47, 0.88);
+  --panel-strong: rgba(22, 38, 57, 0.96);
+  --border: rgba(158, 181, 199, 0.16);
+  --border-soft: rgba(158, 181, 199, 0.1);
+  --text: #eff5f2;
+  --text-muted: #9dafb8;
+  --accent: #e3c48f;
+  --accent-soft: rgba(227, 196, 143, 0.16);
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  --max-width: 1120px;
+  --radius: 22px;
 }
 
 * {
@@ -21,26 +25,48 @@ html {
 
 body {
   margin: 0;
-  font-family: Inter, Arial, Helvetica, sans-serif;
-  background: var(--bg);
+  font-family: "Space Grotesk", Arial, Helvetica, sans-serif;
   color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(227, 196, 143, 0.12), transparent 24%),
+    radial-gradient(circle at 85% 16%, rgba(88, 131, 164, 0.16), transparent 24%),
+    linear-gradient(180deg, #09131d 0%, #07111b 42%, #061019 100%);
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 88%);
 }
 
 .page {
   display: none;
   width: min(calc(100% - 2rem), var(--max-width));
   margin: 0 auto;
-  padding: 3rem 0 4rem;
+  padding: 3.5rem 0 5rem;
 }
 
 .page.active {
   display: block;
 }
 
+.page[hidden] {
+  display: none;
+}
+
 label {
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   color: var(--text-muted);
   font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 input,
@@ -52,24 +78,26 @@ button {
 input,
 select {
   width: 100%;
-  padding: 0.85rem 0.9rem;
-  border-radius: 10px;
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
   border: 1px solid var(--border);
-  background: var(--panel-2);
+  background: rgba(11, 21, 33, 0.92);
   color: var(--text);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 input:focus,
 select:focus {
   outline: none;
-  border-color: #44536f;
+  border-color: rgba(227, 196, 143, 0.42);
+  box-shadow: 0 0 0 4px rgba(227, 196, 143, 0.1);
 }
 
 .result-label {
   margin: 0 0 0.35rem;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.16em;
   color: var(--text-muted);
   font-weight: 700;
 }
@@ -78,22 +106,27 @@ select:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--panel-2);
+  min-height: 48px;
+  padding: 0.85rem 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(227, 196, 143, 0.24);
+  background: linear-gradient(135deg, rgba(227, 196, 143, 0.18), rgba(227, 196, 143, 0.06));
   color: var(--text);
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
+  letter-spacing: 0.02em;
   cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
 .cta-button:hover {
-  border-color: #3a4a66;
+  transform: translateY(-1px);
+  border-color: rgba(227, 196, 143, 0.44);
 }
 
 .cta-button.secondary {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--border);
   color: var(--text-muted);
 }
 
@@ -102,47 +135,80 @@ select:focus {
   cursor: not-allowed;
 }
 
+.section-heading {
+  display: grid;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+.section-label {
+  margin: 0;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
 /* ===============================
    Navigation
 =============================== */
 .nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid var(--border);
+  width: min(calc(100% - 2rem), var(--max-width));
+  margin: 1rem auto 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(8, 16, 26, 0.74);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--shadow);
 }
 
 .nav-left {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.85rem;
 }
 
 .logo {
-  width: 30px;
-  height: 30px;
+  width: 38px;
+  height: 38px;
   object-fit: contain;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(227, 196, 143, 0.2), rgba(255, 255, 255, 0.02));
+  padding: 0.3rem;
 }
 
 .site-name {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--text);
 }
 
 .nav-right {
   display: flex;
   gap: 0.5rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .nav-link {
   color: var(--text-muted);
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 10px;
-  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  padding: 0.65rem 1rem;
   cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
 .nav-link:hover {
@@ -151,35 +217,46 @@ select:focus {
 }
 
 .nav-link.active {
-  color: var(--text);
-  border-color: var(--border);
-  background: var(--panel);
+  color: #0b131b;
+  border-color: transparent;
+  background: linear-gradient(135deg, #f0d6a8, #d7b47a);
 }
 
 /* ===============================
    Responsive
 =============================== */
 @media (max-width: 820px) {
-  .page {
+  .page,
+  .nav {
     width: min(calc(100% - 1.5rem), var(--max-width));
   }
 }
 
 @media (max-width: 720px) {
   .nav {
-    padding: 1rem;
+    margin-top: 0.75rem;
+    padding: 0.85rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+  }
+
+  .nav-left {
+    justify-content: center;
+  }
+
+  .nav-right {
+    justify-content: center;
+    flex-wrap: wrap;
   }
 
   .page {
     width: min(calc(100% - 1.25rem), var(--max-width));
-    padding: 2rem 0 3rem;
-  }
-
-  .nav-right {
-    gap: 0.35rem;
+    padding: 2.4rem 0 3.5rem;
   }
 
   .nav-link {
-    padding: 0.5rem 0.75rem;
+    flex: 1 1 0;
+    min-width: 120px;
   }
 }
