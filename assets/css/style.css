@@ -61,9 +61,14 @@ body {
   position: relative;
   overflow: hidden;
   isolation: isolate;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
   --pointer-x: 50%;
   --pointer-y: 50%;
   --glow-opacity: 0;
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --lift-z: 0px;
   border: 1px solid var(--line);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06) 48%, rgba(255, 255, 255, 0.04)),
@@ -75,7 +80,8 @@ body {
     0 -1px 0 rgba(255, 255, 255, 0.04) inset,
     0 0 0 1px rgba(255, 255, 255, 0.02) inset,
     0 18px 40px rgba(0, 0, 0, 0.28);
-  transition: background 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+  transform: perspective(1200px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateZ(var(--lift-z));
+  transition: background 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease, transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .surface::before {
@@ -86,10 +92,11 @@ body {
   z-index: 0;
   border-radius: inherit;
   background:
-    radial-gradient(circle 240px at var(--pointer-x) var(--pointer-y), rgba(255, 255, 255, 0.16), transparent 42%),
+    radial-gradient(circle 260px at var(--pointer-x) var(--pointer-y), rgba(255, 255, 255, 0.16), transparent 42%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 22%),
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 34%);
-  opacity: calc(0.78 + (var(--glow-opacity) * 0.22));
+  opacity: calc(0.74 + (var(--glow-opacity) * 0.24));
+  transform: translateZ(18px);
   transition: opacity 0.28s ease, background 0.16s ease;
 }
 
@@ -105,15 +112,23 @@ body {
     inset 0 -18px 24px -24px var(--glass-shadow-inner),
     inset 18px 0 24px -26px rgba(255, 255, 255, 0.04),
     inset -18px 0 24px -26px rgba(255, 255, 255, 0.02);
+  transform: translateZ(12px);
 }
 
 .glass-track {
   position: relative;
   overflow: hidden;
   isolation: isolate;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
   --pointer-x: 50%;
   --pointer-y: 50%;
   --glow-opacity: 0;
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --lift-z: 0px;
+  transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateZ(var(--lift-z));
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
 }
 
 .glass-track > * {
@@ -129,10 +144,24 @@ body {
   z-index: 0;
   border-radius: inherit;
   background:
-    radial-gradient(circle 200px at var(--pointer-x) var(--pointer-y), rgba(255, 255, 255, 0.15), transparent 42%),
+    radial-gradient(circle 220px at var(--pointer-x) var(--pointer-y), rgba(255, 255, 255, 0.15), transparent 42%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 32%);
-  opacity: calc(0.18 + (var(--glow-opacity) * 0.72));
+  opacity: calc(0.14 + (var(--glow-opacity) * 0.66));
+  transform: translateZ(12px);
   transition: opacity 0.28s ease, background 0.16s ease;
+}
+
+.glass-track.is-pointer-active {
+  box-shadow: 0 22px 42px rgba(0, 0, 0, 0.3);
+}
+
+.surface.is-pointer-active {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 -1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 26px 54px rgba(0, 0, 0, 0.34);
 }
 
 label {
@@ -320,9 +349,11 @@ select:focus {
   input,
   select,
   .surface,
+  .glass-track,
   .glass-track::before {
     animation: none;
     transition: none;
+    transform: none;
   }
 }
 
