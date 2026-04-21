@@ -47,13 +47,11 @@ function initializeGlassTracking() {
       const clampedY = Math.min(1, Math.max(0, py));
       const centeredX = (clampedX - 0.5) * 2;
       const centeredY = (clampedY - 0.5) * 2;
-      const rotateY = centeredX * 2.3;
-      const rotateX = centeredY * -2.3;
+      const rotateY = centeredX * 1.15;
+      const rotateX = centeredY * -1.15;
       const distance = Math.min(1, Math.hypot(centeredX, centeredY));
-      const depth = 3.5 - distance * 1.2;
+      const depth = 1.8 - distance * 0.6;
 
-      panel.style.setProperty("--pointer-x", `${(clampedX * 100).toFixed(2)}%`);
-      panel.style.setProperty("--pointer-y", `${(clampedY * 100).toFixed(2)}%`);
       panel.style.setProperty("--tilt-x", `${rotateX.toFixed(2)}deg`);
       panel.style.setProperty("--tilt-y", `${rotateY.toFixed(2)}deg`);
       panel.style.setProperty("--lift-z", `${depth.toFixed(2)}px`);
@@ -69,7 +67,6 @@ function initializeGlassTracking() {
 
     panel.addEventListener("pointerenter", (event) => {
       panel.classList.add("is-pointer-active");
-      panel.style.setProperty("--glow-opacity", "1");
       scheduleUpdate(event);
     });
 
@@ -78,9 +75,6 @@ function initializeGlassTracking() {
     panel.addEventListener("pointerleave", () => {
       activeEvent = null;
       panel.classList.remove("is-pointer-active");
-      panel.style.setProperty("--glow-opacity", "0");
-      panel.style.setProperty("--pointer-x", "50%");
-      panel.style.setProperty("--pointer-y", "50%");
       panel.style.setProperty("--tilt-x", "0deg");
       panel.style.setProperty("--tilt-y", "0deg");
       panel.style.setProperty("--lift-z", "0px");
