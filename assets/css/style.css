@@ -81,7 +81,7 @@ body {
     0 0 0 1px rgba(255, 255, 255, 0.02) inset,
     0 18px 40px rgba(0, 0, 0, 0.28);
   transform: perspective(1200px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateZ(var(--lift-z));
-  transition: background 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease, transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: background 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease, transform 0.72s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .surface::before {
@@ -97,7 +97,7 @@ body {
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 34%);
   opacity: calc(0.74 + (var(--glow-opacity) * 0.24));
   transform: translateZ(18px);
-  transition: opacity 0.28s ease, background 0.16s ease;
+  transition: opacity 0.34s ease, background 0.16s ease;
 }
 
 .surface::after {
@@ -128,7 +128,7 @@ body {
   --tilt-y: 0deg;
   --lift-z: 0px;
   transform: perspective(900px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y)) translateZ(var(--lift-z));
-  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
+  transition: transform 0.64s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.34s ease, border-color 0.34s ease, background 0.34s ease;
 }
 
 .glass-track > * {
@@ -148,11 +148,11 @@ body {
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 32%);
   opacity: calc(0.14 + (var(--glow-opacity) * 0.66));
   transform: translateZ(12px);
-  transition: opacity 0.28s ease, background 0.16s ease;
+  transition: opacity 0.34s ease, background 0.16s ease;
 }
 
 .glass-track.is-pointer-active {
-  box-shadow: 0 22px 42px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 21px 40px rgba(0, 0, 0, 0.29);
 }
 
 .surface.is-pointer-active {
@@ -161,7 +161,7 @@ body {
     0 1px 0 rgba(255, 255, 255, 0.12) inset,
     0 -1px 0 rgba(255, 255, 255, 0.04) inset,
     0 0 0 1px rgba(255, 255, 255, 0.02) inset,
-    0 26px 54px rgba(0, 0, 0, 0.34);
+    0 24px 48px rgba(0, 0, 0, 0.33);
 }
 
 label {
