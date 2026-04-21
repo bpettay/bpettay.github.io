@@ -47,9 +47,10 @@ function initializeGlassTracking() {
       const clampedY = Math.min(1, Math.max(0, py));
       const centeredX = (clampedX - 0.5) * 2;
       const centeredY = (clampedY - 0.5) * 2;
-      const rotateY = centeredX * 4;
-      const rotateX = centeredY * -4;
-      const depth = 6 - Math.min(1, Math.hypot(centeredX, centeredY)) * 2;
+      const rotateY = centeredX * 2.3;
+      const rotateX = centeredY * -2.3;
+      const distance = Math.min(1, Math.hypot(centeredX, centeredY));
+      const depth = 3.5 - distance * 1.2;
 
       panel.style.setProperty("--pointer-x", `${(clampedX * 100).toFixed(2)}%`);
       panel.style.setProperty("--pointer-y", `${(clampedY * 100).toFixed(2)}%`);
