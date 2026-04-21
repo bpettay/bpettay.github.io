@@ -27,53 +27,73 @@ function initializePanelTilt() {
 
   panels.forEach((panel) => {
     let frameId = 0;
-    let activeEvent = null;
+    let targetTiltX = 0;
+    let targetTiltY = 0;
+    let targetLiftZ = 0;
+    let currentTiltX = 0;
+    let currentTiltY = 0;
+    let currentLiftZ = 0;
 
-    const applyPointerState = () => {
-      frameId = 0;
+    const render = () => {
+      const easing = panel.classList.contains("is-pointer-active") ? 0.12 : 0.08;
 
-      if (!activeEvent) {
+      currentTiltX += (targetTiltX - currentTiltX) * easing;
+      currentTiltY += (targetTiltY - currentTiltY) * easing;
+      currentLiftZ += (targetLiftZ - currentLiftZ) * easing;
+
+      panel.style.setProperty("--tilt-x", `${currentTiltX.toFixed(2)}deg`);
+      panel.style.setProperty("--tilt-y", `${currentTiltY.toFixed(2)}deg`);
+      panel.style.setProperty("--lift-z", `${currentLiftZ.toFixed(2)}px`);
+
+      const settled =
+        Math.abs(targetTiltX - currentTiltX) < 0.01 &&
+        Math.abs(targetTiltY - currentTiltY) < 0.01 &&
+        Math.abs(targetLiftZ - currentLiftZ) < 0.01;
+
+      if (settled) {
+        frameId = 0;
         return;
       }
 
+      frameId = window.requestAnimationFrame(render);
+    };
+
+    const scheduleRender = () => {
+      if (!frameId) {
+        frameId = window.requestAnimationFrame(render);
+      }
+    };
+
+    const updateTargets = (event) => {
       const rect = panel.getBoundingClientRect();
-      const px = (activeEvent.clientX - rect.left) / rect.width;
-      const py = (activeEvent.clientY - rect.top) / rect.height;
+      const px = (event.clientX - rect.left) / rect.width;
+      const py = (event.clientY - rect.top) / rect.height;
       const clampedX = Math.min(1, Math.max(0, px));
       const clampedY = Math.min(1, Math.max(0, py));
       const centeredX = (clampedX - 0.5) * 2;
       const centeredY = (clampedY - 0.5) * 2;
-      const rotateY = centeredX * 1.05;
-      const rotateX = centeredY * -1.05;
       const distance = Math.min(1, Math.hypot(centeredX, centeredY));
-      const depth = 1.6 - distance * 0.55;
 
-      panel.style.setProperty("--tilt-x", `${rotateX.toFixed(2)}deg`);
-      panel.style.setProperty("--tilt-y", `${rotateY.toFixed(2)}deg`);
-      panel.style.setProperty("--lift-z", `${depth.toFixed(2)}px`);
-    };
+      targetTiltY = centeredX * 1.05;
+      targetTiltX = centeredY * -1.05;
+      targetLiftZ = 1.6 - distance * 0.55;
 
-    const scheduleUpdate = (event) => {
-      activeEvent = event;
-
-      if (!frameId) {
-        frameId = window.requestAnimationFrame(applyPointerState);
-      }
+      scheduleRender();
     };
 
     panel.addEventListener("pointerenter", (event) => {
       panel.classList.add("is-pointer-active");
-      scheduleUpdate(event);
+      updateTargets(event);
     });
 
-    panel.addEventListener("pointermove", scheduleUpdate);
+    panel.addEventListener("pointermove", updateTargets);
 
     panel.addEventListener("pointerleave", () => {
-      activeEvent = null;
       panel.classList.remove("is-pointer-active");
-      panel.style.setProperty("--tilt-x", "0deg");
-      panel.style.setProperty("--tilt-y", "0deg");
-      panel.style.setProperty("--lift-z", "0px");
+      targetTiltX = 0;
+      targetTiltY = 0;
+      targetLiftZ = 0;
+      scheduleRender();
     });
   });
 }
