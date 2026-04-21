@@ -68,14 +68,15 @@
 .roadmap-section {
   min-width: 0;
   padding: var(--space-5);
-  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .home-section:hover,
 .quick-section:hover,
 .roadmap-section:hover {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.08));
-  border-color: var(--line-strong);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.05));
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 18px 34px rgba(0, 0, 0, 0.24);
 }
 
 .home-section h2,
@@ -132,7 +133,7 @@
   gap: var(--space-4);
   align-items: start;
   padding: var(--space-4) 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .roadmap-item:first-child {
@@ -166,8 +167,8 @@
   font-weight: 500;
   letter-spacing: 0.04em;
   color: var(--ink-soft);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 @media (prefers-reduced-motion: reduce) {
