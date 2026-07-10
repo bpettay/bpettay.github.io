@@ -33,6 +33,17 @@
   <link rel="stylesheet" href="./assets/css/style.css?v=20260423a" />
   <link rel="stylesheet" href="./assets/css/home.css?v=20260423a" />
   <link rel="stylesheet" href="./assets/css/tools.css?v=20260423a" />
+
+  <!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0066cc">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js');
+    });
+  }
+</script>
 </head>
 
 <body>
