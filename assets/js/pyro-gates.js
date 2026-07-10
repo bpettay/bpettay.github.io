@@ -13,7 +13,7 @@ function initializePyroGateWorkflow() {
       id: "checks",
       title: "Checks",
       subtitle: "Interlocks + cues",
-      sections: [".pyro-grid", "#simChannelGrid"],
+      sections: ["[data-checks-interlocks]", "#simChannelGrid"],
     },
     {
       id: "fire",
@@ -22,6 +22,9 @@ function initializePyroGateWorkflow() {
       sections: ["#teamSyncPanel", ".command-panel", ".event-log-panel"],
     },
   ];
+
+  const interlockPanel = document.querySelector(".pyro-grid .pyro-panel:not(.command-panel)");
+  interlockPanel?.setAttribute("data-checks-interlocks", "true");
 
   const statusBar = document.createElement("section");
   statusBar.className = "pyro-sticky-status";
