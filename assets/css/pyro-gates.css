@@ -49,27 +49,29 @@
 }
 
 .pyro-gate-tabs {
-  position: sticky;
-  top: calc(0.5rem + 154px);
-  z-index: 18;
+  position: relative;
+  z-index: 6;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.5rem;
+  width: 100%;
+  margin: 0;
   padding: 0.55rem;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.09);
-  background: rgba(7, 9, 11, 0.92);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.26);
+  background: rgba(7, 9, 11, 0.72);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(14px);
 }
 
 .pyro-gate-tab {
-  min-height: 58px;
+  min-width: 0;
+  min-height: 54px;
   display: grid;
   gap: 0.18rem;
   align-content: center;
   justify-items: start;
-  padding: 0.56rem 0.62rem;
+  padding: 0.52rem 0.62rem;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--ink-soft);
@@ -81,13 +83,13 @@
 
 .pyro-gate-tab strong {
   color: var(--ink);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
 .pyro-gate-tab span {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   line-height: 1.25;
 }
 
@@ -104,32 +106,48 @@
 .pyro-gate-tab.complete::after {
   content: "Complete";
   color: #aaffbb;
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .pyro-gate-panel {
   display: none;
+  width: 100%;
+  min-width: 0;
 }
 
 .pyro-gate-panel.active {
   display: grid;
+  gap: var(--space-3);
 }
 
-.pyro-gate-panel[data-gate-panel="overview"].active {
+.pyro-gate-panel > .pyro-panel,
+.pyro-gate-panel > .pyro-grid,
+.pyro-gate-panel > .team-sync-panel,
+.pyro-gate-panel > .command-panel,
+.pyro-gate-panel > .event-log-panel {
+  width: 100%;
+  min-width: 0;
+}
+
+.pyro-gate-panel .pyro-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
+  width: 100%;
 }
 
 .pyro-gate-footer {
   display: flex;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-top: 0.9rem;
+  width: 100%;
+  margin-top: 0.25rem;
 }
 
 .pyro-gate-nav-button {
-  min-height: 54px;
+  min-height: 52px;
   min-width: 120px;
   padding: 0.65rem 0.9rem;
   border-radius: 14px;
@@ -307,54 +325,54 @@ body:has(.activity-chat-dock) {
 }
 
 @media (max-width: 980px) {
-  .pyro-sticky-status {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    top: calc(0.5rem + 92px);
+  .pyro-gate-panel .pyro-grid {
+    grid-template-columns: 1fr;
   }
 
   .pyro-gate-tabs {
-    top: calc(0.5rem + 230px);
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 720px) {
-  .pyro-sticky-status {
-    position: sticky;
-    top: 0.25rem;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding: 0.55rem;
-  }
-
-  .sticky-status-tile {
-    padding: 0.5rem;
-  }
-
-  .sticky-status-tile strong {
-    font-size: 0.78rem;
-  }
-
   .pyro-gate-tabs {
-    position: sticky;
-    top: 8.7rem;
+    position: relative;
+    top: auto;
     grid-template-columns: 1fr;
-    max-height: 46vh;
-    overflow: auto;
+    gap: 0.45rem;
+    padding: 0.5rem;
+    max-height: none;
+    overflow: visible;
   }
 
   .pyro-gate-tab {
-    min-height: 52px;
+    min-height: 46px;
+    padding: 0.45rem 0.55rem;
+  }
+
+  .pyro-gate-panel.active {
+    gap: 0.75rem;
+  }
+
+  .pyro-gate-panel > .pyro-panel,
+  .pyro-gate-panel > .team-sync-panel,
+  .pyro-gate-panel > .command-panel,
+  .pyro-gate-panel > .event-log-panel,
+  .pyro-gate-panel .pyro-grid > .pyro-panel {
+    width: 100%;
+    margin: 0;
+  }
+
+  .pyro-gate-panel .pyro-grid {
+    gap: 0.75rem;
   }
 
   .pyro-gate-footer {
-    position: sticky;
-    bottom: 0.5rem;
-    z-index: 16;
-    padding: 0.55rem;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    background: rgba(7, 9, 11, 0.92);
-    backdrop-filter: blur(14px);
+    position: static;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    backdrop-filter: none;
   }
 
   .activity-chat-dock {
@@ -381,14 +399,6 @@ body:has(.activity-chat-dock) {
 }
 
 @media (max-width: 420px) {
-  .pyro-sticky-status {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .sticky-status-tile span {
-    font-size: 0.58rem;
-  }
-
   .pyro-gate-nav-button {
     min-width: 0;
     width: 100%;
