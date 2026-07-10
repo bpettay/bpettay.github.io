@@ -59,7 +59,7 @@ function initializeNavigation() {
     btn.addEventListener("click", () => openPage(btn.dataset.pageTarget));
   });
 
-  // Browser back/forward support
+  // Browser back/forward
   window.addEventListener("popstate", () => {
     openPage(getCurrentPageFromUrl(), { updateUrl: false });
   });
@@ -68,7 +68,6 @@ function initializeNavigation() {
   const initialPage = getCurrentPageFromUrl();
   openPage(initialPage, { updateUrl: true, replaceState: true });
 
-  // Expose for other scripts if needed
   window.siteNavigation = { openPage, pages: validPages };
 
   return window.siteNavigation;
