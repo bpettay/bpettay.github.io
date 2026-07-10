@@ -55,6 +55,28 @@ function initializePyroGateWorkflow() {
     </div>
   `;
 
+  const activityDock = document.createElement("aside");
+  activityDock.id = "activityChatDock";
+  activityDock.className = "activity-chat-dock";
+  activityDock.setAttribute("aria-label", "Persistent activity log and chat");
+  activityDock.innerHTML = `
+    <div class="activity-dock-header">
+      <div>
+        <span>Live Activity</span>
+        <strong>Operator Log + Chat</strong>
+      </div>
+      <button id="activityDockToggle" class="activity-dock-toggle" type="button" aria-expanded="true">Minimize</button>
+    </div>
+    <ol id="persistentActivityLog" class="persistent-activity-log" aria-live="polite"></ol>
+    <form id="activityChatForm" class="activity-chat-form">
+      <label class="sr-only" for="activityChatInput">Send coordination note</label>
+      <input id="activityChatInput" type="text" autocomplete="off" placeholder="Type coordination note..." />
+      <button type="submit">Send</button>
+    </form>
+  `;
+
+  root.after(activityDock);
+
   const tabs = document.createElement("nav");
   tabs.id = "pyroGateTabs";
   tabs.className = "pyro-gate-tabs";
@@ -70,6 +92,11 @@ function initializePyroGateWorkflow() {
   root.prepend(statusBar);
 
   const panels = new Map();
+  const mirroredLogItems = new WeakSet();
+  const persistentActivityLog = document.getElementById("persistentActivityLog");
+  const activityChatForm = document.getElementById("activityChatForm");
+  const activityChatInput = document.getElementById("activityChatInput");
+  const activityDockToggle = document.getElementById("activityDockToggle");
 
   gateDefinitions.forEach((gate) => {
     const panel = document.createElement("section");
@@ -97,6 +124,85 @@ function initializePyroGateWorkflow() {
   });
 
   let activeGateIndex = 0;
+
+  function currentOperatorLabel() {
+    return document.getElementById("operatorStatusText")?.textContent?.replace("Authorized: ", "") || "Operator";
+  }
+
+  function currentZoneLabel() {
+    return `Zone ${document.getElementById("teamAssignedZone")?.value || "A"}`;
+  }
+
+  function currentTraceLabel() {
+    return document.getElementById("traceLastAction")?.textContent || "TR-1000";
+  }
+
+  function addPersistentActivity(message, type = "system", meta = "") {
+    if (!persistentActivityLog) return;
+
+    const item = document.createElement("li");
+    item.className = `activity-message ${type}`;
+
+    const time = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    item.innerHTML = `
+      <span>${time} · ${meta || currentZoneLabel()}</span>
+      <strong>${message}</strong>
+    `;
+
+    persistentActivityLog.prepend(item);
+
+    while (persistentActivityLog.children.length > 10) {
+      persistentActivityLog.removeChild(persistentActivityLog.lastElementChild);
+    }
+  }
+
+  function mirrorExistingEventLog() {
+    const eventLog = document.getElementById("simEventLog");
+    if (!eventLog) return;
+
+    Array.from(eventLog.children).reverse().forEach((item) => {
+      if (mirroredLogItems.has(item)) return;
+      mirroredLogItems.add(item);
+
+      const time = item.querySelector("span")?.textContent || "Log";
+      const message = item.textContent.replace(time, "").trim();
+      if (message) {
+        addPersistentActivity(message, "system", `${time} · ${currentTraceLabel()}`);
+      }
+    });
+  }
+
+  function initializeActivityDock() {
+    addPersistentActivity("Persistent activity console initialized.", "system", currentTraceLabel());
+    mirrorExistingEventLog();
+
+    const eventLog = document.getElementById("simEventLog");
+    if (eventLog) {
+      const observer = new MutationObserver(mirrorExistingEventLog);
+      observer.observe(eventLog, { childList: true });
+    }
+
+    activityChatForm?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const text = activityChatInput?.value.trim();
+      if (!text) return;
+
+      const operator = currentOperatorLabel();
+      addPersistentActivity(text, "chat", `${currentZoneLabel()} · ${operator} · ${currentTraceLabel()}`);
+      activityChatInput.value = "";
+    });
+
+    activityDockToggle?.addEventListener("click", () => {
+      const collapsed = activityDock.classList.toggle("collapsed");
+      activityDockToggle.textContent = collapsed ? "Open" : "Minimize";
+      activityDockToggle.setAttribute("aria-expanded", String(!collapsed));
+    });
+  }
 
   function gateIsComplete(gateId) {
     const masterPower = document.getElementById("simMasterPower")?.checked;
@@ -177,6 +283,7 @@ function initializePyroGateWorkflow() {
     window.setTimeout(() => {
       refreshStickyStatus();
       showGate(activeGateIndex);
+      mirrorExistingEventLog();
     }, 0);
   });
 
@@ -184,9 +291,11 @@ function initializePyroGateWorkflow() {
     window.setTimeout(() => {
       refreshStickyStatus();
       showGate(activeGateIndex);
+      mirrorExistingEventLog();
     }, 0);
   });
 
+  initializeActivityDock();
   window.setInterval(refreshStickyStatus, 1000);
   showGate(0);
 }
