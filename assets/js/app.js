@@ -8,6 +8,10 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeConverter();
   }
 
+  if (typeof initializePyroSimulator === "function") {
+    initializePyroSimulator();
+  }
+
   // Optional fancy tilt effect (only on desktop with mouse)
   initializePanelTilt();
 });
