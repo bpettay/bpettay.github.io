@@ -10,15 +10,9 @@ function initializePyroGateWorkflow() {
       sections: [".pyro-hmi-header"],
     },
     {
-      id: "team",
-      title: "Team/Auth",
-      subtitle: "Operator + zone",
-      sections: ["#teamSyncPanel"],
-    },
-    {
       id: "interlocks",
       title: "Interlocks",
-      subtitle: "Power + permissives",
+      subtitle: "Power + auth",
       sections: [".pyro-grid"],
     },
     {
@@ -28,10 +22,10 @@ function initializePyroGateWorkflow() {
       sections: ["#simChannelGrid"],
     },
     {
-      id: "command",
-      title: "Command",
-      subtitle: "Log + command review",
-      sections: [".event-log-panel"],
+      id: "fire",
+      title: "Fire Control",
+      subtitle: "Device + command",
+      sections: ["#teamSyncPanel", ".command-panel", ".event-log-panel"],
     },
   ];
 
@@ -112,10 +106,9 @@ function initializePyroGateWorkflow() {
     const readyState = document.getElementById("localZoneState")?.textContent?.trim().toUpperCase() === "READY";
 
     if (gateId === "overview") return true;
-    if (gateId === "team") return readyState || keyEnable;
     if (gateId === "interlocks") return Boolean(masterPower && controlEnable && keyEnable && areaClear);
     if (gateId === "cues") return true;
-    if (gateId === "command") return false;
+    if (gateId === "fire") return readyState || keyEnable;
     return false;
   }
 
