@@ -12,6 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
     initializePyroSimulator();
   }
 
+  if (typeof initializePyroTeamSync === "function") {
+    initializePyroTeamSync();
+  }
+
   // Optional fancy tilt effect (only on desktop with mouse)
   initializePanelTilt();
 });
