@@ -29,10 +29,22 @@
     rel="stylesheet"
   />
 
+  <!-- Critical layout guard: prevents the monogram from flashing at full image size. -->
+  <style>
+    .logo {
+      width: 34px !important;
+      height: 34px !important;
+      max-width: 34px !important;
+      max-height: 34px !important;
+      flex: 0 0 34px !important;
+      object-fit: contain !important;
+    }
+  </style>
+
   <!-- Styles -->
-  <link rel="stylesheet" href="./assets/css/style.css?v=20260709" />
-  <link rel="stylesheet" href="./assets/css/home.css?v=20260709" />
-  <link rel="stylesheet" href="./assets/css/tools.css?v=20260709" />
+  <link rel="stylesheet" href="./assets/css/style.css?v=20260709-layout2" />
+  <link rel="stylesheet" href="./assets/css/home.css?v=20260709-layout2" />
+  <link rel="stylesheet" href="./assets/css/tools.css?v=20260709-layout2" />
 </head>
 
 <body>
@@ -248,9 +260,9 @@
   </main>
 
   <!-- Scripts -->
-  <script src="./assets/js/converter-data.js?v=20260709"></script>
-  <script src="./assets/js/navigation.js?v=20260709"></script>
-  <script src="./assets/js/converter.js?v=20260709"></script>
-  <script src="./assets/js/app.js?v=20260709"></script>
+  <script src="./assets/js/converter-data.js?v=20260709-layout2"></script>
+  <script src="./assets/js/navigation.js?v=20260709-layout2"></script>
+  <script src="./assets/js/converter.js?v=20260709-layout2"></script>
+  <script src="./assets/js/app.js?v=20260709-layout2"></script>
 </body>
 </html>
