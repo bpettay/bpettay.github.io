@@ -8,6 +8,7 @@
   align-items: start;
   justify-content: space-between;
   gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .tool-label {
@@ -35,26 +36,15 @@
   line-height: 1.72;
 }
 
-.compact-tool-card {
-  padding: var(--space-5);
-}
-
-.compact-tool-header {
-  margin-bottom: var(--space-4);
-}
-
+/* Converter Layout */
 .compact-converter-layout {
   display: grid;
   gap: var(--space-3);
 }
 
-.compact-query-top {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
 #queryInput {
   font-size: 1rem;
+  padding: 1rem;
 }
 
 .preview-panel {
@@ -81,11 +71,7 @@
   color: var(--ink);
 }
 
-.compact-query-status {
-  margin-top: 0;
-  font-size: 0.84rem;
-}
-
+/* Form Grid */
 .tool-grid {
   display: grid;
   gap: var(--space-3);
@@ -99,9 +85,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
-  min-width: 0;
 }
 
+/* Results */
 .compact-results-grid {
   display: grid;
   grid-template-columns: 1.05fr 0.95fr;
@@ -110,20 +96,18 @@
 
 .result-panel,
 .related-panel {
-  min-width: 0;
   padding: var(--space-4);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.05);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
-  transition: background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  transition: background 0.22s ease, border-color 0.22s ease;
 }
 
 .result-panel:hover,
 .related-panel:hover {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
 }
 
 .result-value {
@@ -132,9 +116,9 @@
   font-size: clamp(2rem, 4vw, 2.8rem);
   font-weight: 400;
   line-height: 1.02;
-  word-break: break-word;
 }
 
+/* Related */
 .related-results {
   display: grid;
   gap: var(--space-2);
@@ -150,54 +134,36 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
-.related-item-label {
-  color: var(--ink-soft);
-  font-size: 0.88rem;
-}
-
-.related-item-value {
-  color: var(--ink);
-  font-weight: 500;
-  text-align: right;
-  font-size: 0.88rem;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .result-panel,
-  .related-panel {
-    transition: none;
-  }
-}
-
+/* Responsive */
 @media (max-width: 980px) {
   .compact-tool-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
   .compact-results-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 720px) {
+  .tool-card,
   .compact-tool-card {
     padding: var(--space-4);
   }
-
   .compact-tool-grid {
     grid-template-columns: 1fr;
   }
-
   .result-value {
     font-size: 1.85rem;
   }
-
   .related-item {
     flex-direction: column;
     align-items: flex-start;
   }
+}
 
-  .related-item-value {
-    text-align: left;
+@media (prefers-reduced-motion: reduce) {
+  .result-panel,
+  .related-panel {
+    transition: none;
   }
 }
