@@ -425,7 +425,8 @@
 .hmi-pushbutton:active,
 .pyro-button:active,
 .hmi-fire-button:active,
-.channel-button:active {
+.channel-button:active,
+.cue-wheel-step:active {
   transform: translateY(2px);
 }
 
@@ -443,6 +444,93 @@
 .pyro-button:disabled {
   opacity: 0.42;
   cursor: not-allowed;
+}
+
+.cue-quick-select {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.75rem;
+  border-radius: 16px;
+  border: 1px solid rgba(120, 255, 190, 0.14);
+  background: rgba(20, 45, 32, 0.14);
+}
+
+.cue-quick-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.cue-quick-header span {
+  color: var(--ink-soft);
+  font-size: 0.65rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.cue-quick-header strong {
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.cue-wheel-row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 52px;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.cue-wheel-step,
+.cue-wheel-select {
+  min-height: 54px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.14);
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+}
+
+.cue-wheel-step {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cue-wheel-select {
+  appearance: none;
+  text-align: center;
+  text-align-last: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background:
+    linear-gradient(180deg, rgba(20,45,32,0.72), rgba(8,22,16,0.9)),
+    linear-gradient(90deg, transparent, rgba(120,255,190,0.08), transparent);
+}
+
+.cue-wheel-status {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cue-wheel-status.good {
+  color: #7ef0a3;
+}
+
+.cue-wheel-status.open {
+  color: #ffb12d;
+}
+
+.cue-wheel-status.used {
+  color: var(--ink-soft);
 }
 
 .hmi-fire-button {
@@ -678,6 +766,14 @@
 
   .channel-button {
     min-height: 74px;
+  }
+
+  .cue-wheel-row {
+    grid-template-columns: 46px minmax(0, 1fr) 46px;
+  }
+
+  .cue-wheel-select {
+    font-size: 1.08rem;
   }
 }
 
