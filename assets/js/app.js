@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   initializeScrollHeader();
+  initializeCompactPyroStatusBar();
 
   // Optional fancy tilt effect (only on desktop with mouse)
   initializePanelTilt();
@@ -59,6 +60,87 @@ function initializeScrollHeader() {
   }, { passive: true });
 
   updateHeader();
+}
+
+function initializeCompactPyroStatusBar() {
+  if (document.getElementById("compactPyroStatusOverrides")) return;
+
+  const style = document.createElement("style");
+  style.id = "compactPyroStatusOverrides";
+  style.textContent = `
+    .pyro-sticky-status {
+      top: 0.55rem !important;
+      z-index: 26 !important;
+      grid-template-columns: minmax(120px, 1.15fr) repeat(4, minmax(76px, 0.72fr)) !important;
+      gap: 0.28rem !important;
+      padding: 0.32rem !important;
+      border-radius: 999px !important;
+      background: rgba(5, 8, 8, 0.86) !important;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.32) !important;
+      backdrop-filter: blur(14px) !important;
+    }
+
+    .sticky-status-tile {
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.34rem !important;
+      padding: 0.25rem 0.46rem !important;
+      border-radius: 999px !important;
+      border-color: rgba(255, 255, 255, 0.06) !important;
+      background: rgba(255, 255, 255, 0.025) !important;
+      min-height: 30px !important;
+    }
+
+    .sticky-status-tile span {
+      flex: 0 0 auto !important;
+      font-size: 0.52rem !important;
+      letter-spacing: 0.07em !important;
+      line-height: 1 !important;
+    }
+
+    .sticky-status-tile strong {
+      min-width: 0 !important;
+      font-size: 0.7rem !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+
+    .sticky-status-tile.primary {
+      border-color: rgba(120, 255, 190, 0.18) !important;
+      background: rgba(20, 45, 32, 0.18) !important;
+    }
+
+    .pyro-gate-tabs {
+      top: 3.35rem !important;
+    }
+
+    @media (max-width: 720px) {
+      .pyro-sticky-status {
+        top: 0.25rem !important;
+        display: flex !important;
+        overflow-x: auto !important;
+        scrollbar-width: none !important;
+      }
+
+      .pyro-sticky-status::-webkit-scrollbar {
+        display: none !important;
+      }
+
+      .sticky-status-tile {
+        flex: 0 0 auto !important;
+        min-width: 118px !important;
+      }
+
+      .pyro-gate-tabs {
+        top: 3.35rem !important;
+        max-height: 34vh !important;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
 }
 
 function initializePanelTilt() {
