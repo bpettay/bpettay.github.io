@@ -69,38 +69,62 @@ function initializeCompactPyroStatusBar() {
   style.id = "compactPyroStatusOverrides";
   style.textContent = `
     .pyro-sticky-status {
-      top: 0.55rem !important;
+      top: 0.35rem !important;
       z-index: 26 !important;
-      grid-template-columns: minmax(120px, 1.15fr) repeat(4, minmax(76px, 0.72fr)) !important;
-      gap: 0.28rem !important;
-      padding: 0.32rem !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 0 !important;
+      width: fit-content !important;
+      max-width: min(calc(100% - 1rem), 980px) !important;
+      margin-inline: auto !important;
+      padding: 0.16rem 0.42rem !important;
+      min-height: 24px !important;
       border-radius: 999px !important;
-      background: rgba(5, 8, 8, 0.86) !important;
-      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.32) !important;
-      backdrop-filter: blur(14px) !important;
+      border: 1px solid rgba(120, 255, 190, 0.12) !important;
+      background: rgba(4, 7, 7, 0.78) !important;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28) !important;
+      backdrop-filter: blur(12px) !important;
+      overflow-x: auto !important;
+      scrollbar-width: none !important;
+    }
+
+    .pyro-sticky-status::-webkit-scrollbar {
+      display: none !important;
     }
 
     .sticky-status-tile {
-      display: flex !important;
-      align-items: center !important;
-      gap: 0.34rem !important;
-      padding: 0.25rem 0.46rem !important;
-      border-radius: 999px !important;
-      border-color: rgba(255, 255, 255, 0.06) !important;
-      background: rgba(255, 255, 255, 0.025) !important;
-      min-height: 30px !important;
+      display: inline-flex !important;
+      align-items: baseline !important;
+      gap: 0.22rem !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      padding: 0 0.46rem !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      white-space: nowrap !important;
+    }
+
+    .sticky-status-tile + .sticky-status-tile {
+      border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
     }
 
     .sticky-status-tile span {
       flex: 0 0 auto !important;
-      font-size: 0.52rem !important;
+      color: rgba(169, 176, 183, 0.74) !important;
+      font-size: 0.48rem !important;
       letter-spacing: 0.07em !important;
       line-height: 1 !important;
+      text-transform: uppercase !important;
     }
 
     .sticky-status-tile strong {
       min-width: 0 !important;
-      font-size: 0.7rem !important;
+      max-width: 12ch !important;
+      color: rgba(243, 245, 247, 0.92) !important;
+      font-size: 0.64rem !important;
+      font-weight: 600 !important;
       line-height: 1 !important;
       white-space: nowrap !important;
       overflow: hidden !important;
@@ -108,33 +132,50 @@ function initializeCompactPyroStatusBar() {
     }
 
     .sticky-status-tile.primary {
-      border-color: rgba(120, 255, 190, 0.18) !important;
-      background: rgba(20, 45, 32, 0.18) !important;
+      border-color: transparent !important;
+      background: transparent !important;
+    }
+
+    .sticky-status-tile.primary strong {
+      color: #c8ffd8 !important;
+      max-width: 16ch !important;
+    }
+
+    .sticky-status-tile.hold strong {
+      color: #ffd2cf !important;
     }
 
     .pyro-gate-tabs {
-      top: 3.35rem !important;
+      top: 2.25rem !important;
     }
 
     @media (max-width: 720px) {
       .pyro-sticky-status {
-        top: 0.25rem !important;
-        display: flex !important;
-        overflow-x: auto !important;
-        scrollbar-width: none !important;
-      }
-
-      .pyro-sticky-status::-webkit-scrollbar {
-        display: none !important;
+        top: 0.2rem !important;
+        max-width: calc(100% - 0.5rem) !important;
+        margin-inline: 0.25rem !important;
+        padding: 0.14rem 0.34rem !important;
       }
 
       .sticky-status-tile {
-        flex: 0 0 auto !important;
-        min-width: 118px !important;
+        padding: 0 0.38rem !important;
+      }
+
+      .sticky-status-tile span {
+        font-size: 0.44rem !important;
+      }
+
+      .sticky-status-tile strong {
+        font-size: 0.58rem !important;
+        max-width: 10ch !important;
+      }
+
+      .sticky-status-tile.primary strong {
+        max-width: 14ch !important;
       }
 
       .pyro-gate-tabs {
-        top: 3.35rem !important;
+        top: 2.15rem !important;
         max-height: 34vh !important;
       }
     }
