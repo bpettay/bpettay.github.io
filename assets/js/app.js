@@ -1,17 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Initialize core features
   if (typeof initializeNavigation === "function") {
     initializeNavigation();
   }
 
-  if (
-    typeof initializeConverter === "function" &&
-    document.getElementById("category") &&
-    document.getElementById("fromUnit") &&
-    document.getElementById("toUnit")
-  ) {
+  if (typeof initializeConverter === "function") {
     initializeConverter();
   }
 
+  // Optional fancy tilt effect (only on desktop with mouse)
   initializePanelTilt();
 });
 
@@ -45,45 +42,36 @@ function initializePanelTilt() {
       panel.style.setProperty("--tilt-y", `${currentTiltY.toFixed(2)}deg`);
       panel.style.setProperty("--lift-z", `${currentLiftZ.toFixed(2)}px`);
 
-      const settled =
-        Math.abs(targetTiltX - currentTiltX) < 0.01 &&
-        Math.abs(targetTiltY - currentTiltY) < 0.01 &&
-        Math.abs(targetLiftZ - currentLiftZ) < 0.01;
-
-      if (settled) {
+      if (Math.abs(targetTiltX - currentTiltX) < 0.01 &&
+          Math.abs(targetTiltY - currentTiltY) < 0.01 &&
+          Math.abs(targetLiftZ - currentLiftZ) < 0.01) {
         frameId = 0;
         return;
       }
 
-      frameId = window.requestAnimationFrame(render);
-    };
-
-    const scheduleRender = () => {
-      if (!frameId) {
-        frameId = window.requestAnimationFrame(render);
-      }
+      frameId = requestAnimationFrame(render);
     };
 
     const updateTargets = (event) => {
       const rect = panel.getBoundingClientRect();
       const px = (event.clientX - rect.left) / rect.width;
       const py = (event.clientY - rect.top) / rect.height;
-      const clampedX = Math.min(1, Math.max(0, px));
-      const clampedY = Math.min(1, Math.max(0, py));
-      const centeredX = (clampedX - 0.5) * 2;
-      const centeredY = (clampedY - 0.5) * 2;
-      const distance = Math.min(1, Math.hypot(centeredX, centeredY));
+
+      const centeredX = (Math.min(1, Math.max(0, px)) - 0.5) * 2;
+      const centeredY = (Math.min(1, Math.max(0, py)) - 0.5) * 2;
 
       targetTiltY = centeredX * 1.05;
       targetTiltX = centeredY * -1.05;
-      targetLiftZ = 1.6 - distance * 0.55;
+      targetLiftZ = 1.6 - Math.min(1, Math.hypot(centeredX, centeredY)) * 0.55;
 
-      scheduleRender();
+      if (!frameId) {
+        frameId = requestAnimationFrame(render);
+      }
     };
 
-    panel.addEventListener("pointerenter", (event) => {
+    panel.addEventListener("pointerenter", (e) => {
       panel.classList.add("is-pointer-active");
-      updateTargets(event);
+      updateTargets(e);
     });
 
     panel.addEventListener("pointermove", updateTargets);
@@ -93,7 +81,9 @@ function initializePanelTilt() {
       targetTiltX = 0;
       targetTiltY = 0;
       targetLiftZ = 0;
-      scheduleRender();
+      if (!frameId) frameId = requestAnimationFrame(render);
     });
+  });
+}
   });
 }
