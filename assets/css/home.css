@@ -3,23 +3,12 @@
   grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.8fr);
   gap: var(--space-4);
   align-items: center;
-}
-
-.hero,
-.home-section,
-.quick-section,
-.roadmap-section {
-  border-radius: var(--radius);
-}
-
-.hero {
   padding: var(--space-5);
-  min-height: 0;
+  border-radius: var(--radius);
 }
 
 .hero-main {
   max-width: 720px;
-  min-width: 0;
 }
 
 .eyebrow {
@@ -45,7 +34,6 @@
   color: var(--ink-soft);
   line-height: 1.75;
   font-size: 1rem;
-  font-weight: 400;
 }
 
 .hero-links {
@@ -66,8 +54,8 @@
 .home-section,
 .quick-section,
 .roadmap-section {
-  min-width: 0;
   padding: var(--space-5);
+  border-radius: var(--radius);
   transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -82,12 +70,11 @@
 .home-section h2,
 .quick-section h2,
 .roadmap-section h2 {
-  margin: 0;
+  margin: 0 0 var(--space-3);
   font-size: clamp(1.45rem, 2vw, 2rem);
   font-weight: 400;
   line-height: 1.08;
   letter-spacing: -0.02em;
-  color: var(--ink);
 }
 
 .home-section p,
@@ -98,26 +85,19 @@
   line-height: 1.72;
 }
 
+/* Quick Access */
 .quick-list {
   display: grid;
   gap: var(--space-4);
-}
-
-.quick-item {
-  padding-top: 0;
 }
 
 .quick-item h3 {
   margin: 0 0 0.35rem;
   font-size: 1rem;
   font-weight: 500;
-  color: var(--ink);
 }
 
-.quick-item p {
-  margin: 0;
-}
-
+/* Roadmap */
 .roadmap-section {
   margin-top: var(--space-4);
 }
@@ -141,19 +121,10 @@
   padding-top: 0.1rem;
 }
 
-.roadmap-item:last-child {
-  padding-bottom: 0.1rem;
-}
-
 .roadmap-item h3 {
   margin: 0 0 0.35rem;
   font-size: 1rem;
   font-weight: 500;
-  color: var(--ink);
-}
-
-.roadmap-item p {
-  margin: 0;
 }
 
 .roadmap-status {
@@ -171,20 +142,12 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .home-section,
-  .quick-section,
-  .roadmap-section {
-    transition: none;
-  }
-}
-
+/* Responsive */
 @media (max-width: 980px) {
   .hero,
   .home-grid {
     grid-template-columns: 1fr;
   }
-
   .hero-links {
     justify-content: flex-start;
   }
@@ -197,14 +160,20 @@
   .roadmap-section {
     padding: var(--space-4);
   }
-
   .hero-links {
     flex-direction: column;
     align-items: stretch;
   }
-
   .roadmap-item {
     grid-template-columns: 1fr;
     gap: var(--space-2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-section,
+  .quick-section,
+  .roadmap-section {
+    transition: none;
   }
 }
