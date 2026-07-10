@@ -45,6 +45,7 @@
   <link rel="stylesheet" href="./assets/css/style.css?v=20260709-pyro2" />
   <link rel="stylesheet" href="./assets/css/home.css?v=20260709-layout2" />
   <link rel="stylesheet" href="./assets/css/tools.css?v=20260709-hmi1" />
+  <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260709-auth1" />
 </head>
 
 <body>
@@ -311,10 +312,10 @@
                 </span>
               </label>
 
-              <label class="selector-widget">
+              <label class="selector-widget" id="keyEnableWidget">
                 <span class="selector-text">
                   <strong>Key Enable</strong>
-                  <small>Authorization interlock</small>
+                  <small id="operatorStatusText">Authorization required</small>
                 </span>
                 <span class="selector-switch">
                   <input id="simSupervisorKey" type="checkbox" />
@@ -386,11 +387,51 @@
     </section>
   </main>
 
+  <dialog id="operatorAuthDialog" class="auth-dialog" aria-labelledby="authDialogTitle">
+    <div class="auth-panel">
+      <div class="auth-header">
+        <div>
+          <p class="tool-label">Authorization</p>
+          <h3 id="authDialogTitle">Operator Keypad</h3>
+        </div>
+        <button id="authCancelBtn" class="auth-close-button" type="button" aria-label="Close authorization keypad">×</button>
+      </div>
+
+      <div class="auth-display">
+        <label for="authOperator">
+          Operator
+          <select id="authOperator">
+            <option value="BP">Brock Pettay</option>
+            <option value="LD">Lead Operator</option>
+            <option value="TC">Test Crew</option>
+          </select>
+        </label>
+        <div id="authPinDisplay" class="auth-pin-display">----</div>
+        <p id="authStatus" class="auth-status">Select operator and enter PIN.</p>
+      </div>
+
+      <div class="auth-keypad" aria-label="Authorization keypad">
+        <button type="button" data-auth-key="1">1</button>
+        <button type="button" data-auth-key="2">2</button>
+        <button type="button" data-auth-key="3">3</button>
+        <button type="button" data-auth-key="4">4</button>
+        <button type="button" data-auth-key="5">5</button>
+        <button type="button" data-auth-key="6">6</button>
+        <button type="button" data-auth-key="7">7</button>
+        <button type="button" data-auth-key="8">8</button>
+        <button type="button" data-auth-key="9">9</button>
+        <button type="button" id="authClearBtn" class="auth-clear">CLR</button>
+        <button type="button" data-auth-key="0">0</button>
+        <button type="button" id="authSubmitBtn" class="auth-submit">ENT</button>
+      </div>
+    </div>
+  </dialog>
+
   <!-- Scripts -->
   <script src="./assets/js/converter-data.js?v=20260709-layout2"></script>
   <script src="./assets/js/navigation.js?v=20260709-layout2"></script>
   <script src="./assets/js/converter.js?v=20260709-layout2"></script>
-  <script src="./assets/js/pyro-sim.js?v=20260709-hmi1"></script>
+  <script src="./assets/js/pyro-sim.js?v=20260709-auth1"></script>
   <script src="./assets/js/app.js?v=20260709-pyro2"></script>
 </body>
 </html>
