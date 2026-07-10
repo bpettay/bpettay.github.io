@@ -2,12 +2,19 @@ function initializePyroSimulator() {
   const root = document.getElementById("pyro-controls");
   if (!root) return;
 
+  const operatorCodes = {
+    BP: { name: "Brock Pettay", code: "2626" },
+    LD: { name: "Lead Operator", code: "1911" },
+    TC: { name: "Test Crew", code: "7342" },
+  };
+
   const channelGrid = document.getElementById("simChannelGrid");
   const eventLog = document.getElementById("simEventLog");
   const stateText = document.getElementById("pyroStateText");
   const selectedCueText = document.getElementById("pyroSelectedCue");
   const continuitySummaryText = document.getElementById("pyroContinuitySummary");
   const continuityLamp = document.getElementById("continuityLamp");
+  const operatorStatusText = document.getElementById("operatorStatusText");
 
   const masterPower = document.getElementById("simMasterPower");
   const trainingMode = document.getElementById("simTrainingMode");
@@ -21,6 +28,15 @@ function initializePyroSimulator() {
   const scrambleBtn = document.getElementById("simScrambleBtn");
   const clearLogBtn = document.getElementById("simClearLogBtn");
 
+  const authDialog = document.getElementById("operatorAuthDialog");
+  const authOperator = document.getElementById("authOperator");
+  const authPinDisplay = document.getElementById("authPinDisplay");
+  const authStatus = document.getElementById("authStatus");
+  const authCancelBtn = document.getElementById("authCancelBtn");
+  const authClearBtn = document.getElementById("authClearBtn");
+  const authSubmitBtn = document.getElementById("authSubmitBtn");
+  const authKeypadButtons = document.querySelectorAll("[data-auth-key]");
+
   const channels = Array.from({ length: 12 }, (_, index) => ({
     id: index + 1,
     continuity: ![4, 9].includes(index + 1),
@@ -29,6 +45,8 @@ function initializePyroSimulator() {
   }));
 
   let armed = false;
+  let authorizedOperator = null;
+  let pendingPin = "";
 
   function addLog(message) {
     if (!eventLog) return;
@@ -64,6 +82,7 @@ function initializePyroSimulator() {
       masterPower?.checked &&
       trainingMode?.checked &&
       keyEnable?.checked &&
+      authorizedOperator &&
       zoneClear?.checked &&
       channels.some((channel) => channel.continuity && !channel.used)
     );
@@ -73,6 +92,71 @@ function initializePyroSimulator() {
     root.querySelectorAll("[data-status-light]").forEach((light) => {
       light.classList.toggle("active", light.dataset.statusLight === mode);
     });
+  }
+
+  function updateAuthDisplay() {
+    if (authPinDisplay) {
+      authPinDisplay.textContent = pendingPin ? "•".repeat(pendingPin.length) : "----";
+    }
+
+    if (operatorStatusText) {
+      operatorStatusText.textContent = authorizedOperator
+        ? `Authorized: ${authorizedOperator.name}`
+        : "Authorization required";
+    }
+  }
+
+  function openAuthorizationDialog() {
+    pendingPin = "";
+    if (authStatus) authStatus.textContent = "Select operator and enter PIN.";
+    updateAuthDisplay();
+
+    if (typeof authDialog?.showModal === "function") {
+      authDialog.showModal();
+    } else {
+      authDialog?.classList.add("open");
+    }
+  }
+
+  function closeAuthorizationDialog() {
+    if (typeof authDialog?.close === "function") {
+      authDialog.close();
+    } else {
+      authDialog?.classList.remove("open");
+    }
+  }
+
+  function clearAuthorization() {
+    authorizedOperator = null;
+    keyEnable.checked = false;
+    addLog("Key Enable authorization cleared.");
+    render();
+  }
+
+  function submitAuthorization() {
+    const selectedOperator = operatorCodes[authOperator?.value];
+
+    if (!selectedOperator) {
+      if (authStatus) authStatus.textContent = "Select a valid operator.";
+      return;
+    }
+
+    if (pendingPin === selectedOperator.code) {
+      authorizedOperator = selectedOperator;
+      keyEnable.checked = true;
+      closeAuthorizationDialog();
+      addLog(`Key Enable authorized by ${selectedOperator.name}.`);
+      render();
+      return;
+    }
+
+    pendingPin = "";
+    keyEnable.checked = false;
+    authorizedOperator = null;
+    if (authStatus) authStatus.textContent = "Invalid code. Try again.";
+    updateAuthDisplay();
+    addLog("Key Enable authorization failed.");
+    render();
   }
 
   function renderChannels() {
@@ -142,6 +226,12 @@ function initializePyroSimulator() {
       continuityLamp.classList.toggle("active", counts.good > 0);
     }
 
+    if (!authorizedOperator && keyEnable?.checked) {
+      keyEnable.checked = false;
+    }
+
+    updateAuthDisplay();
+
     armBtn.disabled = !ready || armed;
     fireBtn.disabled = !armed || !selected.continuity || selected.used;
 
@@ -154,8 +244,55 @@ function initializePyroSimulator() {
     render();
   }
 
-  [masterPower, trainingMode, keyEnable, zoneClear].forEach((control) => {
+  [masterPower, trainingMode, zoneClear].forEach((control) => {
     control?.addEventListener("change", render);
+  });
+
+  keyEnable?.addEventListener("click", (event) => {
+    if (authorizedOperator && keyEnable.checked) {
+      return;
+    }
+
+    event.preventDefault();
+    keyEnable.checked = false;
+    openAuthorizationDialog();
+    render();
+  });
+
+  keyEnable?.addEventListener("change", () => {
+    if (!keyEnable.checked) {
+      clearAuthorization();
+    }
+  });
+
+  authKeypadButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      if (pendingPin.length >= 6) return;
+      pendingPin += button.dataset.authKey;
+      if (authStatus) authStatus.textContent = "Enter operator PIN.";
+      updateAuthDisplay();
+    });
+  });
+
+  authClearBtn?.addEventListener("click", () => {
+    pendingPin = "";
+    if (authStatus) authStatus.textContent = "PIN cleared.";
+    updateAuthDisplay();
+  });
+
+  authCancelBtn?.addEventListener("click", () => {
+    pendingPin = "";
+    keyEnable.checked = false;
+    closeAuthorizationDialog();
+    render();
+  });
+
+  authSubmitBtn?.addEventListener("click", submitAuthorization);
+
+  authDialog?.addEventListener("cancel", () => {
+    pendingPin = "";
+    keyEnable.checked = false;
+    render();
   });
 
   continuityBtn?.addEventListener("click", runContinuityCheck);
@@ -163,7 +300,7 @@ function initializePyroSimulator() {
   armBtn?.addEventListener("click", () => {
     if (!readyToArm()) return;
     armed = true;
-    addLog("Controller armed after interlock chain completed.");
+    addLog(`Controller armed by ${authorizedOperator?.name || "authorized operator"}.`);
     render();
   });
 
@@ -179,7 +316,7 @@ function initializePyroSimulator() {
 
     selected.used = true;
     armed = false;
-    addLog(`Cue ${String(selected.id).padStart(2, "0")} command recorded.`);
+    addLog(`Cue ${String(selected.id).padStart(2, "0")} command recorded by ${authorizedOperator?.name || "operator"}.`);
     render();
   });
 
