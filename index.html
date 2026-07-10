@@ -10,15 +10,16 @@
     name="description"
     content="Brock Pettay's engineering site with practical tools, project work, and a clean professional presentation."
   />
+
   <!-- ===============================
     Title + Favicon + PWA
   ================================ -->
   <title>Brock | Engineering</title>
   <link rel="icon" type="image/png" href="./Favicon.png" />
-  
+
   <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0066cc">
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0066cc" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -27,11 +28,13 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
     rel="stylesheet"
   />
+
   <!-- Styles -->
-  <link rel="stylesheet" href="./assets/css/style.css?v=20250709" />
-  <link rel="stylesheet" href="./assets/css/home.css?v=20250709" />
-  <link rel="stylesheet" href="./assets/css/tools.css?v=20250709" />
+  <link rel="stylesheet" href="./assets/css/style.css?v=20260709" />
+  <link rel="stylesheet" href="./assets/css/home.css?v=20260709" />
+  <link rel="stylesheet" href="./assets/css/tools.css?v=20260709" />
 </head>
+
 <body>
   <!-- Navigation -->
   <nav class="nav" aria-label="Primary">
@@ -43,6 +46,7 @@
       />
       <span class="site-name">Brock Pettay</span>
     </div>
+
     <div class="nav-right">
       <button class="nav-link active" data-page="home" type="button">Home</button>
       <button class="nav-link" data-page="tools" type="button">Tools</button>
@@ -69,6 +73,7 @@
           organized to be easy to scan and easy to use.
         </p>
       </div>
+
       <div class="hero-links">
         <button class="cta-button" type="button" data-page-target="tools">Open Tools</button>
         <a
@@ -81,6 +86,7 @@
         </a>
       </div>
     </section>
+
     <section class="home-grid">
       <section class="home-section surface intro-section">
         <div class="section-heading">
@@ -88,16 +94,18 @@
           <h2>Simple and useful.</h2>
         </div>
         <p>
-          I’m Brock Pettay, a mechanical engineering student focused on practical
+          I’m Brock Pettay, a mechanical engineer focused on practical
           engineering work, testing, design, and problem solving. This site is a
           straightforward place for tools, project material, and professional information.
         </p>
       </section>
+
       <section class="home-section surface quick-section">
         <div class="section-heading">
           <p class="section-label">Quick Access</p>
           <h2>Find things quickly.</h2>
         </div>
+
         <div class="quick-list">
           <article class="quick-item">
             <h3>Tools</h3>
@@ -114,11 +122,13 @@
         </div>
       </section>
     </section>
+
     <section class="home-section surface roadmap-section">
       <div class="section-heading">
         <p class="section-label">Roadmap</p>
         <h2>What belongs here next.</h2>
       </div>
+
       <div class="roadmap-list">
         <article class="roadmap-item">
           <span class="roadmap-status">Now</span>
@@ -127,6 +137,7 @@
             <p>Keep the site readable, minimal, and easy to extend without adding clutter.</p>
           </div>
         </article>
+
         <article class="roadmap-item">
           <span class="roadmap-status">Next</span>
           <div>
@@ -134,6 +145,7 @@
             <p>Add references and calculators that are actually useful in projects and shop work.</p>
           </div>
         </article>
+
         <article class="roadmap-item">
           <span class="roadmap-status">Later</span>
           <div>
@@ -146,33 +158,99 @@
   </main>
 
   <!-- Tools Page -->
-  <main id="tools" class="page" data-page-label="Tools">
-    <!-- Your original tools content here (unchanged) -->
+  <main id="tools" class="page" data-page-label="Tools" hidden>
     <section class="tool-card compact-tool-card surface">
-      <!-- ... your converter code ... -->
+      <div class="tool-header">
+        <div>
+          <p class="tool-label">Converter</p>
+          <h2>Engineering Unit Converter</h2>
+          <p class="tool-intro">
+            Convert common engineering units quickly. Type a value manually or use the quick query box.
+          </p>
+        </div>
+      </div>
+
+      <div class="compact-converter-layout">
+        <div class="field-group">
+          <label for="queryInput">Quick query</label>
+          <input
+            id="queryInput"
+            type="text"
+            inputmode="text"
+            autocomplete="off"
+            placeholder="Example: 10 in to mm"
+          />
+          <div class="preview-panel" aria-live="polite">
+            <p id="previewSummary" class="preview-summary">Try a quick conversion like “10 in to mm”.</p>
+            <p id="previewFactor" class="preview-factor">The standard converter below is ready to use.</p>
+            <p id="queryStatus" class="query-status"></p>
+          </div>
+        </div>
+
+        <div class="tool-grid compact-tool-grid">
+          <div class="field-group">
+            <label for="category">Category</label>
+            <select id="category"></select>
+          </div>
+
+          <div class="field-group">
+            <label for="inputValue">Value</label>
+            <input id="inputValue" type="number" inputmode="decimal" value="1" step="any" />
+          </div>
+
+          <div class="field-group">
+            <label for="fromUnit">From</label>
+            <select id="fromUnit"></select>
+          </div>
+
+          <div class="field-group">
+            <label for="toUnit">To</label>
+            <select id="toUnit"></select>
+          </div>
+        </div>
+
+        <div class="compact-results-grid">
+          <section class="result-panel" aria-live="polite">
+            <p class="tool-label">Result</p>
+            <p id="resultValue" class="result-value">—</p>
+            <p id="resultFormula" class="result-formula">Enter a value to convert.</p>
+            <p id="resultFactor" class="result-factor"></p>
+          </section>
+
+          <section class="related-panel">
+            <p class="tool-label">Related</p>
+            <div id="relatedResults" class="related-results"></div>
+          </section>
+        </div>
+      </div>
     </section>
   </main>
 
-  <!-- Pyro Control Page -->
-  <main id="pyro" class="page" data-page-label="Pyro">
+  <!-- Pyro Page -->
+  <main id="pyro" class="page" data-page-label="Pyro" hidden>
     <section class="tool-card surface">
       <div class="tool-header">
         <div>
-          <p class="tool-label">Control</p>
-          <h2>Pyro Ignition</h2>
-          <p class="tool-intro">Safe remote firework control system.</p>
+          <p class="tool-label">Project Placeholder</p>
+          <h2>Pyro</h2>
+          <p class="tool-intro">
+            This page is reserved for future project notes and non-operational documentation.
+          </p>
         </div>
       </div>
+
       <div id="pyro-controls" style="display: grid; gap: 1.5rem;">
-        <!-- UI goes here - we'll fill it in the next step -->
+        <p class="tool-intro">
+          No live firing controls are implemented on this website.
+        </p>
       </div>
     </section>
   </main>
 
   <!-- Scripts -->
-  <script src="./assets/js/converter-data.js?v=20260421f"></script>
-  <script src="./assets/js/navigation.js?v=20260421f"></script>
-  <script src="./assets/js/converter.js?v=20260421f"></script>
-  <script src="./assets/js/app.js?v=20250709"></script>
+  <script src="./assets/js/converter-data.js?v=20260709"></script>
+  <script src="./assets/js/navigation.js?v=20260709"></script>
+  <script src="./assets/js/converter.js?v=20260709"></script>
+  <script src="./assets/js/app.js?v=20260709"></script>
 </body>
 </html>
