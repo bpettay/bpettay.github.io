@@ -47,6 +47,10 @@ function initializePyroSimulator() {
   let armed = false;
   let authorizedOperator = null;
   let pendingPin = "";
+  let cueWheelSelect = null;
+  let cueWheelStatus = null;
+  let cueWheelPrev = null;
+  let cueWheelNext = null;
 
   function addLog(message) {
     if (!eventLog) return;
@@ -68,6 +72,27 @@ function initializePyroSimulator() {
 
   function selectedChannel() {
     return channels.find((channel) => channel.selected) || channels[0];
+  }
+
+  function selectChannelById(id, announce = true) {
+    const target = channels.find((channel) => channel.id === Number(id));
+    if (!target) return;
+
+    channels.forEach((channel) => {
+      channel.selected = channel.id === target.id;
+    });
+
+    if (announce) {
+      addLog(`Cue ${String(target.id).padStart(2, "0")} selected.`);
+    }
+
+    render();
+  }
+
+  function nudgeSelectedCue(direction) {
+    const selected = selectedChannel();
+    const nextId = ((selected.id - 1 + direction + channels.length) % channels.length) + 1;
+    selectChannelById(nextId);
   }
 
   function continuityCounts() {
@@ -159,6 +184,67 @@ function initializePyroSimulator() {
     render();
   }
 
+  function injectCueWheel() {
+    const commandPanel = document.querySelector(".command-panel");
+    if (!commandPanel || document.getElementById("cueQuickSelect")) return;
+
+    const fireButton = document.getElementById("simFireBtn");
+    const wheel = document.createElement("section");
+    wheel.id = "cueQuickSelect";
+    wheel.className = "cue-quick-select";
+    wheel.innerHTML = `
+      <div class="cue-quick-header">
+        <span>Quick Select</span>
+        <strong>Selected Cue</strong>
+      </div>
+      <div class="cue-wheel-row">
+        <button id="cueWheelPrev" class="cue-wheel-step" type="button" aria-label="Previous cue">‹</button>
+        <select id="cueWheelSelect" class="cue-wheel-select" aria-label="Select cue to command"></select>
+        <button id="cueWheelNext" class="cue-wheel-step" type="button" aria-label="Next cue">›</button>
+      </div>
+      <p id="cueWheelStatus" class="cue-wheel-status">Cue status loading.</p>
+    `;
+
+    if (fireButton) {
+      commandPanel.insertBefore(wheel, fireButton);
+    } else {
+      commandPanel.appendChild(wheel);
+    }
+
+    cueWheelSelect = document.getElementById("cueWheelSelect");
+    cueWheelStatus = document.getElementById("cueWheelStatus");
+    cueWheelPrev = document.getElementById("cueWheelPrev");
+    cueWheelNext = document.getElementById("cueWheelNext");
+
+    if (cueWheelSelect) {
+      cueWheelSelect.innerHTML = channels.map((channel) => `
+        <option value="${channel.id}">Cue ${String(channel.id).padStart(2, "0")}</option>
+      `).join("");
+
+      cueWheelSelect.addEventListener("change", () => {
+        selectChannelById(cueWheelSelect.value);
+      });
+    }
+
+    cueWheelPrev?.addEventListener("click", () => nudgeSelectedCue(-1));
+    cueWheelNext?.addEventListener("click", () => nudgeSelectedCue(1));
+  }
+
+  function updateCueWheel() {
+    const selected = selectedChannel();
+    if (cueWheelSelect) {
+      cueWheelSelect.value = String(selected.id);
+    }
+
+    if (cueWheelStatus) {
+      const status = selected.used ? "Used" : selected.continuity ? "Continuity good" : "Continuity open";
+      cueWheelStatus.textContent = `Cue ${String(selected.id).padStart(2, "0")} · ${status}`;
+      cueWheelStatus.classList.toggle("good", selected.continuity && !selected.used);
+      cueWheelStatus.classList.toggle("open", !selected.continuity && !selected.used);
+      cueWheelStatus.classList.toggle("used", selected.used);
+    }
+  }
+
   function renderChannels() {
     if (!channelGrid) return;
 
@@ -181,12 +267,7 @@ function initializePyroSimulator() {
       `;
 
       button.addEventListener("click", () => {
-        channels.forEach((item) => {
-          item.selected = false;
-        });
-        channel.selected = true;
-        addLog(`Cue ${String(channel.id).padStart(2, "0")} selected.`);
-        render();
+        selectChannelById(channel.id);
       });
 
       channelGrid.appendChild(button);
@@ -236,6 +317,7 @@ function initializePyroSimulator() {
     fireBtn.disabled = !armed || !selected.continuity || selected.used;
 
     renderChannels();
+    updateCueWheel();
   }
 
   function runContinuityCheck() {
@@ -335,6 +417,7 @@ function initializePyroSimulator() {
     addLog("Event log cleared.");
   });
 
+  injectCueWheel();
   addLog("Controller interface initialized in SAFE.");
   render();
 }
