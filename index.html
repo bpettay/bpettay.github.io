@@ -44,7 +44,7 @@
   <!-- Styles -->
   <link rel="stylesheet" href="./assets/css/style.css?v=20260709-layout2" />
   <link rel="stylesheet" href="./assets/css/home.css?v=20260709-layout2" />
-  <link rel="stylesheet" href="./assets/css/tools.css?v=20260709-layout2" />
+  <link rel="stylesheet" href="./assets/css/tools.css?v=20260709-pyro1" />
 </head>
 
 <body>
@@ -240,21 +240,102 @@
 
   <!-- Pyro Page -->
   <main id="pyro" class="page" data-page-label="Pyro" hidden>
-    <section class="tool-card surface">
-      <div class="tool-header">
+    <section class="tool-card surface pyro-card">
+      <div class="tool-header pyro-header">
         <div>
-          <p class="tool-label">Project Placeholder</p>
-          <h2>Pyro</h2>
+          <p class="tool-label">Simulation Interface</p>
+          <h2>Remote Ignition Controller</h2>
           <p class="tool-intro">
-            This page is reserved for future project notes and non-operational documentation.
+            A non-operational controller concept that demonstrates lockouts, deliberate state changes,
+            simulated continuity checks, and clear operator feedback without connecting to hardware.
           </p>
         </div>
+        <span class="sim-badge">Simulation Only</span>
       </div>
 
-      <div id="pyro-controls" style="display: grid; gap: 1.5rem;">
-        <p class="tool-intro">
-          No live firing controls are implemented on this website.
-        </p>
+      <div id="pyro-controls" class="pyro-console" aria-label="Simulated remote ignition controller">
+        <section class="pyro-panel pyro-status-panel">
+          <div>
+            <p class="tool-label">Controller State</p>
+            <p id="pyroStateText" class="pyro-state-text">Safe / locked out</p>
+          </div>
+          <div class="pyro-status-lights" aria-label="System status lights">
+            <span class="status-light safe active" data-status-light="safe">Safe</span>
+            <span class="status-light ready" data-status-light="ready">Ready</span>
+            <span class="status-light armed" data-status-light="armed">Armed</span>
+          </div>
+        </section>
+
+        <section class="pyro-grid">
+          <div class="pyro-panel">
+            <p class="tool-label">Safety Chain</p>
+            <div class="safety-stack">
+              <label class="safety-row">
+                <input id="simMasterPower" type="checkbox" />
+                <span>
+                  <strong>Master power enabled</strong>
+                  <small>First deliberate control step.</small>
+                </span>
+              </label>
+              <label class="safety-row">
+                <input id="simTrainingMode" type="checkbox" checked />
+                <span>
+                  <strong>Training mode locked on</strong>
+                  <small>Interface remains simulation-only.</small>
+                </span>
+              </label>
+              <label class="safety-row">
+                <input id="simSupervisorKey" type="checkbox" />
+                <span>
+                  <strong>Supervisor key simulated</strong>
+                  <small>Intentional authorization step.</small>
+                </span>
+              </label>
+              <label class="safety-row">
+                <input id="simZoneClear" type="checkbox" />
+                <span>
+                  <strong>Area clear confirmed</strong>
+                  <small>Required before simulated arming.</small>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <div class="pyro-panel command-panel">
+            <p class="tool-label">Command Controls</p>
+            <button id="simContinuityBtn" class="pyro-button secondary" type="button">Run Simulated Continuity Check</button>
+            <button id="simArmBtn" class="pyro-button arm" type="button" disabled>Arm Simulation</button>
+            <button id="simDisarmBtn" class="pyro-button secondary" type="button">Disarm / Reset Safe</button>
+            <button id="simFireBtn" class="pyro-fire-button" type="button" disabled>
+              Simulated Fire Command
+            </button>
+            <p class="pyro-fine-print">
+              This button only writes to the on-page event log. It does not transmit, connect, or control anything.
+            </p>
+          </div>
+        </section>
+
+        <section class="pyro-panel">
+          <div class="channel-header">
+            <div>
+              <p class="tool-label">Cue Channels</p>
+              <h3>12-channel simulation bank</h3>
+            </div>
+            <button id="simScrambleBtn" class="pyro-button compact" type="button">Randomize Continuity</button>
+          </div>
+          <div id="simChannelGrid" class="channel-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="pyro-panel event-log-panel">
+          <div class="channel-header">
+            <div>
+              <p class="tool-label">Event Log</p>
+              <h3>Operator feedback</h3>
+            </div>
+            <button id="simClearLogBtn" class="pyro-button compact" type="button">Clear Log</button>
+          </div>
+          <ol id="simEventLog" class="event-log" aria-live="polite"></ol>
+        </section>
       </div>
     </section>
   </main>
@@ -263,6 +344,7 @@
   <script src="./assets/js/converter-data.js?v=20260709-layout2"></script>
   <script src="./assets/js/navigation.js?v=20260709-layout2"></script>
   <script src="./assets/js/converter.js?v=20260709-layout2"></script>
-  <script src="./assets/js/app.js?v=20260709-layout2"></script>
+  <script src="./assets/js/pyro-sim.js?v=20260709-pyro1"></script>
+  <script src="./assets/js/app.js?v=20260709-pyro1"></script>
 </body>
 </html>
