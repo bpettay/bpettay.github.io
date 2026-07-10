@@ -44,7 +44,7 @@
   <!-- Styles -->
   <link rel="stylesheet" href="./assets/css/style.css?v=20260709-pyro2" />
   <link rel="stylesheet" href="./assets/css/home.css?v=20260709-layout2" />
-  <link rel="stylesheet" href="./assets/css/tools.css?v=20260709-pyro2" />
+  <link rel="stylesheet" href="./assets/css/tools.css?v=20260709-hmi1" />
 </head>
 
 <body>
@@ -243,74 +243,120 @@
     <section class="tool-card surface pyro-card">
       <div class="tool-header pyro-header">
         <div>
-          <p class="tool-label">Control Interface Concept</p>
+          <p class="tool-label">Operator Interface Concept</p>
           <h2>Remote Ignition Controller</h2>
           <p class="tool-intro">
-            A mobile-first controller layout with cue selection, interlock sequencing,
-            continuity status, command state feedback, and an operator event log.
+            Mobile-first HMI-style control panel with physical-feeling switches,
+            illuminated status indicators, cue selection, and command feedback.
           </p>
         </div>
-        <span class="sim-badge">Panel Concept</span>
+        <span class="sim-badge">HMI Concept</span>
       </div>
 
       <div id="pyro-controls" class="pyro-console" aria-label="Remote ignition controller interface concept">
-        <section class="pyro-panel pyro-status-panel">
-          <div>
-            <p class="tool-label">System Status</p>
-            <p id="pyroStateText" class="pyro-state-text">Safe / locked out</p>
+        <section class="pyro-panel pyro-hmi-header">
+          <div class="hmi-screen">
+            <p class="hmi-screen-label">System Display</p>
+            <div id="pyroStateText" class="hmi-screen-main">SAFE / LOCKED OUT</div>
+            <div class="hmi-screen-sub">
+              <span id="pyroSelectedCue">CUE 01</span>
+              <span id="pyroContinuitySummary">10 GOOD / 2 OPEN</span>
+            </div>
           </div>
-          <div class="pyro-status-lights" aria-label="System status lights">
-            <span class="status-light safe active" data-status-light="safe">Safe</span>
-            <span class="status-light ready" data-status-light="ready">Ready</span>
-            <span class="status-light armed" data-status-light="armed">Armed</span>
+
+          <div class="lamp-bank" aria-label="System status lights">
+            <div class="lamp-widget">
+              <span class="lamp-label">Safe</span>
+              <span class="pilot-light safe active" data-status-light="safe"></span>
+            </div>
+            <div class="lamp-widget">
+              <span class="lamp-label">Ready</span>
+              <span class="pilot-light ready" data-status-light="ready"></span>
+            </div>
+            <div class="lamp-widget">
+              <span class="lamp-label">Armed</span>
+              <span class="pilot-light armed" data-status-light="armed"></span>
+            </div>
+            <div class="lamp-widget">
+              <span class="lamp-label">Cont</span>
+              <span class="pilot-light continuity" id="continuityLamp"></span>
+            </div>
           </div>
         </section>
 
         <section class="pyro-grid">
           <div class="pyro-panel">
-            <p class="tool-label">Safety Interlocks</p>
-            <div class="safety-stack">
-              <label class="safety-row">
-                <input id="simMasterPower" type="checkbox" />
-                <span>
+            <p class="tool-label">Interlocks</p>
+
+            <div class="switch-bank">
+              <label class="selector-widget">
+                <span class="selector-text">
                   <strong>Master Power</strong>
-                  <small>Primary enable state for the panel.</small>
+                  <small>Main controller enable</small>
+                </span>
+                <span class="selector-switch">
+                  <input id="simMasterPower" type="checkbox" />
+                  <span class="selector-slider"></span>
                 </span>
               </label>
-              <label class="safety-row">
-                <input id="simTrainingMode" type="checkbox" checked />
-                <span>
-                  <strong>Controller Enabled</strong>
-                  <small>Software-side controller state.</small>
+
+              <label class="selector-widget">
+                <span class="selector-text">
+                  <strong>Control Enable</strong>
+                  <small>Panel active state</small>
+                </span>
+                <span class="selector-switch">
+                  <input id="simTrainingMode" type="checkbox" checked />
+                  <span class="selector-slider"></span>
                 </span>
               </label>
-              <label class="safety-row">
-                <input id="simSupervisorKey" type="checkbox" />
-                <span>
+
+              <label class="selector-widget">
+                <span class="selector-text">
                   <strong>Key Enable</strong>
-                  <small>Deliberate authorization step.</small>
+                  <small>Authorization interlock</small>
+                </span>
+                <span class="selector-switch">
+                  <input id="simSupervisorKey" type="checkbox" />
+                  <span class="selector-slider"></span>
                 </span>
               </label>
-              <label class="safety-row">
-                <input id="simZoneClear" type="checkbox" />
-                <span>
+
+              <label class="selector-widget">
+                <span class="selector-text">
                   <strong>Area Clear</strong>
-                  <small>Final condition before arming.</small>
+                  <small>Final permissive condition</small>
+                </span>
+                <span class="selector-switch">
+                  <input id="simZoneClear" type="checkbox" />
+                  <span class="selector-slider"></span>
                 </span>
               </label>
             </div>
           </div>
 
           <div class="pyro-panel command-panel">
-            <p class="tool-label">Fire Control</p>
-            <button id="simContinuityBtn" class="pyro-button secondary" type="button">Test Continuity</button>
-            <button id="simArmBtn" class="pyro-button arm" type="button" disabled>Arm</button>
-            <button id="simDisarmBtn" class="pyro-button secondary" type="button">Disarm / Safe</button>
-            <button id="simFireBtn" class="pyro-fire-button" type="button" disabled>
-              Fire Selected Cue
+            <p class="tool-label">Command Station</p>
+
+            <div class="pushbutton-grid">
+              <button id="simContinuityBtn" class="hmi-pushbutton neutral" type="button">
+                <span>Test</span>
+              </button>
+              <button id="simArmBtn" class="hmi-pushbutton amber" type="button" disabled>
+                <span>Arm</span>
+              </button>
+              <button id="simDisarmBtn" class="hmi-pushbutton neutral" type="button">
+                <span>Disarm</span>
+              </button>
+            </div>
+
+            <button id="simFireBtn" class="hmi-fire-button" type="button" disabled>
+              <span class="fire-cap">Fire</span>
+              <span class="fire-sub">Selected Cue</span>
             </button>
+
             <p class="pyro-fine-print">
-              The interface records panel actions locally for display and testing.
+              Interface actions are recorded locally for visual feedback and testing.
             </p>
           </div>
         </section>
@@ -318,8 +364,8 @@
         <section class="pyro-panel">
           <div class="channel-header">
             <div>
-              <p class="tool-label">Cue Matrix</p>
-              <h3>12-channel bank</h3>
+              <p class="tool-label">Cue Bank</p>
+              <h3>12-channel matrix</h3>
             </div>
             <button id="simScrambleBtn" class="pyro-button compact" type="button">Randomize Continuity</button>
           </div>
@@ -329,8 +375,8 @@
         <section class="pyro-panel event-log-panel">
           <div class="channel-header">
             <div>
-              <p class="tool-label">Event Log</p>
-              <h3>Operator feedback</h3>
+              <p class="tool-label">Message Console</p>
+              <h3>Operator log</h3>
             </div>
             <button id="simClearLogBtn" class="pyro-button compact" type="button">Clear Log</button>
           </div>
@@ -344,7 +390,7 @@
   <script src="./assets/js/converter-data.js?v=20260709-layout2"></script>
   <script src="./assets/js/navigation.js?v=20260709-layout2"></script>
   <script src="./assets/js/converter.js?v=20260709-layout2"></script>
-  <script src="./assets/js/pyro-sim.js?v=20260709-pyro2"></script>
+  <script src="./assets/js/pyro-sim.js?v=20260709-hmi1"></script>
   <script src="./assets/js/app.js?v=20260709-pyro2"></script>
 </body>
 </html>
