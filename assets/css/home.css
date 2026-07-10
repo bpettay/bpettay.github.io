@@ -3,12 +3,14 @@
   grid-template-columns: minmax(0, 1.5fr) minmax(220px, 0.8fr);
   gap: var(--space-4);
   align-items: center;
+  min-width: 0;
   padding: var(--space-5);
   border-radius: var(--radius);
 }
 
 .hero-main {
   max-width: 720px;
+  min-width: 0;
 }
 
 .eyebrow {
@@ -26,6 +28,7 @@
   line-height: 1.02;
   letter-spacing: -0.03em;
   font-weight: 300;
+  overflow-wrap: anywhere;
 }
 
 .hero-text {
@@ -42,6 +45,7 @@
   align-items: center;
   gap: var(--space-3);
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .home-grid {
@@ -49,11 +53,13 @@
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: var(--space-4);
   margin-top: var(--space-4);
+  min-width: 0;
 }
 
 .home-section,
 .quick-section,
 .roadmap-section {
+  min-width: 0;
   padding: var(--space-5);
   border-radius: var(--radius);
   transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
@@ -75,6 +81,7 @@
   font-weight: 400;
   line-height: 1.08;
   letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
 }
 
 .home-section p,
@@ -83,12 +90,17 @@
   margin: 0;
   color: var(--ink-soft);
   line-height: 1.72;
+  overflow-wrap: anywhere;
 }
 
 /* Quick Access */
 .quick-list {
   display: grid;
   gap: var(--space-4);
+}
+
+.quick-item {
+  min-width: 0;
 }
 
 .quick-item h3 {
@@ -105,13 +117,15 @@
 .roadmap-list {
   display: grid;
   gap: 0;
+  min-width: 0;
 }
 
 .roadmap-item {
   display: grid;
-  grid-template-columns: 80px 1fr;
+  grid-template-columns: 80px minmax(0, 1fr);
   gap: var(--space-4);
   align-items: start;
+  min-width: 0;
   padding: var(--space-4) 0;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -148,6 +162,7 @@
   .home-grid {
     grid-template-columns: 1fr;
   }
+
   .hero-links {
     justify-content: flex-start;
   }
@@ -160,13 +175,24 @@
   .roadmap-section {
     padding: var(--space-4);
   }
+
   .hero-links {
     flex-direction: column;
     align-items: stretch;
   }
+
   .roadmap-item {
     grid-template-columns: 1fr;
     gap: var(--space-2);
+  }
+}
+
+@media (max-width: 420px) {
+  .hero,
+  .home-section,
+  .quick-section,
+  .roadmap-section {
+    padding: var(--space-3);
   }
 }
 
