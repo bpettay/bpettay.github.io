@@ -46,6 +46,7 @@
   <link rel="stylesheet" href="./assets/css/home.css?v=20260709-layout2" />
   <link rel="stylesheet" href="./assets/css/tools.css?v=20260709-hmi1" />
   <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260709-auth1" />
+  <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260709-team1" />
 </head>
 
 <body>
@@ -248,7 +249,7 @@
           <h2>Remote Ignition Controller</h2>
           <p class="tool-intro">
             Mobile-first HMI-style control panel with physical-feeling switches,
-            illuminated status indicators, cue selection, and command feedback.
+            illuminated status indicators, cue selection, and team coordination feedback.
           </p>
         </div>
         <span class="sim-badge">HMI Concept</span>
@@ -281,6 +282,81 @@
             <div class="lamp-widget">
               <span class="lamp-label">Cont</span>
               <span class="pilot-light continuity" id="continuityLamp"></span>
+            </div>
+          </div>
+        </section>
+
+        <section id="teamSyncPanel" class="pyro-panel team-sync-panel" aria-label="Team coordination and sync concept">
+          <div class="team-sync-header">
+            <div>
+              <p class="tool-label">Team Sync</p>
+              <h3>Cross-device coordination concept</h3>
+            </div>
+            <span id="syncStatePill" class="sync-state-pill">Local Sync Demo</span>
+          </div>
+
+          <div class="team-sync-grid">
+            <div class="team-card">
+              <p class="tool-label">Local Terminal</p>
+              <h4>Device assignment</h4>
+              <div class="team-form-grid">
+                <label for="teamDeviceName">
+                  Device Name
+                  <input id="teamDeviceName" type="text" value="Zone A Phone" />
+                </label>
+                <label for="teamAssignedZone">
+                  Assigned Zone
+                  <select id="teamAssignedZone">
+                    <option value="A">Zone A</option>
+                    <option value="B">Zone B</option>
+                  </select>
+                </label>
+                <label for="teamRole">
+                  Role
+                  <select id="teamRole">
+                    <option>Zone Operator</option>
+                    <option>Show Lead</option>
+                    <option>Safety Watch</option>
+                    <option>Continuity Tech</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="team-card">
+              <p class="tool-label">Zone Status</p>
+              <h4>Shared status board</h4>
+              <div class="zone-status-stack">
+                <article class="zone-status-card">
+                  <span class="zone-letter" data-local-zone>A</span>
+                  <div>
+                    <strong>Local Zone <span data-local-zone>A</span></strong>
+                    <small id="localZoneDetail">Zone A Phone / Zone Operator</small>
+                  </div>
+                  <span id="localZoneState" class="zone-state">Safe</span>
+                </article>
+                <article class="zone-status-card">
+                  <span class="zone-letter" data-peer-zone>B</span>
+                  <div>
+                    <strong>Peer Zone <span data-peer-zone>B</span></strong>
+                    <small id="peerZoneDetail">Peer Zone B / simulated standby</small>
+                  </div>
+                  <span id="peerZoneState" class="zone-state">Safe</span>
+                </article>
+              </div>
+            </div>
+
+            <div class="team-card">
+              <p class="tool-label">Coordination</p>
+              <h4>Quick messages</h4>
+              <div class="sync-button-grid">
+                <button class="sync-button" type="button" data-sync-action="ready">Ready</button>
+                <button class="sync-button" type="button" data-sync-action="standby">Standby</button>
+                <button class="sync-button" type="button" data-sync-action="peer-ready">Peer Ready</button>
+                <button class="sync-button hold" type="button" data-sync-action="hold">Hold</button>
+                <button class="sync-button clear" type="button" data-sync-action="clear-hold">Clear Hold</button>
+              </div>
+              <ol id="syncMiniLog" class="sync-mini-log" aria-live="polite"></ol>
             </div>
           </div>
         </section>
@@ -432,6 +508,7 @@
   <script src="./assets/js/navigation.js?v=20260709-layout2"></script>
   <script src="./assets/js/converter.js?v=20260709-layout2"></script>
   <script src="./assets/js/pyro-sim.js?v=20260709-auth1"></script>
-  <script src="./assets/js/app.js?v=20260709-pyro2"></script>
+  <script src="./assets/js/pyro-team.js?v=20260709-team1"></script>
+  <script src="./assets/js/app.js?v=20260709-team1"></script>
 </body>
 </html>
