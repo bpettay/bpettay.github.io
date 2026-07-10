@@ -20,9 +20,46 @@ document.addEventListener("DOMContentLoaded", () => {
     initializePyroGateWorkflow();
   }
 
+  initializeScrollHeader();
+
   // Optional fancy tilt effect (only on desktop with mouse)
   initializePanelTilt();
 });
+
+function initializeScrollHeader() {
+  const nav = document.querySelector(".nav");
+  if (!nav) return;
+
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+
+  function updateHeader() {
+    const currentY = window.scrollY;
+    const scrollingDown = currentY > lastScrollY + 6;
+    const scrollingUp = currentY < lastScrollY - 6;
+    const nearTop = currentY < 80;
+
+    nav.classList.toggle("nav-compact", currentY > 80);
+
+    if (nearTop || scrollingUp) {
+      nav.classList.remove("nav-hidden");
+    } else if (scrollingDown && currentY > 260) {
+      nav.classList.add("nav-hidden");
+    }
+
+    lastScrollY = currentY;
+    ticking = false;
+  }
+
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      window.requestAnimationFrame(updateHeader);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  updateHeader();
+}
 
 function initializePanelTilt() {
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
