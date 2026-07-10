@@ -169,13 +169,305 @@
   color: var(--ink);
 }
 
+/* Pyro Controller */
+.pyro-card {
+  background:
+    radial-gradient(circle at top right, rgba(255, 120, 0, 0.12), transparent 30%),
+    rgba(255, 255, 255, 0.08);
+}
+
+.pyro-header {
+  align-items: center;
+}
+
+.sim-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pyro-console {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.pyro-panel {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.26);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+.pyro-status-panel,
+.channel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.pyro-state-text {
+  margin: 0.25rem 0 0;
+  color: var(--ink);
+  font-size: clamp(1.35rem, 4vw, 2.2rem);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.pyro-status-lights {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.status-light {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 32px;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.status-light::before {
+  content: "";
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 0 0 transparent;
+}
+
+.status-light.safe.active::before {
+  background: #45e66f;
+  box-shadow: 0 0 14px rgba(69, 230, 111, 0.8);
+}
+
+.status-light.ready.active::before {
+  background: #ffb12d;
+  box-shadow: 0 0 14px rgba(255, 177, 45, 0.8);
+}
+
+.status-light.armed.active::before {
+  background: #ff3b30;
+  box-shadow: 0 0 14px rgba(255, 59, 48, 0.9);
+}
+
+.status-light.active {
+  color: var(--ink);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pyro-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+  gap: var(--space-3);
+  align-items: stretch;
+}
+
+.safety-stack,
+.command-panel {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.safety-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.045);
+  cursor: pointer;
+}
+
+.safety-row input {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: #ff8a1f;
+}
+
+.safety-row strong,
+.safety-row small {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.safety-row strong {
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.safety-row small,
+.pyro-fine-print {
+  color: var(--ink-soft);
+  line-height: 1.45;
+  font-size: 0.82rem;
+}
+
+.pyro-button,
+.pyro-fire-button {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.pyro-button:hover,
+.pyro-fire-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.pyro-button:disabled,
+.pyro-fire-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.pyro-button.arm {
+  border-color: rgba(255, 177, 45, 0.45);
+  background: rgba(255, 177, 45, 0.16);
+}
+
+.pyro-button.compact {
+  width: auto;
+  min-height: 36px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.72rem;
+}
+
+.pyro-fire-button {
+  min-height: 74px;
+  border-color: rgba(255, 59, 48, 0.55);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 64, 52, 0.28), rgba(145, 22, 18, 0.42));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 10px 24px rgba(255, 59, 48, 0.12);
+  font-size: 0.95rem;
+}
+
+.channel-header h3 {
+  margin: 0.1rem 0 0;
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.channel-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: var(--space-3);
+}
+
+.channel-button {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  min-height: 72px;
+  padding: 0.75rem 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.055);
+  cursor: pointer;
+}
+
+.channel-button.selected {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.channel-number {
+  color: var(--ink);
+  font-size: 1.12rem;
+  font-weight: 600;
+}
+
+.channel-status {
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.channel-button.continuity-good .channel-status {
+  color: #82f49c;
+}
+
+.channel-button.continuity-open .channel-status {
+  color: #ffb12d;
+}
+
+.channel-button.channel-used {
+  opacity: 0.56;
+}
+
+.event-log {
+  display: grid;
+  gap: 0.5rem;
+  min-height: 120px;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.event-log li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.86rem;
+}
+
+.event-log li span {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Responsive */
 @media (max-width: 980px) {
   .compact-tool-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .compact-results-grid {
+  .compact-results-grid,
+  .pyro-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -186,8 +478,12 @@
     padding: var(--space-4);
   }
 
-  .tool-header {
-    display: block;
+  .tool-header,
+  .pyro-header,
+  .pyro-status-panel,
+  .channel-header {
+    display: grid;
+    gap: 0.85rem;
   }
 
   .compact-tool-grid {
@@ -206,6 +502,19 @@
   .related-item-value {
     text-align: left;
   }
+
+  .pyro-status-lights {
+    justify-content: stretch;
+  }
+
+  .status-light {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+
+  .channel-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 420px) {
@@ -213,8 +522,34 @@
   .compact-tool-card,
   .result-panel,
   .related-panel,
-  .preview-panel {
+  .preview-panel,
+  .pyro-panel {
     padding: var(--space-3);
+  }
+
+  .tool-card h2 {
+    font-size: 1.42rem;
+  }
+
+  .tool-intro {
+    font-size: 0.92rem;
+    line-height: 1.55;
+  }
+
+  .pyro-state-text {
+    font-size: 1.28rem;
+  }
+
+  .channel-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .channel-button {
+    min-height: 64px;
+  }
+
+  .pyro-fire-button {
+    min-height: 68px;
   }
 }
 
