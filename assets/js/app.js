@@ -16,6 +16,10 @@ document.addEventListener("DOMContentLoaded", () => {
     initializePyroTeamSync();
   }
 
+  if (typeof initializePyroGateWorkflow === "function") {
+    initializePyroGateWorkflow();
+  }
+
   // Optional fancy tilt effect (only on desktop with mouse)
   initializePanelTilt();
 });
