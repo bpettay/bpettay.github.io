@@ -53,7 +53,7 @@
   top: calc(0.5rem + 154px);
   z-index: 18;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5rem;
   padding: 0.55rem;
   border-radius: 16px;
@@ -158,6 +158,154 @@
   margin-bottom: 0.25rem;
 }
 
+.activity-chat-dock {
+  position: fixed;
+  left: 50%;
+  bottom: 0.75rem;
+  transform: translateX(-50%);
+  z-index: 40;
+  width: min(calc(100% - 1.25rem), 980px);
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.72rem;
+  border-radius: 18px;
+  border: 1px solid rgba(120, 255, 190, 0.16);
+  background: linear-gradient(180deg, rgba(8, 12, 12, 0.97), rgba(4, 5, 7, 0.97));
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+}
+
+.activity-dock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.activity-dock-header div {
+  min-width: 0;
+  display: grid;
+  gap: 0.1rem;
+}
+
+.activity-dock-header span {
+  color: var(--ink-soft);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.activity-dock-header strong {
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+
+.activity-dock-toggle {
+  min-height: 36px;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+}
+
+.persistent-activity-log {
+  display: grid;
+  gap: 0.45rem;
+  max-height: 168px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.activity-message {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.58rem 0.65rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.activity-message span {
+  color: var(--ink-soft);
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.activity-message strong {
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 500;
+  line-height: 1.32;
+}
+
+.activity-message.chat {
+  border-color: rgba(120, 255, 190, 0.16);
+  background: rgba(20, 45, 32, 0.18);
+}
+
+.activity-message.system {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.activity-chat-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.55rem;
+}
+
+.activity-chat-form input {
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.activity-chat-form button {
+  min-height: 48px;
+  padding: 0.45rem 0.9rem;
+  border-radius: 14px;
+  border: 1px solid rgba(120, 255, 190, 0.24);
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(120, 255, 190, 0.18), rgba(20, 45, 32, 0.34));
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.activity-chat-dock.collapsed {
+  width: min(calc(100% - 1.25rem), 540px);
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.activity-chat-dock.collapsed .persistent-activity-log,
+.activity-chat-dock.collapsed .activity-chat-form {
+  display: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+body:has(.activity-chat-dock) {
+  padding-bottom: 15rem;
+}
+
 @media (max-width: 980px) {
   .pyro-sticky-status {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -208,6 +356,28 @@
     background: rgba(7, 9, 11, 0.92);
     backdrop-filter: blur(14px);
   }
+
+  .activity-chat-dock {
+    bottom: 0.45rem;
+    width: min(calc(100% - 0.7rem), 720px);
+    padding: 0.55rem;
+  }
+
+  .persistent-activity-log {
+    max-height: 128px;
+  }
+
+  .activity-chat-form {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-chat-form button {
+    width: 100%;
+  }
+
+  body:has(.activity-chat-dock) {
+    padding-bottom: 16.5rem;
+  }
 }
 
 @media (max-width: 420px) {
@@ -222,5 +392,9 @@
   .pyro-gate-nav-button {
     min-width: 0;
     width: 100%;
+  }
+
+  .activity-dock-header strong {
+    font-size: 0.84rem;
   }
 }
