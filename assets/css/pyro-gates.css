@@ -1,0 +1,226 @@
+.pyro-sticky-status {
+  position: sticky;
+  top: calc(0.5rem + 64px);
+  z-index: 20;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) repeat(4, minmax(0, 0.72fr));
+  gap: 0.55rem;
+  padding: 0.7rem;
+  border: 1px solid rgba(120, 255, 190, 0.16);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(10, 18, 14, 0.96), rgba(5, 7, 8, 0.96));
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
+}
+
+.sticky-status-tile {
+  min-width: 0;
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.58rem 0.62rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sticky-status-tile span {
+  color: var(--ink-soft);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sticky-status-tile strong {
+  color: var(--ink);
+  font-size: 0.84rem;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.sticky-status-tile.primary {
+  border-color: rgba(120, 255, 190, 0.2);
+  background: rgba(20, 45, 32, 0.26);
+}
+
+.sticky-status-tile.hold {
+  border-color: rgba(255, 76, 65, 0.34);
+  background: rgba(125, 18, 12, 0.26);
+}
+
+.pyro-gate-tabs {
+  position: sticky;
+  top: calc(0.5rem + 154px);
+  z-index: 18;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0.55rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(7, 9, 11, 0.92);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.26);
+  backdrop-filter: blur(14px);
+}
+
+.pyro-gate-tab {
+  min-height: 58px;
+  display: grid;
+  gap: 0.18rem;
+  align-content: center;
+  justify-items: start;
+  padding: 0.56rem 0.62rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  text-align: left;
+  touch-action: manipulation;
+}
+
+.pyro-gate-tab strong {
+  color: var(--ink);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pyro-gate-tab span {
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.pyro-gate-tab.active {
+  border-color: rgba(120, 255, 190, 0.24);
+  background: rgba(20, 45, 32, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.pyro-gate-tab.complete {
+  border-color: rgba(56, 214, 99, 0.22);
+}
+
+.pyro-gate-tab.complete::after {
+  content: "Complete";
+  color: #aaffbb;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pyro-gate-panel {
+  display: none;
+}
+
+.pyro-gate-panel.active {
+  display: grid;
+}
+
+.pyro-gate-panel[data-gate-panel="overview"].active {
+  gap: var(--space-3);
+}
+
+.pyro-gate-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.pyro-gate-nav-button {
+  min-height: 54px;
+  min-width: 120px;
+  padding: 0.65rem 0.9rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--ink);
+  background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04));
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.pyro-gate-nav-button.primary {
+  border-color: rgba(120, 255, 190, 0.24);
+  background: linear-gradient(180deg, rgba(120, 255, 190, 0.18), rgba(20, 45, 32, 0.34));
+}
+
+.pyro-gate-nav-button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.pyro-gate-panel .channel-header,
+.pyro-gate-panel .team-sync-header {
+  margin-bottom: 0.25rem;
+}
+
+@media (max-width: 980px) {
+  .pyro-sticky-status {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    top: calc(0.5rem + 92px);
+  }
+
+  .pyro-gate-tabs {
+    top: calc(0.5rem + 230px);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .pyro-sticky-status {
+    position: sticky;
+    top: 0.25rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 0.55rem;
+  }
+
+  .sticky-status-tile {
+    padding: 0.5rem;
+  }
+
+  .sticky-status-tile strong {
+    font-size: 0.78rem;
+  }
+
+  .pyro-gate-tabs {
+    position: sticky;
+    top: 8.7rem;
+    grid-template-columns: 1fr;
+    max-height: 46vh;
+    overflow: auto;
+  }
+
+  .pyro-gate-tab {
+    min-height: 52px;
+  }
+
+  .pyro-gate-footer {
+    position: sticky;
+    bottom: 0.5rem;
+    z-index: 16;
+    padding: 0.55rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    background: rgba(7, 9, 11, 0.92);
+    backdrop-filter: blur(14px);
+  }
+}
+
+@media (max-width: 420px) {
+  .pyro-sticky-status {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sticky-status-tile span {
+    font-size: 0.58rem;
+  }
+
+  .pyro-gate-nav-button {
+    min-width: 0;
+    width: 100%;
+  }
+}
