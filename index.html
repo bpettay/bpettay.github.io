@@ -42,9 +42,9 @@
   </style>
 
   <!-- Styles -->
-  <link rel="stylesheet" href="./assets/css/style.css?v=20260709-layout2" />
+  <link rel="stylesheet" href="./assets/css/style.css?v=20260709-pyro2" />
   <link rel="stylesheet" href="./assets/css/home.css?v=20260709-layout2" />
-  <link rel="stylesheet" href="./assets/css/tools.css?v=20260709-pyro1" />
+  <link rel="stylesheet" href="./assets/css/tools.css?v=20260709-pyro2" />
 </head>
 
 <body>
@@ -243,20 +243,20 @@
     <section class="tool-card surface pyro-card">
       <div class="tool-header pyro-header">
         <div>
-          <p class="tool-label">Simulation Interface</p>
+          <p class="tool-label">Control Interface Concept</p>
           <h2>Remote Ignition Controller</h2>
           <p class="tool-intro">
-            A non-operational controller concept that demonstrates lockouts, deliberate state changes,
-            simulated continuity checks, and clear operator feedback without connecting to hardware.
+            A mobile-first controller layout with cue selection, interlock sequencing,
+            continuity status, command state feedback, and an operator event log.
           </p>
         </div>
-        <span class="sim-badge">Simulation Only</span>
+        <span class="sim-badge">Panel Concept</span>
       </div>
 
-      <div id="pyro-controls" class="pyro-console" aria-label="Simulated remote ignition controller">
+      <div id="pyro-controls" class="pyro-console" aria-label="Remote ignition controller interface concept">
         <section class="pyro-panel pyro-status-panel">
           <div>
-            <p class="tool-label">Controller State</p>
+            <p class="tool-label">System Status</p>
             <p id="pyroStateText" class="pyro-state-text">Safe / locked out</p>
           </div>
           <div class="pyro-status-lights" aria-label="System status lights">
@@ -268,49 +268,49 @@
 
         <section class="pyro-grid">
           <div class="pyro-panel">
-            <p class="tool-label">Safety Chain</p>
+            <p class="tool-label">Safety Interlocks</p>
             <div class="safety-stack">
               <label class="safety-row">
                 <input id="simMasterPower" type="checkbox" />
                 <span>
-                  <strong>Master power enabled</strong>
-                  <small>First deliberate control step.</small>
+                  <strong>Master Power</strong>
+                  <small>Primary enable state for the panel.</small>
                 </span>
               </label>
               <label class="safety-row">
                 <input id="simTrainingMode" type="checkbox" checked />
                 <span>
-                  <strong>Training mode locked on</strong>
-                  <small>Interface remains simulation-only.</small>
+                  <strong>Controller Enabled</strong>
+                  <small>Software-side controller state.</small>
                 </span>
               </label>
               <label class="safety-row">
                 <input id="simSupervisorKey" type="checkbox" />
                 <span>
-                  <strong>Supervisor key simulated</strong>
-                  <small>Intentional authorization step.</small>
+                  <strong>Key Enable</strong>
+                  <small>Deliberate authorization step.</small>
                 </span>
               </label>
               <label class="safety-row">
                 <input id="simZoneClear" type="checkbox" />
                 <span>
-                  <strong>Area clear confirmed</strong>
-                  <small>Required before simulated arming.</small>
+                  <strong>Area Clear</strong>
+                  <small>Final condition before arming.</small>
                 </span>
               </label>
             </div>
           </div>
 
           <div class="pyro-panel command-panel">
-            <p class="tool-label">Command Controls</p>
-            <button id="simContinuityBtn" class="pyro-button secondary" type="button">Run Simulated Continuity Check</button>
-            <button id="simArmBtn" class="pyro-button arm" type="button" disabled>Arm Simulation</button>
-            <button id="simDisarmBtn" class="pyro-button secondary" type="button">Disarm / Reset Safe</button>
+            <p class="tool-label">Fire Control</p>
+            <button id="simContinuityBtn" class="pyro-button secondary" type="button">Test Continuity</button>
+            <button id="simArmBtn" class="pyro-button arm" type="button" disabled>Arm</button>
+            <button id="simDisarmBtn" class="pyro-button secondary" type="button">Disarm / Safe</button>
             <button id="simFireBtn" class="pyro-fire-button" type="button" disabled>
-              Simulated Fire Command
+              Fire Selected Cue
             </button>
             <p class="pyro-fine-print">
-              This button only writes to the on-page event log. It does not transmit, connect, or control anything.
+              The interface records panel actions locally for display and testing.
             </p>
           </div>
         </section>
@@ -318,8 +318,8 @@
         <section class="pyro-panel">
           <div class="channel-header">
             <div>
-              <p class="tool-label">Cue Channels</p>
-              <h3>12-channel simulation bank</h3>
+              <p class="tool-label">Cue Matrix</p>
+              <h3>12-channel bank</h3>
             </div>
             <button id="simScrambleBtn" class="pyro-button compact" type="button">Randomize Continuity</button>
           </div>
@@ -344,7 +344,7 @@
   <script src="./assets/js/converter-data.js?v=20260709-layout2"></script>
   <script src="./assets/js/navigation.js?v=20260709-layout2"></script>
   <script src="./assets/js/converter.js?v=20260709-layout2"></script>
-  <script src="./assets/js/pyro-sim.js?v=20260709-pyro1"></script>
-  <script src="./assets/js/app.js?v=20260709-pyro1"></script>
+  <script src="./assets/js/pyro-sim.js?v=20260709-pyro2"></script>
+  <script src="./assets/js/app.js?v=20260709-pyro2"></script>
 </body>
 </html>
