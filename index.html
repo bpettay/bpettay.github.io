@@ -1,253 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- ===============================
-    Basic Meta
-  ================================ -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta
-    name="description"
-    content="Brock Pettay's engineering site with practical tools, project work, and a clean professional presentation."
-  />
-
-  <!-- ===============================
-    Title + Favicon
-  ================================ -->
+  <meta name="description" content="Brock Pettay's engineering site with practical tools, project work, and a clean professional presentation." />
+  
   <title>Brock | Engineering</title>
   <link rel="icon" type="image/png" href="./Favicon.png" />
-
-  <!-- ===============================
-    Fonts
-  ================================ -->
+  
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0066cc">
+  
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-    rel="stylesheet"
-  />
-
-  <!-- ===============================
-    Styles
-  ================================ -->
-  <link rel="stylesheet" href="./assets/css/style.css?v=20260423a" />
-  <link rel="stylesheet" href="./assets/css/home.css?v=20260423a" />
-  <link rel="stylesheet" href="./assets/css/tools.css?v=20260423a" />
-
-  <!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0066cc">
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js');
-    });
-  }
-</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="./assets/css/style.css?v=20250709" />
+  <link rel="stylesheet" href="./assets/css/home.css?v=20250709" />
+  <link rel="stylesheet" href="./assets/css/tools.css?v=20250709" />
 </head>
-
 <body>
-  <!-- ===============================
-    Navigation
-  ================================ -->
+  <!-- Navigation -->
   <nav class="nav" aria-label="Primary">
     <div class="nav-left">
-      <img
-        src="./assets/img/bp-monogram.png"
-        alt="Brock Pettay monogram"
-        class="logo"
-      />
+      <img src="./assets/img/bp-monogram.png" alt="Brock Pettay monogram" class="logo" />
       <span class="site-name">Brock Pettay</span>
     </div>
-
     <div class="nav-right">
       <button class="nav-link active" data-page="home" type="button">Home</button>
       <button class="nav-link" data-page="tools" type="button">Tools</button>
-      <a
-        class="nav-link nav-link-anchor"
-        href="./assets/pdf/brock-pettay-resume.pdf"
-        target="_blank"
-        rel="noopener"
-      >
-        Resume
-      </a>
+      <a class="nav-link nav-link-anchor" href="./assets/pdf/brock-pettay-resume.pdf" target="_blank" rel="noopener">Resume</a>
     </div>
   </nav>
 
-  <!-- ===============================
-    Home Page
-  ================================ -->
-  <main id="home" class="page active" data-page-label="Home">
-    <section class="hero surface">
-      <div class="hero-main">
-        <p class="eyebrow">Mechanical Engineering</p>
-        <h1>Brock Pettay</h1>
-        <p class="hero-text">
-          Mechanical engineering work, practical tools, and project documentation
-          organized to be easy to scan and easy to use.
-        </p>
-      </div>
+  <!-- Pages will be here (home, tools, etc.) -->
 
-      <div class="hero-links">
-        <button class="cta-button" type="button" data-page-target="tools">Open Tools</button>
-        <a
-          class="cta-button secondary"
-          href="./assets/pdf/brock-pettay-resume.pdf"
-          target="_blank"
-          rel="noopener"
-        >
-          View Resume
-        </a>
-      </div>
-    </section>
-
-    <section class="home-grid">
-      <section class="home-section surface intro-section">
-        <div class="section-heading">
-          <p class="section-label">About</p>
-          <h2>Simple and useful.</h2>
-        </div>
-        <p>
-          I’m Brock Pettay, a mechanical engineering student focused on practical
-          engineering work, testing, design, and problem solving. This site is a
-          straightforward place for tools, project material, and professional information.
-        </p>
-      </section>
-
-      <section class="home-section surface quick-section">
-        <div class="section-heading">
-          <p class="section-label">Quick Access</p>
-          <h2>Find things quickly.</h2>
-        </div>
-        <div class="quick-list">
-          <article class="quick-item">
-            <h3>Tools</h3>
-            <p>Engineering utilities for fast day-to-day reference and conversion.</p>
-          </article>
-          <article class="quick-item">
-            <h3>Projects</h3>
-            <p>Selected technical work and documentation as the site expands.</p>
-          </article>
-          <article class="quick-item">
-            <h3>Resume</h3>
-            <p>Professional background and supporting material in one place.</p>
-          </article>
-        </div>
-      </section>
-    </section>
-
-    <section class="home-section surface roadmap-section">
-      <div class="section-heading">
-        <p class="section-label">Roadmap</p>
-        <h2>What belongs here next.</h2>
-      </div>
-      <div class="roadmap-list">
-        <article class="roadmap-item">
-          <span class="roadmap-status">Now</span>
-          <div>
-            <h3>Core Site Structure</h3>
-            <p>Keep the site readable, minimal, and easy to extend without adding clutter.</p>
-          </div>
-        </article>
-
-        <article class="roadmap-item">
-          <span class="roadmap-status">Next</span>
-          <div>
-            <h3>Practical Tools</h3>
-            <p>Add references and calculators that are actually useful in projects and shop work.</p>
-          </div>
-        </article>
-
-        <article class="roadmap-item">
-          <span class="roadmap-status">Later</span>
-          <div>
-            <h3>Project Documentation</h3>
-            <p>Add selected engineering projects in a format that stays clean and easy to navigate.</p>
-          </div>
-        </article>
-      </div>
-    </section>
-  </main>
-
-  <!-- ===============================
-    Tools Page
-  ================================ -->
-  <main id="tools" class="page" data-page-label="Tools">
-    <section class="tool-card compact-tool-card surface">
-      <div class="tool-header compact-tool-header">
-        <div>
-          <p class="tool-label">Tool</p>
-          <h2>Unit Converter</h2>
-          <p class="tool-intro">
-            Fast engineering conversions with direct input and clear output.
-          </p>
-        </div>
-      </div>
-
-      <div class="compact-converter-layout">
-        <div class="compact-query-top">
-          <input
-            id="queryInput"
-            type="text"
-            placeholder="10 in to mm"
-            autocomplete="off"
-          />
-        </div>
-
-        <div id="previewPanel" class="preview-panel compact-preview-panel">
-          <p id="previewSummary" class="preview-summary">No request previewed yet.</p>
-          <p id="previewFactor" class="preview-factor">Conversion factor will appear here.</p>
-        </div>
-
-        <p id="queryStatus" class="query-status compact-query-status">
-          Live preview updates as you type.
-        </p>
-      </div>
-
-      <div class="tool-grid compact-tool-grid">
-        <div class="field-group">
-          <label for="category">Category</label>
-          <select id="category"></select>
-        </div>
-
-        <div class="field-group">
-          <label for="inputValue">Value</label>
-          <input id="inputValue" type="number" step="any" value="1" />
-        </div>
-
-        <div class="field-group">
-          <label for="fromUnit">From</label>
-          <select id="fromUnit"></select>
-        </div>
-
-        <div class="field-group">
-          <label for="toUnit">To</label>
-          <select id="toUnit"></select>
-        </div>
-      </div>
-
-      <div class="compact-results-grid">
-        <div class="result-panel compact-result-panel">
-          <p class="result-label">Result</p>
-          <p id="resultValue" class="result-value">—</p>
-          <p id="resultFormula" class="result-formula">Enter a value or type a request.</p>
-          <p id="resultFactor" class="result-factor">Conversion factor: —</p>
-        </div>
-
-        <div class="related-panel compact-related-panel">
-          <p class="result-label">Related Units</p>
-          <div id="relatedResults" class="related-results compact-related-results"></div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- ===============================
-    Scripts
-  ================================ -->
-  <script src="./assets/js/converter-data.js?v=20260421f"></script>
-  <script src="./assets/js/navigation.js?v=20260421f"></script>
-  <script src="./assets/js/converter.js?v=20260421f"></script>
-  <script src="./assets/js/app.js?v=20260421f"></script>
+  <!-- Scripts -->
+  <script src="./assets/js/app.js?v=20250709"></script>
 </body>
+</html>
 </html>
