@@ -103,7 +103,7 @@ button {
 .nav {
   position: sticky;
   top: var(--space-3);
-  z-index: 10;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -116,6 +116,47 @@ button {
   background: rgba(8, 8, 8, 0.86);
   box-shadow: var(--shadow);
   backdrop-filter: blur(14px);
+  transition:
+    transform 0.24s ease,
+    padding 0.22s ease,
+    opacity 0.22s ease,
+    border-radius 0.22s ease,
+    background 0.22s ease;
+}
+
+.nav.nav-compact {
+  transform: translateY(-0.35rem);
+  padding: 0.38rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(8, 8, 8, 0.72);
+  opacity: 0.94;
+}
+
+.nav.nav-compact .logo {
+  width: 24px !important;
+  height: 24px !important;
+  max-width: 24px !important;
+  max-height: 24px !important;
+  flex-basis: 24px !important;
+  border-radius: 7px;
+}
+
+.nav.nav-compact .site-name {
+  font-size: 0.86rem;
+}
+
+.nav.nav-compact .nav-link,
+.nav.nav-compact .nav-link-anchor {
+  min-height: 30px;
+  padding: 0.32rem 0.58rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.nav.nav-hidden {
+  transform: translateY(-115%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .nav-left,
@@ -142,6 +183,7 @@ button {
   flex: 0 0 34px;
   object-fit: contain;
   border-radius: 9px;
+  transition: width 0.22s ease, height 0.22s ease, flex-basis 0.22s ease;
 }
 
 .site-name {
@@ -151,6 +193,7 @@ button {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: font-size 0.22s ease;
 }
 
 .nav-link,
@@ -168,7 +211,7 @@ button {
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, padding 0.22s ease, min-height 0.22s ease, font-size 0.22s ease;
 }
 
 .nav-link:hover,
@@ -222,6 +265,23 @@ button {
     padding: 0.75rem;
   }
 
+  .nav.nav-compact {
+    gap: 0.35rem;
+    padding: 0.38rem 0.5rem;
+    border-radius: 16px;
+  }
+
+  .nav.nav-compact .nav-left {
+    display: none;
+  }
+
+  .nav.nav-compact .nav-link,
+  .nav.nav-compact .nav-link-anchor {
+    min-height: 32px;
+    padding: 0.32rem 0.45rem;
+    font-size: 0.78rem;
+  }
+
   .nav-left,
   .nav-right {
     width: 100%;
@@ -235,6 +295,11 @@ button {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.5rem;
+  }
+
+  .nav.nav-compact .nav-right {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.35rem;
   }
 
   .nav-link,
@@ -258,6 +323,10 @@ button {
 
   .nav-right {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nav.nav-compact .nav-right {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .site-name {
