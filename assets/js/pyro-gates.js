@@ -10,16 +10,10 @@ function initializePyroGateWorkflow() {
       sections: [".pyro-hmi-header"],
     },
     {
-      id: "interlocks",
-      title: "Interlocks",
-      subtitle: "Power + auth",
-      sections: [".pyro-grid"],
-    },
-    {
-      id: "cues",
-      title: "Cue Check",
-      subtitle: "Continuity + cue bank",
-      sections: ["#simChannelGrid"],
+      id: "checks",
+      title: "Checks",
+      subtitle: "Interlocks + cues",
+      sections: [".pyro-grid", "#simChannelGrid"],
     },
     {
       id: "fire",
@@ -212,8 +206,7 @@ function initializePyroGateWorkflow() {
     const readyState = document.getElementById("localZoneState")?.textContent?.trim().toUpperCase() === "READY";
 
     if (gateId === "overview") return true;
-    if (gateId === "interlocks") return Boolean(masterPower && controlEnable && keyEnable && areaClear);
-    if (gateId === "cues") return true;
+    if (gateId === "checks") return Boolean(masterPower && controlEnable && keyEnable && areaClear);
     if (gateId === "fire") return readyState || keyEnable;
     return false;
   }
