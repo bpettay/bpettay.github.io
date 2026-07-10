@@ -1,14 +1,20 @@
 .tool-card {
   border-radius: var(--radius);
   padding: var(--space-5);
+  min-width: 0;
 }
 
 .tool-header {
   display: flex;
-  align-items: start;
+  align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
   margin-bottom: var(--space-4);
+  min-width: 0;
+}
+
+.tool-header > * {
+  min-width: 0;
 }
 
 .tool-label {
@@ -23,10 +29,11 @@
 .tool-card h2 {
   margin: 0;
   color: var(--ink);
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
-  line-height: 1.02;
+  font-size: clamp(1.6rem, 4vw, 2.5rem);
+  line-height: 1.08;
   font-weight: 300;
   letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
 }
 
 .tool-intro {
@@ -39,7 +46,8 @@
 /* Converter Layout */
 .compact-converter-layout {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-4);
+  min-width: 0;
 }
 
 #queryInput {
@@ -48,6 +56,7 @@
 }
 
 .preview-panel {
+  min-width: 0;
   padding: var(--space-3) var(--space-4);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
@@ -64,6 +73,7 @@
   color: var(--ink-soft);
   line-height: 1.58;
   font-size: 0.92rem;
+  overflow-wrap: anywhere;
 }
 
 .preview-summary {
@@ -75,6 +85,7 @@
 .tool-grid {
   display: grid;
   gap: var(--space-3);
+  min-width: 0;
 }
 
 .compact-tool-grid {
@@ -85,17 +96,26 @@
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
+  min-width: 0;
+}
+
+.field-group label {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
 }
 
 /* Results */
 .compact-results-grid {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
   gap: var(--space-3);
+  align-items: start;
+  min-width: 0;
 }
 
 .result-panel,
 .related-panel {
+  min-width: 0;
   padding: var(--space-4);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -113,25 +133,40 @@
 .result-value {
   margin: 0;
   color: var(--ink);
-  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-size: clamp(1.75rem, 5vw, 2.8rem);
   font-weight: 400;
-  line-height: 1.02;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
 }
 
 /* Related */
 .related-results {
   display: grid;
   gap: var(--space-2);
+  min-width: 0;
 }
 
 .related-item {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   gap: var(--space-3);
+  min-width: 0;
   padding: var(--space-3);
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
+}
+
+.related-item-label,
+.related-item-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.related-item-value {
+  text-align: right;
+  color: var(--ink);
 }
 
 /* Responsive */
@@ -139,6 +174,7 @@
   .compact-tool-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
   .compact-results-grid {
     grid-template-columns: 1fr;
   }
@@ -149,15 +185,36 @@
   .compact-tool-card {
     padding: var(--space-4);
   }
+
+  .tool-header {
+    display: block;
+  }
+
   .compact-tool-grid {
     grid-template-columns: 1fr;
   }
+
   .result-value {
     font-size: 1.85rem;
   }
+
   .related-item {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .related-item-value {
+    text-align: left;
+  }
+}
+
+@media (max-width: 420px) {
+  .tool-card,
+  .compact-tool-card,
+  .result-panel,
+  .related-panel,
+  .preview-panel {
+    padding: var(--space-3);
   }
 }
 
