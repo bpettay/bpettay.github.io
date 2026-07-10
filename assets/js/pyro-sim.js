@@ -5,6 +5,9 @@ function initializePyroSimulator() {
   const channelGrid = document.getElementById("simChannelGrid");
   const eventLog = document.getElementById("simEventLog");
   const stateText = document.getElementById("pyroStateText");
+  const selectedCueText = document.getElementById("pyroSelectedCue");
+  const continuitySummaryText = document.getElementById("pyroContinuitySummary");
+  const continuityLamp = document.getElementById("continuityLamp");
 
   const masterPower = document.getElementById("simMasterPower");
   const trainingMode = document.getElementById("simTrainingMode");
@@ -49,6 +52,13 @@ function initializePyroSimulator() {
     return channels.find((channel) => channel.selected) || channels[0];
   }
 
+  function continuityCounts() {
+    return {
+      good: channels.filter((channel) => channel.continuity && !channel.used).length,
+      open: channels.filter((channel) => !channel.continuity && !channel.used).length,
+    };
+  }
+
   function readyToArm() {
     return Boolean(
       masterPower?.checked &&
@@ -81,6 +91,7 @@ function initializePyroSimulator() {
       ].filter(Boolean).join(" ");
 
       button.innerHTML = `
+        <span class="channel-lamp" aria-hidden="true"></span>
         <span class="channel-number">${String(channel.id).padStart(2, "0")}</span>
         <span class="channel-status">${channel.used ? "Used" : channel.continuity ? "Good" : "Open"}</span>
       `;
@@ -101,6 +112,7 @@ function initializePyroSimulator() {
   function render() {
     const ready = readyToArm();
     const selected = selectedChannel();
+    const counts = continuityCounts();
 
     if (armed && !ready) {
       armed = false;
@@ -118,6 +130,18 @@ function initializePyroSimulator() {
       setLights("safe");
     }
 
+    if (selectedCueText) {
+      selectedCueText.textContent = `CUE ${String(selected.id).padStart(2, "0")}`;
+    }
+
+    if (continuitySummaryText) {
+      continuitySummaryText.textContent = `${counts.good} GOOD / ${counts.open} OPEN`;
+    }
+
+    if (continuityLamp) {
+      continuityLamp.classList.toggle("active", counts.good > 0);
+    }
+
     armBtn.disabled = !ready || armed;
     fireBtn.disabled = !armed || !selected.continuity || selected.used;
 
@@ -125,9 +149,8 @@ function initializePyroSimulator() {
   }
 
   function runContinuityCheck() {
-    const available = channels.filter((channel) => channel.continuity && !channel.used).length;
-    const open = channels.filter((channel) => !channel.continuity && !channel.used).length;
-    addLog(`Continuity check: ${available} good, ${open} open.`);
+    const counts = continuityCounts();
+    addLog(`Continuity check complete: ${counts.good} good, ${counts.open} open.`);
     render();
   }
 
