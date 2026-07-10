@@ -8,6 +8,9 @@ function initializePyroSimulator() {
     TC: { name: "Test Crew", code: "7342" },
   };
 
+  const zoneLabels = ["A", "B", "C"];
+  const cuesPerZone = 10;
+
   const channelGrid = document.getElementById("simChannelGrid");
   const eventLog = document.getElementById("simEventLog");
   const stateText = document.getElementById("pyroStateText");
@@ -37,12 +40,24 @@ function initializePyroSimulator() {
   const authSubmitBtn = document.getElementById("authSubmitBtn");
   const authKeypadButtons = document.querySelectorAll("[data-auth-key]");
 
-  const channels = Array.from({ length: 12 }, (_, index) => ({
-    id: index + 1,
-    continuity: ![4, 9].includes(index + 1),
-    used: false,
-    selected: index === 0,
-  }));
+  const openCueKeys = new Set(["A-04", "B-09", "C-07"]);
+  const channels = zoneLabels.flatMap((zone, zoneIndex) =>
+    Array.from({ length: cuesPerZone }, (_, index) => {
+      const cue = index + 1;
+      const id = zoneIndex * cuesPerZone + cue;
+      const key = `${zone}-${String(cue).padStart(2, "0")}`;
+
+      return {
+        id,
+        zone,
+        cue,
+        key,
+        continuity: !openCueKeys.has(key),
+        used: false,
+        selected: id === 1,
+      };
+    })
+  );
 
   let armed = false;
   let authorizedOperator = null;
@@ -51,6 +66,12 @@ function initializePyroSimulator() {
   let cueWheelStatus = null;
   let cueWheelPrev = null;
   let cueWheelNext = null;
+
+  function cueLabel(channel, compact = false) {
+    if (!channel) return compact ? "A-01" : "Zone A / Cue 01";
+    const cue = String(channel.cue).padStart(2, "0");
+    return compact ? `${channel.zone}-${cue}` : `Zone ${channel.zone} / Cue ${cue}`;
+  }
 
   function addLog(message) {
     if (!eventLog) return;
@@ -83,7 +104,7 @@ function initializePyroSimulator() {
     });
 
     if (announce) {
-      addLog(`Cue ${String(target.id).padStart(2, "0")} selected.`);
+      addLog(`${cueLabel(target)} selected.`);
     }
 
     render();
@@ -91,8 +112,9 @@ function initializePyroSimulator() {
 
   function nudgeSelectedCue(direction) {
     const selected = selectedChannel();
-    const nextId = ((selected.id - 1 + direction + channels.length) % channels.length) + 1;
-    selectChannelById(nextId);
+    const selectedIndex = channels.findIndex((channel) => channel.id === selected.id);
+    const nextIndex = (selectedIndex + direction + channels.length) % channels.length;
+    selectChannelById(channels[nextIndex].id);
   }
 
   function continuityCounts() {
@@ -184,6 +206,94 @@ function initializePyroSimulator() {
     render();
   }
 
+  function injectCueBankStyles() {
+    if (document.getElementById("zoneCueBankStyles")) return;
+
+    const style = document.createElement("style");
+    style.id = "zoneCueBankStyles";
+    style.textContent = `
+      .channel-grid.zone-cue-bank {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+      }
+
+      .cue-zone-group {
+        display: grid;
+        gap: 0.55rem;
+        min-width: 0;
+      }
+
+      .cue-zone-title {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin: 0;
+        color: var(--ink);
+        font-size: 0.86rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .cue-zone-title span {
+        color: var(--ink-soft);
+        font-size: 0.68rem;
+        font-weight: 500;
+      }
+
+      .zone-channel-grid {
+        display: grid;
+        grid-template-columns: repeat(10, minmax(0, 1fr));
+        gap: 0.45rem;
+      }
+
+      .zone-channel-grid .channel-button {
+        min-height: 64px;
+        padding: 0.5rem 0.35rem;
+        border-radius: 12px;
+      }
+
+      .zone-channel-grid .channel-number {
+        font-size: 0.98rem;
+      }
+
+      .channel-zone-label {
+        color: var(--ink-soft);
+        font-size: 0.58rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      @media (max-width: 980px) {
+        .zone-channel-grid {
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 420px) {
+        .zone-channel-grid {
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 0.38rem;
+        }
+
+        .zone-channel-grid .channel-button {
+          min-height: 58px;
+          padding: 0.42rem 0.25rem;
+        }
+      }
+    `;
+
+    document.head.appendChild(style);
+  }
+
+  function updateCueBankHeader() {
+    const channelPanel = channelGrid?.closest(".pyro-panel");
+    const title = channelPanel?.querySelector(".channel-header h3");
+    if (title) title.textContent = "3 zones / 30-channel matrix";
+  }
+
   function injectCueWheel() {
     const commandPanel = document.querySelector(".command-panel");
     if (!commandPanel || document.getElementById("cueQuickSelect")) return;
@@ -195,11 +305,11 @@ function initializePyroSimulator() {
     wheel.innerHTML = `
       <div class="cue-quick-header">
         <span>Quick Select</span>
-        <strong>Selected Cue</strong>
+        <strong>Zone / Cue</strong>
       </div>
       <div class="cue-wheel-row">
         <button id="cueWheelPrev" class="cue-wheel-step" type="button" aria-label="Previous cue">‹</button>
-        <select id="cueWheelSelect" class="cue-wheel-select" aria-label="Select cue to command"></select>
+        <select id="cueWheelSelect" class="cue-wheel-select" aria-label="Select zone and cue to command"></select>
         <button id="cueWheelNext" class="cue-wheel-step" type="button" aria-label="Next cue">›</button>
       </div>
       <p id="cueWheelStatus" class="cue-wheel-status">Cue status loading.</p>
@@ -217,8 +327,12 @@ function initializePyroSimulator() {
     cueWheelNext = document.getElementById("cueWheelNext");
 
     if (cueWheelSelect) {
-      cueWheelSelect.innerHTML = channels.map((channel) => `
-        <option value="${channel.id}">Cue ${String(channel.id).padStart(2, "0")}</option>
+      cueWheelSelect.innerHTML = zoneLabels.map((zone) => `
+        <optgroup label="Zone ${zone}">
+          ${channels.filter((channel) => channel.zone === zone).map((channel) => `
+            <option value="${channel.id}">${cueLabel(channel)}</option>
+          `).join("")}
+        </optgroup>
       `).join("");
 
       cueWheelSelect.addEventListener("change", () => {
@@ -238,7 +352,7 @@ function initializePyroSimulator() {
 
     if (cueWheelStatus) {
       const status = selected.used ? "Used" : selected.continuity ? "Continuity good" : "Continuity open";
-      cueWheelStatus.textContent = `Cue ${String(selected.id).padStart(2, "0")} · ${status}`;
+      cueWheelStatus.textContent = `${cueLabel(selected)} · ${status}`;
       cueWheelStatus.classList.toggle("good", selected.continuity && !selected.used);
       cueWheelStatus.classList.toggle("open", !selected.continuity && !selected.used);
       cueWheelStatus.classList.toggle("used", selected.used);
@@ -248,29 +362,45 @@ function initializePyroSimulator() {
   function renderChannels() {
     if (!channelGrid) return;
 
+    channelGrid.classList.add("zone-cue-bank");
     channelGrid.innerHTML = "";
 
-    channels.forEach((channel) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = [
-        "channel-button",
-        channel.selected ? "selected" : "",
-        channel.continuity ? "continuity-good" : "continuity-open",
-        channel.used ? "channel-used" : "",
-      ].filter(Boolean).join(" ");
-
-      button.innerHTML = `
-        <span class="channel-lamp" aria-hidden="true"></span>
-        <span class="channel-number">${String(channel.id).padStart(2, "0")}</span>
-        <span class="channel-status">${channel.used ? "Used" : channel.continuity ? "Good" : "Open"}</span>
+    zoneLabels.forEach((zone) => {
+      const zoneChannels = channels.filter((channel) => channel.zone === zone);
+      const zoneGroup = document.createElement("section");
+      zoneGroup.className = "cue-zone-group";
+      zoneGroup.innerHTML = `
+        <h4 class="cue-zone-title">Zone ${zone}<span>10 cues</span></h4>
+        <div class="zone-channel-grid"></div>
       `;
 
-      button.addEventListener("click", () => {
-        selectChannelById(channel.id);
+      const zoneGrid = zoneGroup.querySelector(".zone-channel-grid");
+
+      zoneChannels.forEach((channel) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = [
+          "channel-button",
+          channel.selected ? "selected" : "",
+          channel.continuity ? "continuity-good" : "continuity-open",
+          channel.used ? "channel-used" : "",
+        ].filter(Boolean).join(" ");
+
+        button.innerHTML = `
+          <span class="channel-lamp" aria-hidden="true"></span>
+          <span class="channel-number">${String(channel.cue).padStart(2, "0")}</span>
+          <span class="channel-zone-label">Zone ${channel.zone}</span>
+          <span class="channel-status">${channel.used ? "Used" : channel.continuity ? "Good" : "Open"}</span>
+        `;
+
+        button.addEventListener("click", () => {
+          selectChannelById(channel.id);
+        });
+
+        zoneGrid.appendChild(button);
       });
 
-      channelGrid.appendChild(button);
+      channelGrid.appendChild(zoneGroup);
     });
   }
 
@@ -285,7 +415,7 @@ function initializePyroSimulator() {
     }
 
     if (armed) {
-      stateText.textContent = `ARMED / CUE ${String(selected.id).padStart(2, "0")}`;
+      stateText.textContent = `ARMED / ${cueLabel(selected, true)}`;
       setLights("armed");
     } else if (ready) {
       stateText.textContent = "READY TO ARM";
@@ -296,7 +426,7 @@ function initializePyroSimulator() {
     }
 
     if (selectedCueText) {
-      selectedCueText.textContent = `CUE ${String(selected.id).padStart(2, "0")}`;
+      selectedCueText.textContent = cueLabel(selected, true);
     }
 
     if (continuitySummaryText) {
@@ -322,7 +452,7 @@ function initializePyroSimulator() {
 
   function runContinuityCheck() {
     const counts = continuityCounts();
-    addLog(`Continuity check complete: ${counts.good} good, ${counts.open} open.`);
+    addLog(`Continuity check complete: ${counts.good} good, ${counts.open} open across ${zoneLabels.length} zones.`);
     render();
   }
 
@@ -382,7 +512,7 @@ function initializePyroSimulator() {
   armBtn?.addEventListener("click", () => {
     if (!readyToArm()) return;
     armed = true;
-    addLog(`Controller armed by ${authorizedOperator?.name || "authorized operator"}.`);
+    addLog(`Controller armed by ${authorizedOperator?.name || "authorized operator"} for ${cueLabel(selectedChannel())}.`);
     render();
   });
 
@@ -398,7 +528,7 @@ function initializePyroSimulator() {
 
     selected.used = true;
     armed = false;
-    addLog(`Cue ${String(selected.id).padStart(2, "0")} command recorded by ${authorizedOperator?.name || "operator"}.`);
+    addLog(`${cueLabel(selected)} command recorded by ${authorizedOperator?.name || "operator"}.`);
     render();
   });
 
@@ -408,7 +538,7 @@ function initializePyroSimulator() {
         channel.continuity = Math.random() > 0.22;
       }
     });
-    addLog("Continuity state randomized for display testing.");
+    addLog("Continuity state randomized across all zones for display testing.");
     render();
   });
 
@@ -417,7 +547,9 @@ function initializePyroSimulator() {
     addLog("Event log cleared.");
   });
 
+  injectCueBankStyles();
+  updateCueBankHeader();
   injectCueWheel();
-  addLog("Controller interface initialized in SAFE.");
+  addLog("Controller interface initialized in SAFE with 3 zones / 30 cues.");
   render();
 }
