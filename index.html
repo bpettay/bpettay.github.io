@@ -18,10 +18,16 @@
     Title + Favicon + PWA
   ================================ -->
   <title>Brock | Engineering</title>
-  <link rel="icon" type="image/png" href="./Favicon.png?v=20260710-cache4" />
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json?v=20260710-cache4" />
+  <script>
+    window.siteAssetVersion = Date.now().toString(36);
+    window.versionedAsset = function versionedAsset(path) {
+      return `${path}${path.includes("?") ? "&" : "?"}v=${window.siteAssetVersion}`;
+    };
+
+    document.write(`<link rel="icon" type="image/png" href="${window.versionedAsset("./Favicon.png")}" />`);
+    document.write(`<link rel="manifest" href="${window.versionedAsset("manifest.json")}" />`);
+  </script>
   <meta name="theme-color" content="#0066cc" />
 
   <!-- Fonts -->
@@ -45,23 +51,27 @@
   </style>
 
   <!-- Styles -->
-  <link rel="stylesheet" href="./assets/css/style.css?v=20260710-cache4" />
-  <link rel="stylesheet" href="./assets/css/home.css?v=20260710-cache4" />
-  <link rel="stylesheet" href="./assets/css/tools.css?v=20260710-cache4" />
-  <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260710-cache4" />
-  <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260710-cache4" />
-  <link rel="stylesheet" href="./assets/css/pyro-gates.css?v=20260710-cache4" />
+  <script>
+    [
+      "./assets/css/style.css",
+      "./assets/css/home.css",
+      "./assets/css/tools.css",
+      "./assets/css/pyro-auth.css",
+      "./assets/css/pyro-team.css",
+      "./assets/css/pyro-gates.css",
+    ].forEach((href) => {
+      document.write(`<link rel="stylesheet" href="${window.versionedAsset(href)}" />`);
+    });
+  </script>
 </head>
 
 <body>
   <!-- Navigation -->
   <nav class="nav" aria-label="Primary">
     <div class="nav-left">
-      <img
-        src="./assets/img/bp-monogram.png?v=20260710-cache4"
-        alt="Brock Pettay monogram"
-        class="logo"
-      />
+      <script>
+        document.write(`<img src="${window.versionedAsset("./assets/img/bp-monogram.png")}" alt="Brock Pettay monogram" class="logo" />`);
+      </script>
       <span class="site-name">Brock Pettay</span>
     </div>
 
@@ -508,12 +518,18 @@
   </dialog>
 
   <!-- Scripts -->
-  <script src="./assets/js/converter-data.js?v=20260710-cache4"></script>
-  <script src="./assets/js/navigation.js?v=20260710-cache4"></script>
-  <script src="./assets/js/converter.js?v=20260710-cache4"></script>
-  <script src="./assets/js/pyro-sim.js?v=20260710-cache4"></script>
-  <script src="./assets/js/pyro-team.js?v=20260710-cache4"></script>
-  <script src="./assets/js/pyro-gates.js?v=20260710-cache4"></script>
-  <script src="./assets/js/app.js?v=20260710-cache4"></script>
+  <script>
+    [
+      "./assets/js/converter-data.js",
+      "./assets/js/navigation.js",
+      "./assets/js/converter.js",
+      "./assets/js/pyro-sim.js",
+      "./assets/js/pyro-team.js",
+      "./assets/js/pyro-gates.js",
+      "./assets/js/app.js",
+    ].forEach((src) => {
+      document.write(`<script src="${window.versionedAsset(src)}"><\/script>`);
+    });
+  </script>
 </body>
 </html>
