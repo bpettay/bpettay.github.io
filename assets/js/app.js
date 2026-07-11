@@ -50,7 +50,7 @@ function initializeHomeDashboard() {
   if (!home) return;
 
   home.innerHTML = `
-    <section class="home-dashboard-only" aria-label="Personal dashboard">
+    <section class="home-dashboard-only simplified-dashboard" aria-label="Personal dashboard">
       <article class="home-clock-card dashboard-card surface">
         <span class="dashboard-label">Local Time</span>
         <strong id="homeClockTime">--:--</strong>
@@ -70,7 +70,7 @@ function initializeHomeDashboard() {
         </div>
       </article>
 
-      <article class="dashboard-card surface quick-actions-card">
+      <article class="dashboard-card surface quick-actions-card shortcuts-card">
         <div class="section-heading">
           <p class="section-label">Shortcuts</p>
           <h2>Open</h2>
@@ -86,30 +86,6 @@ function initializeHomeDashboard() {
             <strong>Console</strong>
             <small>Login, cue bank, activity log.</small>
           </button>
-        </div>
-      </article>
-
-      <article class="dashboard-card surface site-status-card">
-        <div class="section-heading">
-          <p class="section-label">System</p>
-          <h2>Status</h2>
-        </div>
-        <div class="status-tile-grid compact-status-grid">
-          <div class="status-tile">
-            <span>Assets</span>
-            <strong>Fresh load</strong>
-            <small>CSS/JS refresh every page load.</small>
-          </div>
-          <div class="status-tile">
-            <span>Pyro</span>
-            <strong>Login required</strong>
-            <small>Actions attach to active operator.</small>
-          </div>
-          <div class="status-tile">
-            <span>Cues</span>
-            <strong>30 total</strong>
-            <small>3 zones × 10 cues.</small>
-          </div>
         </div>
       </article>
     </section>
