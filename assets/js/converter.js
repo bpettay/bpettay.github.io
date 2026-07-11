@@ -15,6 +15,23 @@ function initializeConverter() {
   const requiredElements = [categoryEl, fromUnitEl, toUnitEl, inputValueEl, resultValueEl, resultFormulaEl, resultFactorEl, relatedResultsEl];
   if (requiredElements.some((element) => !element) || typeof unitData !== "object") return;
 
+  const equationPreviewEl = document.createElement("div");
+  equationPreviewEl.id = "equationPreview";
+  equationPreviewEl.setAttribute("aria-live", "polite");
+  equationPreviewEl.style.marginTop = "0.85rem";
+  equationPreviewEl.style.padding = "0.85rem 1rem";
+  equationPreviewEl.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+  equationPreviewEl.style.borderRadius = "10px";
+  equationPreviewEl.style.background = "rgba(0, 0, 0, 0.24)";
+  equationPreviewEl.style.color = "var(--ink)";
+  equationPreviewEl.style.fontFamily = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+  equationPreviewEl.style.fontSize = "0.9rem";
+  equationPreviewEl.style.lineHeight = "1.55";
+  equationPreviewEl.style.overflowWrap = "anywhere";
+
+  const previewPanel = previewSummaryEl?.closest(".preview-panel");
+  if (previewPanel && !document.getElementById("equationPreview")) previewPanel.appendChild(equationPreviewEl);
+
   const getUnits = (categoryName) => {
     const info = unitData[categoryName];
     return Array.isArray(info.units) ? info.units : Object.keys(info.units);
@@ -175,6 +192,86 @@ function initializeConverter() {
     return `1 ${from} = ${formatNumber(factor)} ${to}`;
   }
 
+  function setEquationPreview(lines, state = "neutral") {
+    if (!equationPreviewEl) return;
+    equationPreviewEl.replaceChildren();
+
+    lines.forEach((line, index) => {
+      const row = document.createElement("div");
+      row.textContent = line;
+      if (index === 0) {
+        row.style.color = state === "error" ? "#ffaaa3" : state === "partial" ? "#ffd48a" : "var(--ink)";
+        row.style.fontWeight = "600";
+      } else {
+        row.style.color = "var(--ink-soft)";
+      }
+      equationPreviewEl.appendChild(row);
+    });
+  }
+
+  function describePartialQuery(query) {
+    const trimmed = query.trim();
+    const numberMatch = trimmed.match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)(?:\s+(.*))?$/i);
+
+    if (!numberMatch) {
+      return {
+        state: "error",
+        lines: ["Interpretation: waiting for a numeric value", `Raw input: ${trimmed}`]
+      };
+    }
+
+    const valueText = numberMatch[1];
+    const remainder = (numberMatch[2] || "").trim();
+    const connectorMatch = remainder.match(/^(.*?)(?:\s+)(to|in|as|into)(?:\s+(.*))?$/i);
+
+    if (!remainder) {
+      return {
+        state: "partial",
+        lines: [
+          `Interpretation: value = ${valueText}`,
+          "Waiting for: source unit, conversion word, and destination unit"
+        ]
+      };
+    }
+
+    if (!connectorMatch) {
+      const sourceMatches = findUnitMatches(remainder);
+      const source = sourceMatches[0];
+      return {
+        state: "partial",
+        lines: [
+          `Interpretation: value = ${valueText} | from = ${source ? source.unit : remainder}`,
+          source ? `Detected category: ${source.category}` : "Source unit is not recognized yet",
+          "Waiting for: to / in / as / into, followed by a destination unit"
+        ]
+      };
+    }
+
+    const fromRaw = connectorMatch[1].trim();
+    const operator = connectorMatch[2].toLowerCase();
+    const toRaw = (connectorMatch[3] || "").trim();
+    const fromMatch = findUnitMatches(fromRaw)[0];
+
+    if (!toRaw) {
+      return {
+        state: "partial",
+        lines: [
+          `Interpretation: value = ${valueText} | from = ${fromMatch ? fromMatch.unit : fromRaw} | operator = ${operator}`,
+          fromMatch ? `Detected category: ${fromMatch.category}` : "Source unit is not recognized yet",
+          "Waiting for: destination unit"
+        ]
+      };
+    }
+
+    return {
+      state: "error",
+      lines: [
+        `Interpretation: value = ${valueText} | from = ${fromRaw} | operator = ${operator} | to = ${toRaw}`,
+        "The complete unit pair does not currently resolve to one category"
+      ]
+    };
+  }
+
   function renderRelatedConversions(value, category, from, to) {
     relatedResultsEl.innerHTML = "";
     const commonUnits = unitData[category].common || getUnits(category);
@@ -231,7 +328,7 @@ function initializeConverter() {
 
     const value = Number.parseFloat(match[1]);
     const resolved = resolveQueryUnits(match[2], match[3]);
-    return Number.isFinite(value) && resolved ? { value, ...resolved } : null;
+    return Number.isFinite(value) && resolved ? { value, operator: query.match(/\s+(to|in|as|into)\s+/i)?.[1]?.toLowerCase() || "to", ...resolved } : null;
   }
 
   function updateLivePreview() {
@@ -242,14 +339,20 @@ function initializeConverter() {
       previewSummaryEl.textContent = "Try a quick conversion like “10 in to mm”.";
       previewFactorEl.textContent = "The converter supports mechanical, thermal, fluid, electrical, data, and everyday units.";
       queryStatusEl.textContent = "";
+      setEquationPreview([
+        "Interpretation preview",
+        "Start typing a value, source unit, and destination unit"
+      ]);
       return;
     }
 
     const parsed = parseQuickQuery(query);
     if (!parsed) {
-      previewSummaryEl.textContent = "I couldn’t match that unit pair.";
+      const partial = describePartialQuery(query);
+      previewSummaryEl.textContent = partial.state === "error" ? "I couldn’t fully resolve that conversion yet." : "Reading your conversion…";
       previewFactorEl.textContent = "Use: value unit to unit. Multi-word units work, for example: 30 mpg US to L/100 km.";
-      queryStatusEl.textContent = "Check the unit spelling or select the category manually.";
+      queryStatusEl.textContent = partial.state === "error" ? "Check the unit spelling or continue typing." : "Partial query detected.";
+      setEquationPreview(partial.lines, partial.state);
       return;
     }
 
@@ -260,9 +363,15 @@ function initializeConverter() {
     inputValueEl.value = parsed.value;
 
     const converted = renderConversion(parsed.value, parsed.category, parsed.from, parsed.to);
+    const equation = getFormulaText(parsed.value, parsed.category, parsed.from, parsed.to, converted);
     previewSummaryEl.textContent = `${formatNumber(parsed.value)} ${parsed.from} = ${formatNumber(converted)} ${parsed.to}`;
     previewFactorEl.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
     queryStatusEl.textContent = `Detected category: ${parsed.category}`;
+    setEquationPreview([
+      `Interpretation: value = ${formatNumber(parsed.value)} | from = ${parsed.from} | operator = ${parsed.operator} | to = ${parsed.to}`,
+      `Category: ${parsed.category}`,
+      `Equation: ${equation}`
+    ]);
   }
 
   function addSwapButton() {
@@ -307,4 +416,5 @@ function initializeConverter() {
   setDefaultUnits();
   addSwapButton();
   convertValue();
+  updateLivePreview();
 }
