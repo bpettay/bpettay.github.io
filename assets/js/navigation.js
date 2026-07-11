@@ -26,9 +26,32 @@ function initializeNavigation() {
     }
   }
 
-  function openPage(target, options = {}) {
-    const { updateUrl = true, replaceState = false } = options;
+  async function canOpenPage(pageId) {
+    if (pageId !== "pyro") return true;
+
+    if (typeof window.isPyroOperatorLoggedIn === "function" && window.isPyroOperatorLoggedIn()) {
+      return true;
+    }
+
+    if (typeof window.requestPyroOperatorLogin !== "function") {
+      return false;
+    }
+
+    const session = await window.requestPyroOperatorLogin("Operator login required before opening Pyro.");
+    return Boolean(session);
+  }
+
+  async function openPage(target, options = {}) {
+    const { updateUrl = true, replaceState = false, force = false } = options;
     const pageId = normalizePage(target);
+
+    if (!force && !(await canOpenPage(pageId))) {
+      const fallbackPage = normalizePage(document.querySelector(".page.active")?.id || defaultPage);
+      if (updateUrl) {
+        syncUrl(fallbackPage, true);
+      }
+      return fallbackPage;
+    }
 
     tabs.forEach((tab) => {
       const isActive = tab.dataset.page === pageId;
