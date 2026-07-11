@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- ===============================
-    Basic Meta
-  ================================ -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -13,10 +10,6 @@
     name="description"
     content="Brock Pettay's engineering site with practical tools, project work, and a clean professional presentation."
   />
-
-  <!-- ===============================
-    Title + Favicon + PWA
-  ================================ -->
   <title>Brock | Engineering</title>
 
   <script>
@@ -24,13 +17,11 @@
     window.versionedAsset = function versionedAsset(path) {
       return `${path}${path.includes("?") ? "&" : "?"}v=${window.siteAssetVersion}`;
     };
-
     document.write(`<link rel="icon" type="image/png" href="${window.versionedAsset("./Favicon.png")}" />`);
     document.write(`<link rel="manifest" href="${window.versionedAsset("manifest.json")}" />`);
   </script>
   <meta name="theme-color" content="#0066cc" />
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -38,7 +29,6 @@
     rel="stylesheet"
   />
 
-  <!-- Critical layout guard: prevents the monogram from flashing at full image size. -->
   <style>
     .logo {
       width: 34px !important;
@@ -50,7 +40,6 @@
     }
   </style>
 
-  <!-- Styles -->
   <script>
     [
       "./assets/css/style.css",
@@ -66,7 +55,6 @@
 </head>
 
 <body>
-  <!-- Navigation -->
   <nav class="nav" aria-label="Primary">
     <div class="nav-left">
       <script>
@@ -79,39 +67,21 @@
       <button class="nav-link active" data-page="home" type="button">Home</button>
       <button class="nav-link" data-page="tools" type="button">Tools</button>
       <button class="nav-link" data-page="pyro" type="button">Pyro</button>
-      <a
-        class="nav-link nav-link-anchor"
-        href="./assets/pdf/brock-pettay-resume.pdf"
-        target="_blank"
-        rel="noopener"
-      >
-        Resume
-      </a>
     </div>
   </nav>
 
-  <!-- Home Page -->
   <main id="home" class="page active" data-page-label="Home">
     <section class="hero surface">
       <div class="hero-main">
         <p class="eyebrow">Mechanical Engineering</p>
         <h1>Brock Pettay</h1>
         <p class="hero-text">
-          Mechanical engineering work, practical tools, and project documentation
-          organized to be easy to scan and easy to use.
+          Mechanical engineering work, practical tools, and project documentation organized to be easy to scan and easy to use.
         </p>
       </div>
 
       <div class="hero-links">
         <button class="cta-button" type="button" data-page-target="tools">Open Tools</button>
-        <a
-          class="cta-button secondary"
-          href="./assets/pdf/brock-pettay-resume.pdf"
-          target="_blank"
-          rel="noopener"
-        >
-          View Resume
-        </a>
       </div>
     </section>
 
@@ -122,9 +92,8 @@
           <h2>Simple and useful.</h2>
         </div>
         <p>
-          I’m Brock Pettay, a mechanical engineer focused on practical
-          engineering work, testing, design, and problem solving. This site is a
-          straightforward place for tools, project material, and professional information.
+          I’m Brock Pettay, a mechanical engineer focused on practical engineering work, testing, design, and problem solving.
+          This site is a straightforward place for tools, project material, and technical ideas.
         </p>
       </section>
 
@@ -142,10 +111,6 @@
           <article class="quick-item">
             <h3>Projects</h3>
             <p>Selected technical work and documentation as the site expands.</p>
-          </article>
-          <article class="quick-item">
-            <h3>Resume</h3>
-            <p>Professional background and supporting material in one place.</p>
           </article>
         </div>
       </section>
@@ -185,29 +150,20 @@
     </section>
   </main>
 
-  <!-- Tools Page -->
   <main id="tools" class="page" data-page-label="Tools" hidden>
     <section class="tool-card compact-tool-card surface">
       <div class="tool-header">
         <div>
           <p class="tool-label">Converter</p>
           <h2>Engineering Unit Converter</h2>
-          <p class="tool-intro">
-            Convert common engineering units quickly. Type a value manually or use the quick query box.
-          </p>
+          <p class="tool-intro">Convert common engineering units quickly. Type a value manually or use the quick query box.</p>
         </div>
       </div>
 
       <div class="compact-converter-layout">
         <div class="field-group">
           <label for="queryInput">Quick query</label>
-          <input
-            id="queryInput"
-            type="text"
-            inputmode="text"
-            autocomplete="off"
-            placeholder="Example: 10 in to mm"
-          />
+          <input id="queryInput" type="text" inputmode="text" autocomplete="off" placeholder="Example: 10 in to mm" />
           <div class="preview-panel" aria-live="polite">
             <p id="previewSummary" class="preview-summary">Try a quick conversion like “10 in to mm”.</p>
             <p id="previewFactor" class="preview-factor">The standard converter below is ready to use.</p>
@@ -220,17 +176,14 @@
             <label for="category">Category</label>
             <select id="category"></select>
           </div>
-
           <div class="field-group">
             <label for="inputValue">Value</label>
             <input id="inputValue" type="number" inputmode="decimal" value="1" step="any" />
           </div>
-
           <div class="field-group">
             <label for="fromUnit">From</label>
             <select id="fromUnit"></select>
           </div>
-
           <div class="field-group">
             <label for="toUnit">To</label>
             <select id="toUnit"></select>
@@ -244,7 +197,6 @@
             <p id="resultFormula" class="result-formula">Enter a value to convert.</p>
             <p id="resultFactor" class="result-factor"></p>
           </section>
-
           <section class="related-panel">
             <p class="tool-label">Related</p>
             <div id="relatedResults" class="related-results"></div>
@@ -254,7 +206,6 @@
     </section>
   </main>
 
-  <!-- Pyro Page -->
   <main id="pyro" class="page" data-page-label="Pyro" hidden>
     <section class="tool-card surface pyro-card">
       <div class="tool-header pyro-header">
@@ -262,8 +213,7 @@
           <p class="tool-label">Operator Interface Concept</p>
           <h2>Remote Ignition Controller</h2>
           <p class="tool-intro">
-            Mobile-first HMI-style control panel with physical-feeling switches,
-            illuminated status indicators, cue selection, and team coordination feedback.
+            Mobile-first HMI-style control panel with physical-feeling switches, illuminated status indicators, cue selection, and team coordination feedback.
           </p>
         </div>
         <span class="sim-badge">HMI Concept</span>
@@ -281,22 +231,10 @@
           </div>
 
           <div class="lamp-bank" aria-label="System status lights">
-            <div class="lamp-widget">
-              <span class="lamp-label">Safe</span>
-              <span class="pilot-light safe active" data-status-light="safe"></span>
-            </div>
-            <div class="lamp-widget">
-              <span class="lamp-label">Ready</span>
-              <span class="pilot-light ready" data-status-light="ready"></span>
-            </div>
-            <div class="lamp-widget">
-              <span class="lamp-label">Armed</span>
-              <span class="pilot-light armed" data-status-light="armed"></span>
-            </div>
-            <div class="lamp-widget">
-              <span class="lamp-label">Cont</span>
-              <span class="pilot-light continuity" id="continuityLamp"></span>
-            </div>
+            <div class="lamp-widget"><span class="lamp-label">Safe</span><span class="pilot-light safe active" data-status-light="safe"></span></div>
+            <div class="lamp-widget"><span class="lamp-label">Ready</span><span class="pilot-light ready" data-status-light="ready"></span></div>
+            <div class="lamp-widget"><span class="lamp-label">Armed</span><span class="pilot-light armed" data-status-light="armed"></span></div>
+            <div class="lamp-widget"><span class="lamp-label">Cont</span><span class="pilot-light continuity" id="continuityLamp"></span></div>
           </div>
         </section>
 
@@ -314,26 +252,9 @@
               <p class="tool-label">Local Terminal</p>
               <h4>Device assignment</h4>
               <div class="team-form-grid">
-                <label for="teamDeviceName">
-                  Device Name
-                  <input id="teamDeviceName" type="text" value="Zone A Phone" />
-                </label>
-                <label for="teamAssignedZone">
-                  Assigned Zone
-                  <select id="teamAssignedZone">
-                    <option value="A">Zone A</option>
-                    <option value="B">Zone B</option>
-                  </select>
-                </label>
-                <label for="teamRole">
-                  Role
-                  <select id="teamRole">
-                    <option>Zone Operator</option>
-                    <option>Show Lead</option>
-                    <option>Safety Watch</option>
-                    <option>Continuity Tech</option>
-                  </select>
-                </label>
+                <label for="teamDeviceName">Device Name<input id="teamDeviceName" type="text" value="Zone A Phone" /></label>
+                <label for="teamAssignedZone">Assigned Zone<select id="teamAssignedZone"><option value="A">Zone A</option><option value="B">Zone B</option><option value="C">Zone C</option></select></label>
+                <label for="teamRole">Role<select id="teamRole"><option>Zone Operator</option><option>Show Lead</option><option>Safety Watch</option><option>Continuity Tech</option></select></label>
               </div>
             </div>
 
@@ -341,22 +262,8 @@
               <p class="tool-label">Zone Status</p>
               <h4>Shared status board</h4>
               <div class="zone-status-stack">
-                <article class="zone-status-card">
-                  <span class="zone-letter" data-local-zone>A</span>
-                  <div>
-                    <strong>Local Zone <span data-local-zone>A</span></strong>
-                    <small id="localZoneDetail">Zone A Phone / Zone Operator</small>
-                  </div>
-                  <span id="localZoneState" class="zone-state">Safe</span>
-                </article>
-                <article class="zone-status-card">
-                  <span class="zone-letter" data-peer-zone>B</span>
-                  <div>
-                    <strong>Peer Zone <span data-peer-zone>B</span></strong>
-                    <small id="peerZoneDetail">Peer Zone B / simulated standby</small>
-                  </div>
-                  <span id="peerZoneState" class="zone-state">Safe</span>
-                </article>
+                <article class="zone-status-card"><span class="zone-letter" data-local-zone>A</span><div><strong>Local Zone <span data-local-zone>A</span></strong><small id="localZoneDetail">Zone A Phone / Zone Operator</small></div><span id="localZoneState" class="zone-state">Safe</span></article>
+                <article class="zone-status-card"><span class="zone-letter" data-peer-zone>B</span><div><strong>Peer Zone <span data-peer-zone>B</span></strong><small id="peerZoneDetail">Peer Zone B / simulated standby</small></div><span id="peerZoneState" class="zone-state">Safe</span></article>
               </div>
             </div>
 
@@ -378,77 +285,23 @@
         <section class="pyro-grid">
           <div class="pyro-panel">
             <p class="tool-label">Interlocks</p>
-
             <div class="switch-bank">
-              <label class="selector-widget">
-                <span class="selector-text">
-                  <strong>Master Power</strong>
-                  <small>Main controller enable</small>
-                </span>
-                <span class="selector-switch">
-                  <input id="simMasterPower" type="checkbox" />
-                  <span class="selector-slider"></span>
-                </span>
-              </label>
-
-              <label class="selector-widget">
-                <span class="selector-text">
-                  <strong>Control Enable</strong>
-                  <small>Panel active state</small>
-                </span>
-                <span class="selector-switch">
-                  <input id="simTrainingMode" type="checkbox" checked />
-                  <span class="selector-slider"></span>
-                </span>
-              </label>
-
-              <label class="selector-widget" id="keyEnableWidget">
-                <span class="selector-text">
-                  <strong>Key Enable</strong>
-                  <small id="operatorStatusText">Operator login required</small>
-                </span>
-                <span class="selector-switch">
-                  <input id="simSupervisorKey" type="checkbox" />
-                  <span class="selector-slider"></span>
-                </span>
-              </label>
-
-              <label class="selector-widget">
-                <span class="selector-text">
-                  <strong>Area Clear</strong>
-                  <small>Final permissive condition</small>
-                </span>
-                <span class="selector-switch">
-                  <input id="simZoneClear" type="checkbox" />
-                  <span class="selector-slider"></span>
-                </span>
-              </label>
+              <label class="selector-widget"><span class="selector-text"><strong>Master Power</strong><small>Main controller enable</small></span><span class="selector-switch"><input id="simMasterPower" type="checkbox" /><span class="selector-slider"></span></span></label>
+              <label class="selector-widget"><span class="selector-text"><strong>Control Enable</strong><small>Panel active state</small></span><span class="selector-switch"><input id="simTrainingMode" type="checkbox" checked /><span class="selector-slider"></span></span></label>
+              <label class="selector-widget" id="keyEnableWidget"><span class="selector-text"><strong>Key Enable</strong><small id="operatorStatusText">Operator login required</small></span><span class="selector-switch"><input id="simSupervisorKey" type="checkbox" /><span class="selector-slider"></span></span></label>
+              <label class="selector-widget"><span class="selector-text"><strong>Area Clear</strong><small>Final permissive condition</small></span><span class="selector-switch"><input id="simZoneClear" type="checkbox" /><span class="selector-slider"></span></span></label>
             </div>
           </div>
 
           <div class="pyro-panel command-panel">
             <p class="tool-label">Command Station</p>
-
             <div class="pushbutton-grid">
-              <button id="simContinuityBtn" class="hmi-pushbutton neutral" type="button">
-                <span>Test</span>
-              </button>
-              <button id="simArmBtn" class="hmi-pushbutton amber" type="button" disabled>
-                <span>Arm</span>
-              </button>
-              <button id="simDisarmBtn" class="hmi-pushbutton neutral" type="button">
-                <span>Disarm</span>
-              </button>
+              <button id="simContinuityBtn" class="hmi-pushbutton neutral" type="button"><span>Test</span></button>
+              <button id="simArmBtn" class="hmi-pushbutton amber" type="button" disabled><span>Arm</span></button>
+              <button id="simDisarmBtn" class="hmi-pushbutton neutral" type="button"><span>Disarm</span></button>
             </div>
-
-            <button id="simFireBtn" class="hmi-fire-button" type="button" disabled>
-              <span class="fire-cap">Fire</span>
-              <span class="fire-sub">Selected Cue</span>
-            </button>
-
-            <p class="pyro-fine-print">
-              Interface actions are recorded locally for visual feedback and testing.
-            </p>
+            <button id="simFireBtn" class="hmi-fire-button" type="button" disabled><span class="fire-cap">Fire</span><span class="fire-sub">Selected Cue</span></button>
+            <p class="pyro-fine-print">Interface actions are recorded locally for visual feedback and testing.</p>
           </div>
         </section>
 
@@ -488,14 +341,7 @@
       </div>
 
       <div class="auth-display">
-        <label for="authOperator">
-          Operator
-          <select id="authOperator">
-            <option value="BP">Brock Pettay</option>
-            <option value="LD">Lead Operator</option>
-            <option value="TC">Test Crew</option>
-          </select>
-        </label>
+        <label for="authOperator">Operator<select id="authOperator"><option value="BP">Brock Pettay</option><option value="LD">Lead Operator</option><option value="TC">Test Crew</option></select></label>
         <div id="authPinDisplay" class="auth-pin-display">----</div>
         <p id="authStatus" class="auth-status">Select operator and enter PIN.</p>
       </div>
@@ -517,7 +363,6 @@
     </div>
   </dialog>
 
-  <!-- Scripts -->
   <script>
     [
       "./assets/js/converter-data.js",
