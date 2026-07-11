@@ -12,93 +12,68 @@ function initializeConverter() {
   const previewSummaryEl = document.getElementById("previewSummary");
   const previewFactorEl = document.getElementById("previewFactor");
 
-  const requiredElements = [
-    categoryEl,
-    fromUnitEl,
-    toUnitEl,
-    inputValueEl,
-    resultValueEl,
-    resultFormulaEl,
-    resultFactorEl,
-    relatedResultsEl
-  ];
+  const requiredElements = [categoryEl, fromUnitEl, toUnitEl, inputValueEl, resultValueEl, resultFormulaEl, resultFactorEl, relatedResultsEl];
+  if (requiredElements.some((element) => !element) || typeof unitData !== "object") return;
 
-  if (requiredElements.some((element) => !element) || typeof unitData !== "object") {
-    return;
-  }
+  const getUnits = (categoryName) => {
+    const info = unitData[categoryName];
+    return Array.isArray(info.units) ? info.units : Object.keys(info.units);
+  };
 
-  function normalizeUnit(unit) {
-    if (!unit) return "";
-    const cleaned = unit
+  function canonicalText(value) {
+    return String(value || "")
       .trim()
+      .replace(/μ/g, "µ")
       .replace(/²/g, "^2")
       .replace(/³/g, "^3")
-      .replace(/⋅/g, "·")
-      .replace(/-/g, "·")
+      .replace(/[⋅×]/g, "·")
+      .replace(/degrees?\s*/gi, "°")
+      .replace(/\s+/g, " ")
       .toLowerCase();
-
-    const directMatch = findUnitByLowercase(cleaned);
-    if (directMatch) return directMatch.unit;
-
-    if (typeof unitAliases === "object" && unitAliases[cleaned]) {
-      return unitAliases[cleaned].unit;
-    }
-
-    const aliases = {
-      inches: "in",
-      inch: "in",
-      '"': "in",
-      feet: "ft",
-      foot: "ft",
-      "'": "ft",
-      pounds: "lb",
-      pound: "lb",
-      lbs: "lb",
-      ounces: "oz",
-      ounce: "oz",
-      gallons: "gal",
-      gallon: "gal",
-      liter: "L",
-      liters: "L",
-      litre: "L",
-      litres: "L",
-      millimeter: "mm",
-      millimeters: "mm",
-      centimeter: "cm",
-      centimeters: "cm",
-      meter: "m",
-      meters: "m",
-      kilometer: "km",
-      kilometers: "km",
-      fahrenheit: "F",
-      celsius: "C",
-      kelvin: "K",
-      rpm: "rev",
-      horsepower: "hp"
-    };
-
-    return aliases[cleaned] || unit.trim();
   }
 
-  function findUnitByLowercase(unitLower) {
-    for (const [categoryName, info] of Object.entries(unitData)) {
-      const units = info.type === "temperature" ? info.units : Object.keys(info.units);
-      const unit = units.find((candidate) => candidate.toLowerCase() === unitLower);
-      if (unit) return { category: categoryName, unit };
+  function comparableUnit(value) {
+    return canonicalText(value)
+      .replace(/\^2/g, "²")
+      .replace(/\^3/g, "³")
+      .replace(/\s*·\s*/g, "·")
+      .replace(/\s*\/\s*/g, "/")
+      .replace(/\s*\(\s*/g, "(")
+      .replace(/\s*\)\s*/g, ")");
+  }
+
+  function findUnitMatches(rawUnit) {
+    const normalized = comparableUnit(rawUnit);
+    const matches = [];
+
+    Object.entries(unitData).forEach(([category, info]) => {
+      getUnits(category).forEach((unit) => {
+        if (comparableUnit(unit) === normalized) matches.push({ category, unit });
+      });
+    });
+
+    const alias = typeof unitAliases === "object" ? unitAliases[canonicalText(rawUnit)] : null;
+    if (alias && !matches.some((match) => match.category === alias.category && match.unit === alias.unit)) {
+      matches.unshift(alias);
     }
+
+    return matches;
+  }
+
+  function resolveQueryUnits(fromRaw, toRaw) {
+    const fromMatches = findUnitMatches(fromRaw);
+    const toMatches = findUnitMatches(toRaw);
+
+    for (const fromMatch of fromMatches) {
+      const toMatch = toMatches.find((candidate) => candidate.category === fromMatch.category);
+      if (toMatch) return { category: fromMatch.category, from: fromMatch.unit, to: toMatch.unit };
+    }
+
     return null;
-  }
-
-  function findCategoryForUnits(from, to) {
-    return Object.entries(unitData).find(([, info]) => {
-      const units = info.type === "temperature" ? info.units : Object.keys(info.units);
-      return units.includes(from) && units.includes(to);
-    })?.[0] || null;
   }
 
   function populateCategories() {
     categoryEl.innerHTML = "";
-
     Object.keys(unitData).forEach((group) => {
       const option = document.createElement("option");
       option.value = group;
@@ -111,10 +86,7 @@ function initializeConverter() {
     fromUnitEl.innerHTML = "";
     toUnitEl.innerHTML = "";
 
-    const info = unitData[categoryEl.value];
-    const units = info.type === "temperature" ? info.units : Object.keys(info.units);
-
-    units.forEach((unit) => {
+    getUnits(categoryEl.value).forEach((unit) => {
       const optFrom = document.createElement("option");
       optFrom.value = unit;
       optFrom.textContent = unit;
@@ -129,76 +101,87 @@ function initializeConverter() {
 
   function setDefaultUnits() {
     const defaults = defaultUnits[categoryEl.value];
-
-    if (defaults) {
-      fromUnitEl.value = defaults[0];
-      toUnitEl.value = defaults[1];
-    }
+    if (!defaults) return;
+    fromUnitEl.value = defaults[0];
+    toUnitEl.value = defaults[1];
   }
 
   function formatNumber(value) {
     if (!Number.isFinite(value)) return "Invalid";
+    if (Object.is(value, -0)) value = 0;
 
     const abs = Math.abs(value);
-    if (abs >= 1_000_000 || (abs > 0 && abs < 0.0001)) {
-      return value.toExponential(4);
-    }
+    if (abs >= 1e9 || (abs > 0 && abs < 1e-6)) return value.toExponential(6);
 
-    return Number(value).toFixed(4).replace(/\.?0+$/, "");
+    return new Intl.NumberFormat("en-US", {
+      maximumSignificantDigits: 10,
+      maximumFractionDigits: 8,
+      useGrouping: abs >= 10000
+    }).format(value);
+  }
+
+  function toCelsius(value, unit) {
+    if (unit === "°F") return (value - 32) * 5 / 9;
+    if (unit === "K") return value - 273.15;
+    if (unit === "°R") return (value - 491.67) * 5 / 9;
+    return value;
+  }
+
+  function fromCelsius(value, unit) {
+    if (unit === "°F") return value * 9 / 5 + 32;
+    if (unit === "K") return value + 273.15;
+    if (unit === "°R") return (value + 273.15) * 9 / 5;
+    return value;
+  }
+
+  function fuelEconomyToKmPerLiter(value, unit) {
+    if (unit === "mpg US") return value * 0.425143707430272;
+    if (unit === "mpg UK") return value * 0.354006189934647;
+    if (unit === "L/100 km") return value === 0 ? Infinity : 100 / value;
+    return value;
+  }
+
+  function kmPerLiterToFuelEconomy(value, unit) {
+    if (unit === "mpg US") return value / 0.425143707430272;
+    if (unit === "mpg UK") return value / 0.354006189934647;
+    if (unit === "L/100 km") return value === 0 ? Infinity : 100 / value;
+    return value;
   }
 
   function convertUnits(value, categoryName, from, to) {
     const info = unitData[categoryName];
+    if (from === to) return value;
 
-    if (info.type === "temperature") {
-      let celsius = value;
+    if (info.type === "temperature") return fromCelsius(toCelsius(value, from), to);
+    if (info.type === "fuelEconomy") return kmPerLiterToFuelEconomy(fuelEconomyToKmPerLiter(value, from), to);
 
-      if (from === "F") celsius = (value - 32) * 5 / 9;
-      if (from === "K") celsius = value - 273.15;
-
-      if (to === "F") return celsius * 9 / 5 + 32;
-      if (to === "K") return celsius + 273.15;
-
-      return celsius;
-    }
-
-    const fromFactor = info.units[from];
-    const toFactor = info.units[to];
-
-    return (value * fromFactor) / toFactor;
+    return (value * info.units[from]) / info.units[to];
   }
 
   function getFormulaText(value, category, from, to, converted) {
-    if (category === "Temperature") {
-      return `${formatNumber(value)} ${from} = ${formatNumber(converted)} ${to}`;
-    }
+    const info = unitData[category];
+    if (info.type === "temperature") return `${formatNumber(value)} ${from} = ${formatNumber(converted)} ${to} (absolute temperature scale conversion)`;
+    if (info.type === "fuelEconomy") return `${formatNumber(value)} ${from} = ${formatNumber(converted)} ${to} (distance-per-volume / volume-per-distance conversion)`;
 
-    const fromFactor = unitData[category].units[from];
-    const toFactor = unitData[category].units[to];
-
-    return `${formatNumber(value)} × (${fromFactor}) / (${toFactor}) = ${formatNumber(converted)} ${to}`;
+    return `${formatNumber(value)} ${from} × ${formatNumber(info.units[from] / info.units[to])} = ${formatNumber(converted)} ${to}`;
   }
 
   function getFactorText(category, from, to) {
-    if (category === "Temperature") {
-      return "Temperature conversions use an offset, not a single constant factor.";
-    }
+    const info = unitData[category];
+    if (info.type === "temperature") return "Temperature scales include an offset, so there is no single constant multiplier.";
+    if (info.type === "fuelEconomy" && (from === "L/100 km" || to === "L/100 km")) return "L/100 km is an inverse fuel-consumption scale; the conversion depends on the entered value.";
 
-    const fromFactor = unitData[category].units[from];
-    const toFactor = unitData[category].units[to];
-    const factor = fromFactor / toFactor;
-
+    const factor = convertUnits(1, category, from, to);
     return `1 ${from} = ${formatNumber(factor)} ${to}`;
   }
 
   function renderRelatedConversions(value, category, from, to) {
     relatedResultsEl.innerHTML = "";
-
-    const commonUnits = unitData[category].common || [];
-    const relatedUnits = commonUnits.filter((unit) => unit !== from && unit !== to);
+    const commonUnits = unitData[category].common || getUnits(category);
+    const relatedUnits = commonUnits.filter((unit) => unit !== from && unit !== to).slice(0, 6);
 
     if (!relatedUnits.length) {
-      relatedResultsEl.textContent = "No related conversions for this category.";
+      relatedResultsEl.textContent = "No additional units in this category.";
       return;
     }
 
@@ -206,30 +189,32 @@ function initializeConverter() {
       const converted = convertUnits(value, category, from, unit);
       const row = document.createElement("div");
       row.className = "related-item";
-      row.innerHTML = `
-        <span class="related-item-label">${formatNumber(value)} ${from} → ${unit}</span>
-        <span class="related-item-value">${formatNumber(converted)} ${unit}</span>
-      `;
+
+      const label = document.createElement("span");
+      label.className = "related-item-label";
+      label.textContent = `${formatNumber(value)} ${from} → ${unit}`;
+
+      const result = document.createElement("span");
+      result.className = "related-item-value";
+      result.textContent = `${formatNumber(converted)} ${unit}`;
+
+      row.append(label, result);
       relatedResultsEl.appendChild(row);
     });
   }
 
   function renderConversion(value, category, from, to) {
     const converted = convertUnits(value, category, from, to);
-
     resultValueEl.textContent = `${formatNumber(converted)} ${to}`;
     resultFormulaEl.textContent = getFormulaText(value, category, from, to, converted);
     resultFactorEl.textContent = getFactorText(category, from, to);
-
     renderRelatedConversions(value, category, from, to);
-
     return converted;
   }
 
   function convertValue() {
-    const raw = parseFloat(inputValueEl.value);
-
-    if (Number.isNaN(raw)) {
+    const raw = Number.parseFloat(inputValueEl.value);
+    if (!Number.isFinite(raw)) {
       resultValueEl.textContent = "—";
       resultFormulaEl.textContent = "Enter a valid numeric value.";
       resultFactorEl.textContent = "";
@@ -241,42 +226,30 @@ function initializeConverter() {
   }
 
   function parseQuickQuery(query) {
-    const match = query.trim().match(/^(-?\d+(?:\.\d+)?)\s*([^\s]+)\s+(?:to|in|as)\s+([^\s]+)$/i);
-
+    const match = query.trim().match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s+(.+?)\s+(?:to|in|as|into)\s+(.+)$/i);
     if (!match) return null;
 
     const value = Number.parseFloat(match[1]);
-    const from = normalizeUnit(match[2]);
-    const to = normalizeUnit(match[3]);
-    const category = findCategoryForUnits(from, to);
-
-    if (!Number.isFinite(value) || !category) {
-      return null;
-    }
-
-    return { value, from, to, category };
+    const resolved = resolveQueryUnits(match[2], match[3]);
+    return Number.isFinite(value) && resolved ? { value, ...resolved } : null;
   }
 
   function updateLivePreview() {
-    if (!queryInputEl || !previewSummaryEl || !previewFactorEl || !queryStatusEl) {
-      return;
-    }
-
+    if (!queryInputEl || !previewSummaryEl || !previewFactorEl || !queryStatusEl) return;
     const query = queryInputEl.value.trim();
 
     if (!query) {
       previewSummaryEl.textContent = "Try a quick conversion like “10 in to mm”.";
-      previewFactorEl.textContent = "The standard converter below is ready to use.";
+      previewFactorEl.textContent = "The converter supports mechanical, thermal, fluid, electrical, data, and everyday units.";
       queryStatusEl.textContent = "";
       return;
     }
 
     const parsed = parseQuickQuery(query);
-
     if (!parsed) {
-      previewSummaryEl.textContent = "I couldn’t read that conversion yet.";
-      previewFactorEl.textContent = "Use the format: value unit to unit. Example: 10 in to mm.";
-      queryStatusEl.textContent = "";
+      previewSummaryEl.textContent = "I couldn’t match that unit pair.";
+      previewFactorEl.textContent = "Use: value unit to unit. Multi-word units work, for example: 30 mpg US to L/100 km.";
+      queryStatusEl.textContent = "Check the unit spelling or select the category manually.";
       return;
     }
 
@@ -287,32 +260,51 @@ function initializeConverter() {
     inputValueEl.value = parsed.value;
 
     const converted = renderConversion(parsed.value, parsed.category, parsed.from, parsed.to);
-
     previewSummaryEl.textContent = `${formatNumber(parsed.value)} ${parsed.from} = ${formatNumber(converted)} ${parsed.to}`;
     previewFactorEl.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
     queryStatusEl.textContent = `Detected category: ${parsed.category}`;
   }
 
-  function bindEvents() {
-    categoryEl.addEventListener("change", () => {
-      updateUnits();
-      setDefaultUnits();
+  function addSwapButton() {
+    const grid = categoryEl.closest(".tool-grid");
+    if (!grid || document.getElementById("swapUnits")) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "field-group converter-swap-group";
+
+    const label = document.createElement("label");
+    label.textContent = "Direction";
+
+    const button = document.createElement("button");
+    button.id = "swapUnits";
+    button.type = "button";
+    button.className = "converter-swap-button";
+    button.textContent = "⇄ Swap units";
+    button.addEventListener("click", () => {
+      const previousFrom = fromUnitEl.value;
+      fromUnitEl.value = toUnitEl.value;
+      toUnitEl.value = previousFrom;
       convertValue();
     });
 
-    fromUnitEl.addEventListener("change", convertValue);
-    toUnitEl.addEventListener("change", convertValue);
-    inputValueEl.addEventListener("input", convertValue);
-
-    if (queryInputEl) {
-      queryInputEl.addEventListener("input", updateLivePreview);
-    }
+    wrapper.append(label, button);
+    grid.appendChild(wrapper);
   }
+
+  categoryEl.addEventListener("change", () => {
+    updateUnits();
+    setDefaultUnits();
+    convertValue();
+  });
+  fromUnitEl.addEventListener("change", convertValue);
+  toUnitEl.addEventListener("change", convertValue);
+  inputValueEl.addEventListener("input", convertValue);
+  if (queryInputEl) queryInputEl.addEventListener("input", updateLivePreview);
 
   populateCategories();
   categoryEl.value = "Length";
   updateUnits();
   setDefaultUnits();
-  bindEvents();
+  addSwapButton();
   convertValue();
 }
