@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Keep converter output concise and consistent.
   configureConverterPrecision();
+  removeResumeUI();
 
   // Initialize core features
   if (typeof initializeNavigation === "function") {
@@ -47,6 +48,19 @@ function configureConverterPrecision() {
   ThreeSigNumberFormat.supportedLocalesOf = NativeNumberFormat.supportedLocalesOf.bind(NativeNumberFormat);
   ThreeSigNumberFormat.__converterThreeSigFigs = true;
   Intl.NumberFormat = ThreeSigNumberFormat;
+}
+
+function removeResumeUI() {
+  document.querySelectorAll('a[href*="brock-pettay-resume.pdf"]').forEach((link) => {
+    link.remove();
+  });
+
+  document.querySelectorAll(".quick-item").forEach((item) => {
+    const heading = item.querySelector("h3")?.textContent?.trim().toLowerCase();
+    if (heading === "resume") {
+      item.remove();
+    }
+  });
 }
 
 function initializeGroupedUnitSelectors() {
