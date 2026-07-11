@@ -54,7 +54,7 @@ function initializePyroGateWorkflow() {
 
   const activityDock = document.createElement("aside");
   activityDock.id = "activityChatDock";
-  activityDock.className = "activity-chat-dock";
+  activityDock.className = "activity-chat-dock collapsed";
   activityDock.setAttribute("aria-label", "Persistent activity log and chat");
   activityDock.innerHTML = `
     <div class="activity-dock-header">
@@ -62,7 +62,7 @@ function initializePyroGateWorkflow() {
         <span>Live Activity</span>
         <strong>Operator Log + Chat</strong>
       </div>
-      <button id="activityDockToggle" class="activity-dock-toggle" type="button" aria-expanded="true">Minimize</button>
+      <button id="activityDockToggle" class="activity-dock-toggle" type="button" aria-expanded="false">Open</button>
     </div>
     <ol id="persistentActivityLog" class="persistent-activity-log" aria-live="polite"></ol>
     <form id="activityChatForm" class="activity-chat-form">
