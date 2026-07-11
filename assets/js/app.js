@@ -1,9 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Keep converter output concise and consistent.
   configureConverterPrecision();
-  removeResumeUI();
 
-  // Initialize core features
   if (typeof initializeNavigation === "function") {
     initializeNavigation();
   }
@@ -27,8 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initializeScrollHeader();
   initializeCompactPyroStatusBar();
-
-  // Optional fancy tilt effect (only on desktop with mouse)
   initializePanelTilt();
 });
 
@@ -40,7 +35,6 @@ function configureConverterPrecision() {
     const adjustedOptions = options.maximumSignificantDigits === 10
       ? { ...options, maximumSignificantDigits: 3 }
       : options;
-
     return new NativeNumberFormat(locales, adjustedOptions);
   }
 
@@ -48,19 +42,6 @@ function configureConverterPrecision() {
   ThreeSigNumberFormat.supportedLocalesOf = NativeNumberFormat.supportedLocalesOf.bind(NativeNumberFormat);
   ThreeSigNumberFormat.__converterThreeSigFigs = true;
   Intl.NumberFormat = ThreeSigNumberFormat;
-}
-
-function removeResumeUI() {
-  document.querySelectorAll('a[href*="brock-pettay-resume.pdf"]').forEach((link) => {
-    link.remove();
-  });
-
-  document.querySelectorAll(".quick-item").forEach((item) => {
-    const heading = item.querySelector("h3")?.textContent?.trim().toLowerCase();
-    if (heading === "resume") {
-      item.remove();
-    }
-  });
 }
 
 function initializeGroupedUnitSelectors() {
@@ -143,16 +124,12 @@ function initializeGroupedUnitSelectors() {
   }, true);
 
   categoryEl.addEventListener("change", () => {
-    queueMicrotask(() => {
-      rebuildSelectors(categoryEl.value, fromUnitEl.value, toUnitEl.value);
-    });
+    queueMicrotask(() => rebuildSelectors(categoryEl.value, fromUnitEl.value, toUnitEl.value));
   });
 
   if (queryInputEl) {
     queryInputEl.addEventListener("input", () => {
-      queueMicrotask(() => {
-        rebuildSelectors(categoryEl.value, fromUnitEl.value, toUnitEl.value);
-      });
+      queueMicrotask(() => rebuildSelectors(categoryEl.value, fromUnitEl.value, toUnitEl.value));
     });
   }
 }
@@ -275,10 +252,6 @@ function initializeCompactPyroStatusBar() {
       color: #ffd2cf !important;
     }
 
-    .pyro-gate-tabs {
-      top: 2.25rem !important;
-    }
-
     @media (max-width: 720px) {
       .pyro-sticky-status {
         top: 0.2rem !important;
@@ -303,11 +276,6 @@ function initializeCompactPyroStatusBar() {
       .sticky-status-tile.primary strong {
         max-width: 14ch !important;
       }
-
-      .pyro-gate-tabs {
-        top: 2.15rem !important;
-        max-height: 34vh !important;
-      }
     }
   `;
 
@@ -318,9 +286,7 @@ function initializePanelTilt() {
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const finePointer = window.matchMedia("(pointer: fine)");
 
-  if (prefersReducedMotion.matches || !finePointer.matches) {
-    return;
-  }
+  if (prefersReducedMotion.matches || !finePointer.matches) return;
 
   const panels = document.querySelectorAll("main .surface");
 
@@ -366,14 +332,12 @@ function initializePanelTilt() {
       targetTiltX = centeredY * -1.05;
       targetLiftZ = 1.6 - Math.min(1, Math.hypot(centeredX, centeredY)) * 0.55;
 
-      if (!frameId) {
-        frameId = requestAnimationFrame(render);
-      }
+      if (!frameId) frameId = requestAnimationFrame(render);
     };
 
-    panel.addEventListener("pointerenter", (e) => {
+    panel.addEventListener("pointerenter", (event) => {
       panel.classList.add("is-pointer-active");
-      updateTargets(e);
+      updateTargets(event);
     });
 
     panel.addEventListener("pointermove", updateTargets);
