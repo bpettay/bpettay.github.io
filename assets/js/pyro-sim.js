@@ -60,12 +60,32 @@ function initializePyroSimulator() {
   );
 
   let armed = false;
-  let authorizedOperator = null;
+  let authorizedOperator = window.pyroOperatorSession || null;
   let pendingPin = "";
+  let pendingAuthPurpose = "key";
   let cueWheelSelect = null;
   let cueWheelStatus = null;
   let cueWheelPrev = null;
   let cueWheelNext = null;
+  let loginResolver = null;
+
+  function activeOperator() {
+    return authorizedOperator || window.pyroOperatorSession || null;
+  }
+
+  function setOperatorSession(operator) {
+    if (!operator) return;
+
+    authorizedOperator = {
+      id: operator.id || operator.initials || operator.value || "OP",
+      name: operator.name,
+      loginAt: operator.loginAt || new Date().toISOString(),
+    };
+
+    window.pyroOperatorSession = authorizedOperator;
+    window.dispatchEvent(new CustomEvent("pyro-operator-session", { detail: authorizedOperator }));
+    updateAuthDisplay();
+  }
 
   function cueLabel(channel, compact = false) {
     if (!channel) return compact ? "A-01" : "Zone A / Cue 01";
@@ -73,7 +93,7 @@ function initializePyroSimulator() {
     return compact ? `${channel.zone}-${cue}` : `Zone ${channel.zone} / Cue ${cue}`;
   }
 
-  function addLog(message) {
+  function addLog(message, options = {}) {
     if (!eventLog) return;
 
     const item = document.createElement("li");
@@ -83,7 +103,10 @@ function initializePyroSimulator() {
       second: "2-digit",
     });
 
-    item.innerHTML = `<span>${time}</span>${message}`;
+    const operator = options.system ? null : activeOperator();
+    const actor = operator ? `${operator.name} · ` : "";
+
+    item.innerHTML = `<span>${time}</span>${actor}${message}`;
     eventLog.prepend(item);
 
     while (eventLog.children.length > 8) {
@@ -129,7 +152,7 @@ function initializePyroSimulator() {
       masterPower?.checked &&
       trainingMode?.checked &&
       keyEnable?.checked &&
-      authorizedOperator &&
+      activeOperator() &&
       zoneClear?.checked &&
       channels.some((channel) => channel.continuity && !channel.used)
     );
@@ -147,15 +170,23 @@ function initializePyroSimulator() {
     }
 
     if (operatorStatusText) {
-      operatorStatusText.textContent = authorizedOperator
-        ? `Authorized: ${authorizedOperator.name}`
-        : "Authorization required";
+      const operator = activeOperator();
+      operatorStatusText.textContent = operator
+        ? `Logged in: ${operator.name}`
+        : "Operator login required";
     }
   }
 
-  function openAuthorizationDialog() {
+  function openAuthorizationDialog(purpose = "key") {
+    pendingAuthPurpose = purpose;
     pendingPin = "";
-    if (authStatus) authStatus.textContent = "Select operator and enter PIN.";
+    const title = document.getElementById("authDialogTitle");
+    if (title) title.textContent = purpose === "access" ? "Operator Login" : "Operator Keypad";
+    if (authStatus) {
+      authStatus.textContent = purpose === "access"
+        ? "Operator login required before opening Pyro."
+        : "Select operator and enter PIN.";
+    }
     updateAuthDisplay();
 
     if (typeof authDialog?.showModal === "function") {
@@ -173,11 +204,11 @@ function initializePyroSimulator() {
     }
   }
 
-  function clearAuthorization() {
-    authorizedOperator = null;
-    keyEnable.checked = false;
-    addLog("Key Enable authorization cleared.");
-    render();
+  function finishLogin(success) {
+    if (loginResolver) {
+      loginResolver(success ? activeOperator() : null);
+      loginResolver = null;
+    }
   }
 
   function submitAuthorization() {
@@ -189,22 +220,49 @@ function initializePyroSimulator() {
     }
 
     if (pendingPin === selectedOperator.code) {
-      authorizedOperator = selectedOperator;
-      keyEnable.checked = true;
+      setOperatorSession({ id: authOperator.value, name: selectedOperator.name });
+      if (pendingAuthPurpose === "key") {
+        keyEnable.checked = true;
+        addLog("Key Enable accepted.");
+      } else {
+        addLog("Operator login accepted for Pyro access.");
+      }
       closeAuthorizationDialog();
-      addLog(`Key Enable authorized by ${selectedOperator.name}.`);
+      finishLogin(true);
       render();
       return;
     }
 
     pendingPin = "";
-    keyEnable.checked = false;
-    authorizedOperator = null;
     if (authStatus) authStatus.textContent = "Invalid code. Try again.";
     updateAuthDisplay();
-    addLog("Key Enable authorization failed.");
+    addLog("Operator authorization failed.", { system: true });
+    finishLogin(false);
     render();
   }
+
+  window.isPyroOperatorLoggedIn = function isPyroOperatorLoggedIn() {
+    return Boolean(activeOperator()?.name);
+  };
+
+  window.requestPyroOperatorLogin = function requestPyroOperatorLogin() {
+    if (activeOperator()) {
+      return Promise.resolve(activeOperator());
+    }
+
+    return new Promise((resolve) => {
+      loginResolver = resolve;
+      openAuthorizationDialog("access");
+    });
+  };
+
+  window.addEventListener("pyro-operator-login", (event) => {
+    if (event.detail?.name) {
+      setOperatorSession(event.detail);
+      addLog("Operator login accepted for Pyro access.");
+      render();
+    }
+  });
 
   function injectCueBankStyles() {
     if (document.getElementById("zoneCueBankStyles")) return;
@@ -437,10 +495,6 @@ function initializePyroSimulator() {
       continuityLamp.classList.toggle("active", counts.good > 0);
     }
 
-    if (!authorizedOperator && keyEnable?.checked) {
-      keyEnable.checked = false;
-    }
-
     updateAuthDisplay();
 
     armBtn.disabled = !ready || armed;
@@ -461,20 +515,22 @@ function initializePyroSimulator() {
   });
 
   keyEnable?.addEventListener("click", (event) => {
-    if (authorizedOperator && keyEnable.checked) {
+    if (activeOperator()) {
       return;
     }
 
     event.preventDefault();
     keyEnable.checked = false;
-    openAuthorizationDialog();
+    openAuthorizationDialog("key");
     render();
   });
 
   keyEnable?.addEventListener("change", () => {
     if (!keyEnable.checked) {
-      clearAuthorization();
+      armed = false;
+      addLog("Key Enable switched off.");
     }
+    render();
   });
 
   authKeypadButtons.forEach((button) => {
@@ -496,6 +552,7 @@ function initializePyroSimulator() {
     pendingPin = "";
     keyEnable.checked = false;
     closeAuthorizationDialog();
+    finishLogin(false);
     render();
   });
 
@@ -504,6 +561,7 @@ function initializePyroSimulator() {
   authDialog?.addEventListener("cancel", () => {
     pendingPin = "";
     keyEnable.checked = false;
+    finishLogin(false);
     render();
   });
 
@@ -512,7 +570,7 @@ function initializePyroSimulator() {
   armBtn?.addEventListener("click", () => {
     if (!readyToArm()) return;
     armed = true;
-    addLog(`Controller armed by ${authorizedOperator?.name || "authorized operator"} for ${cueLabel(selectedChannel())}.`);
+    addLog(`Controller armed for ${cueLabel(selectedChannel())}.`);
     render();
   });
 
@@ -528,7 +586,7 @@ function initializePyroSimulator() {
 
     selected.used = true;
     armed = false;
-    addLog(`${cueLabel(selected)} command recorded by ${authorizedOperator?.name || "operator"}.`);
+    addLog(`${cueLabel(selected)} command recorded.`);
     render();
   });
 
@@ -550,6 +608,6 @@ function initializePyroSimulator() {
   injectCueBankStyles();
   updateCueBankHeader();
   injectCueWheel();
-  addLog("Controller interface initialized in SAFE with 3 zones / 30 cues.");
+  addLog("Controller interface initialized in SAFE with 3 zones / 30 cues.", { system: true });
   render();
 }
