@@ -128,11 +128,10 @@ function initializeConverter() {
     if (Object.is(value, -0)) value = 0;
 
     const abs = Math.abs(value);
-    if (abs >= 1e9 || (abs > 0 && abs < 1e-6)) return value.toExponential(6);
+    if (abs >= 1e9 || (abs > 0 && abs < 1e-6)) return value.toExponential(2);
 
     return new Intl.NumberFormat("en-US", {
-      maximumSignificantDigits: 10,
-      maximumFractionDigits: 8,
+      maximumSignificantDigits: 3,
       useGrouping: abs >= 10000
     }).format(value);
   }
@@ -383,12 +382,27 @@ function initializeConverter() {
 
     const label = document.createElement("label");
     label.textContent = "Direction";
+    label.style.color = "var(--ink-soft)";
 
     const button = document.createElement("button");
     button.id = "swapUnits";
     button.type = "button";
     button.className = "converter-swap-button";
     button.textContent = "⇄ Swap units";
+    button.style.width = "100%";
+    button.style.minHeight = "52px";
+    button.style.padding = "0.85rem 1rem";
+    button.style.border = "1px solid var(--line)";
+    button.style.borderRadius = "12px";
+    button.style.background = "rgba(255, 255, 255, 0.08)";
+    button.style.color = "var(--ink)";
+    button.style.cursor = "pointer";
+    button.addEventListener("mouseenter", () => {
+      button.style.background = "rgba(255, 255, 255, 0.13)";
+    });
+    button.addEventListener("mouseleave", () => {
+      button.style.background = "rgba(255, 255, 255, 0.08)";
+    });
     button.addEventListener("click", () => {
       const previousFrom = fromUnitEl.value;
       fromUnitEl.value = toUnitEl.value;
