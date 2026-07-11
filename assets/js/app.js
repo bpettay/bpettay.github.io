@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (typeof initializeConverter === "function") {
     initializeConverter();
+    initializeGroupedUnitSelectors();
   }
 
   if (typeof initializePyroSimulator === "function") {
@@ -46,6 +47,100 @@ function configureConverterPrecision() {
   ThreeSigNumberFormat.supportedLocalesOf = NativeNumberFormat.supportedLocalesOf.bind(NativeNumberFormat);
   ThreeSigNumberFormat.__converterThreeSigFigs = true;
   Intl.NumberFormat = ThreeSigNumberFormat;
+}
+
+function initializeGroupedUnitSelectors() {
+  const categoryEl = document.getElementById("category");
+  const fromUnitEl = document.getElementById("fromUnit");
+  const toUnitEl = document.getElementById("toUnit");
+  const queryInputEl = document.getElementById("queryInput");
+
+  if (!categoryEl || !fromUnitEl || !toUnitEl || typeof unitData !== "object") return;
+
+  const unitsFor = (category) => {
+    const info = unitData[category];
+    return Array.isArray(info.units) ? info.units : Object.keys(info.units);
+  };
+
+  const selectedUnit = (select) => {
+    const option = select.selectedOptions[0];
+    return option ? { category: option.dataset.category || categoryEl.value, unit: option.value } : null;
+  };
+
+  const populateGroupedSelect = (select, selectedCategory, selectedUnitValue) => {
+    select.replaceChildren();
+
+    Object.keys(unitData).forEach((category) => {
+      const group = document.createElement("optgroup");
+      group.label = category;
+
+      unitsFor(category).forEach((unit) => {
+        const option = document.createElement("option");
+        option.value = unit;
+        option.textContent = unit;
+        option.dataset.category = category;
+        option.selected = category === selectedCategory && unit === selectedUnitValue;
+        group.appendChild(option);
+      });
+
+      select.appendChild(group);
+    });
+  };
+
+  const rebuildSelectors = (category, fromUnit, toUnit) => {
+    const defaults = defaultUnits?.[category] || unitsFor(category).slice(0, 2);
+    const safeFrom = unitsFor(category).includes(fromUnit) ? fromUnit : defaults[0];
+    const safeTo = unitsFor(category).includes(toUnit) ? toUnit : (defaults[1] || defaults[0]);
+
+    populateGroupedSelect(fromUnitEl, category, safeFrom);
+    populateGroupedSelect(toUnitEl, category, safeTo);
+  };
+
+  rebuildSelectors(categoryEl.value, fromUnitEl.value, toUnitEl.value);
+
+  fromUnitEl.addEventListener("change", () => {
+    const selected = selectedUnit(fromUnitEl);
+    if (!selected) return;
+
+    const previousTo = selectedUnit(toUnitEl);
+    const defaults = defaultUnits?.[selected.category] || unitsFor(selected.category).slice(0, 2);
+    categoryEl.value = selected.category;
+
+    rebuildSelectors(
+      selected.category,
+      selected.unit,
+      previousTo?.category === selected.category ? previousTo.unit : (defaults[1] || defaults[0])
+    );
+  }, true);
+
+  toUnitEl.addEventListener("change", () => {
+    const selected = selectedUnit(toUnitEl);
+    if (!selected) return;
+
+    const previousFrom = selectedUnit(fromUnitEl);
+    const defaults = defaultUnits?.[selected.category] || unitsFor(selected.category).slice(0, 2);
+    categoryEl.value = selected.category;
+
+    rebuildSelectors(
+      selected.category,
+      previousFrom?.category === selected.category ? previousFrom.unit : defaults[0],
+      selected.unit
+    );
+  }, true);
+
+  categoryEl.addEventListener("change", () => {
+    queueMicrotask(() => {
+      rebuildSelectors(categoryEl.value, fromUnitEl.value, toUnitEl.value);
+    });
+  });
+
+  if (queryInputEl) {
+    queryInputEl.addEventListener("input", () => {
+      queueMicrotask(() => {
+        rebuildSelectors(categoryEl.value, fromUnitEl.value, toUnitEl.value);
+      });
+    });
+  }
 }
 
 function initializeScrollHeader() {
