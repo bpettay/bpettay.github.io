@@ -216,3 +216,202 @@ select optgroup {
     transition: none;
   }
 }
+
+/* =========================
+   Compact Converter Dashboard
+========================= */
+@media (min-width: 1101px) {
+  #tools.page {
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+  }
+
+  #tools .compact-tool-card {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 7.25rem);
+    padding: 1rem 1.1rem;
+  }
+
+  #tools .tool-header {
+    margin-bottom: 0.7rem;
+  }
+
+  #tools .tool-card h2 {
+    font-size: clamp(1.45rem, 2.5vw, 2rem);
+  }
+
+  #tools .tool-intro {
+    margin-top: 0.3rem;
+    line-height: 1.4;
+    font-size: 0.86rem;
+  }
+
+  #tools .compact-converter-layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(285px, 1.05fr) minmax(250px, 0.78fr) minmax(360px, 1.17fr);
+    grid-template-areas: "query controls results";
+    gap: 0.75rem;
+    align-items: stretch;
+    min-height: 0;
+  }
+
+  #tools .compact-converter-layout > .field-group:first-child {
+    grid-area: query;
+    padding: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  #tools #queryInput {
+    padding: 0.72rem 0.8rem;
+    font-size: 0.92rem;
+  }
+
+  #tools .preview-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.25rem;
+    padding: 0.8rem;
+    box-shadow: none;
+  }
+
+  #tools .preview-summary,
+  #tools .preview-factor,
+  #tools .query-status,
+  #tools .result-formula,
+  #tools .result-factor {
+    font-size: 0.8rem;
+    line-height: 1.38;
+  }
+
+  #tools #equationPreview {
+    flex: 1;
+    margin-top: 0.6rem !important;
+    padding: 0.7rem 0.75rem !important;
+    font-size: 0.78rem !important;
+    line-height: 1.4 !important;
+  }
+
+  #tools .compact-tool-grid {
+    grid-area: controls;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 0.7rem;
+    padding: 0.85rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  #tools .compact-tool-grid .field-group:first-child,
+  #tools .converter-swap-group {
+    grid-column: 1 / -1;
+  }
+
+  #tools .field-group {
+    gap: 0.3rem;
+  }
+
+  #tools .field-group label {
+    font-size: 0.76rem;
+  }
+
+  #tools .compact-tool-grid input,
+  #tools .compact-tool-grid select,
+  #tools .converter-swap-button {
+    min-height: 42px;
+    padding: 0.65rem 0.72rem;
+    border-radius: 10px;
+    font-size: 0.86rem;
+  }
+
+  #tools .compact-results-grid {
+    grid-area: results;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 0.75rem;
+    min-height: 0;
+  }
+
+  #tools .result-panel,
+  #tools .related-panel {
+    padding: 0.85rem;
+    box-shadow: none;
+  }
+
+  #tools .result-value {
+    font-size: clamp(1.65rem, 3vw, 2.35rem);
+  }
+
+  #tools .related-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  #tools .related-results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  #tools .related-item {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.55rem 0.6rem;
+  }
+
+  #tools .related-item-label,
+  #tools .related-item-value {
+    font-size: 0.73rem;
+    line-height: 1.25;
+  }
+
+  #tools .related-item-value {
+    text-align: left;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 1100px) {
+  #tools .compact-converter-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.9fr);
+    grid-template-areas:
+      "query query"
+      "controls results";
+    gap: 0.85rem;
+  }
+
+  #tools .compact-converter-layout > .field-group:first-child {
+    grid-area: query;
+  }
+
+  #tools .compact-tool-grid {
+    grid-area: controls;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #tools .compact-results-grid {
+    grid-area: results;
+    grid-template-columns: 1fr;
+  }
+
+  #tools .converter-swap-group {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 820px) {
+  #tools .compact-tool-grid,
+  #tools .compact-results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #tools .converter-swap-group {
+    grid-column: auto;
+  }
+}
