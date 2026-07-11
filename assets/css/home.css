@@ -156,6 +156,19 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* Native form controls need an explicit dark palette in Chromium and Windows. */
+select {
+  color-scheme: dark;
+  background-color: #171717;
+  color: var(--ink);
+}
+
+select option,
+select optgroup {
+  background-color: #171717;
+  color: #f3f5f7;
+}
+
 /* Responsive */
 @media (max-width: 980px) {
   .hero,
