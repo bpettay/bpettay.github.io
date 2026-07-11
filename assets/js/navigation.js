@@ -91,3 +91,15 @@ function initializeNavigation() {
 
   return window.siteNavigation;
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  window.setTimeout(() => {
+    if (document.getElementById("skyPositionScript")) return;
+    const script = document.createElement("script");
+    script.id = "skyPositionScript";
+    script.src = window.versionedAsset
+      ? window.versionedAsset("./assets/js/sky-position.js")
+      : "./assets/js/sky-position.js";
+    document.body.appendChild(script);
+  }, 0);
+});
