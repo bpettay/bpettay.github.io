@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   configureConverterPrecision();
+  initializeHomeDashboard();
 
   if (typeof initializeNavigation === "function") {
     initializeNavigation();
@@ -42,6 +43,216 @@ function configureConverterPrecision() {
   ThreeSigNumberFormat.supportedLocalesOf = NativeNumberFormat.supportedLocalesOf.bind(NativeNumberFormat);
   ThreeSigNumberFormat.__converterThreeSigFigs = true;
   Intl.NumberFormat = ThreeSigNumberFormat;
+}
+
+function initializeHomeDashboard() {
+  const home = document.getElementById("home");
+  if (!home) return;
+
+  home.innerHTML = `
+    <section class="home-hero surface">
+      <div class="home-hero-copy">
+        <p class="eyebrow">Engineering workspace</p>
+        <h1>Brock Pettay</h1>
+        <p class="hero-text">
+          Practical tools, project interfaces, and quick-reference utilities in one clean dashboard.
+        </p>
+        <div class="hero-links">
+          <button class="cta-button" type="button" data-page-target="tools">Open Unit Converter</button>
+          <button class="cta-button secondary" type="button" data-page-target="pyro">Open Pyro Console</button>
+        </div>
+      </div>
+
+      <aside class="home-now-card" aria-label="Current time and weather">
+        <div class="home-clock-card">
+          <span class="dashboard-label">New Philadelphia, OH</span>
+          <strong id="homeClockTime">--:--</strong>
+          <small id="homeClockDate">Loading local time</small>
+        </div>
+        <div class="home-weather-card">
+          <div>
+            <span class="dashboard-label">Weather</span>
+            <strong id="homeWeatherTemp">--°</strong>
+            <small id="homeWeatherSummary">Loading forecast</small>
+          </div>
+          <div class="weather-mini-grid">
+            <span>High <strong id="homeWeatherHigh">--°</strong></span>
+            <span>Low <strong id="homeWeatherLow">--°</strong></span>
+            <span>Wind <strong id="homeWeatherWind">-- mph</strong></span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="home-dashboard-grid">
+      <article class="dashboard-card surface quick-actions-card">
+        <div class="section-heading">
+          <p class="section-label">Quick Actions</p>
+          <h2>Jump straight in.</h2>
+        </div>
+        <div class="action-grid">
+          <button class="action-tile" type="button" data-page-target="tools">
+            <span>Tools</span>
+            <strong>Unit converter</strong>
+            <small>Fast engineering conversions with equation preview.</small>
+          </button>
+          <button class="action-tile" type="button" data-page-target="pyro">
+            <span>Pyro</span>
+            <strong>Operator console</strong>
+            <small>Login-gated HMI concept with audit-style activity.</small>
+          </button>
+        </div>
+      </article>
+
+      <article class="dashboard-card surface site-status-card">
+        <div class="section-heading">
+          <p class="section-label">Site Status</p>
+          <h2>What is live.</h2>
+        </div>
+        <div class="status-tile-grid">
+          <div class="status-tile">
+            <span>Cache</span>
+            <strong>Runtime busted</strong>
+            <small>Fresh local CSS/JS requested every load.</small>
+          </div>
+          <div class="status-tile">
+            <span>Pyro</span>
+            <strong>Login gated</strong>
+            <small>Operator session tags recordable actions.</small>
+          </div>
+          <div class="status-tile">
+            <span>Cue bank</span>
+            <strong>3 × 10</strong>
+            <small>Three zones, ten cues per zone.</small>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="home-dashboard-grid lower-dashboard-grid">
+      <article class="dashboard-card surface">
+        <div class="section-heading">
+          <p class="section-label">Current Build</p>
+          <h2>What this site is for.</h2>
+        </div>
+        <p>
+          This is a lightweight engineering hub: useful calculators, live interface concepts, and project-ready layouts without the clutter of a portfolio dump.
+        </p>
+      </article>
+
+      <article class="dashboard-card surface">
+        <div class="section-heading">
+          <p class="section-label">Next Improvements</p>
+          <h2>Good places to build.</h2>
+        </div>
+        <ul class="home-task-list">
+          <li>Project pages for actual engineering work</li>
+          <li>More shop and lab reference calculators</li>
+          <li>Cleaner operator-interface demos with exportable logs</li>
+        </ul>
+      </article>
+    </section>
+  `;
+
+  startHomeClock();
+  loadHomeWeather();
+}
+
+function startHomeClock() {
+  const timeEl = document.getElementById("homeClockTime");
+  const dateEl = document.getElementById("homeClockDate");
+  if (!timeEl || !dateEl) return;
+
+  const updateClock = () => {
+    const now = new Date();
+    timeEl.textContent = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+      timeZone: "America/New_York",
+    }).format(now);
+
+    dateEl.textContent = new Intl.DateTimeFormat("en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+      timeZone: "America/New_York",
+    }).format(now);
+  };
+
+  updateClock();
+  window.setInterval(updateClock, 1000);
+}
+
+function weatherCodeSummary(code) {
+  const summaries = {
+    0: "Clear",
+    1: "Mostly clear",
+    2: "Partly cloudy",
+    3: "Cloudy",
+    45: "Fog",
+    48: "Rime fog",
+    51: "Light drizzle",
+    53: "Drizzle",
+    55: "Heavy drizzle",
+    61: "Light rain",
+    63: "Rain",
+    65: "Heavy rain",
+    71: "Light snow",
+    73: "Snow",
+    75: "Heavy snow",
+    80: "Rain showers",
+    81: "Showers",
+    82: "Heavy showers",
+    95: "Thunderstorms",
+  };
+
+  return summaries[code] || "Current conditions";
+}
+
+async function loadHomeWeather() {
+  const tempEl = document.getElementById("homeWeatherTemp");
+  const summaryEl = document.getElementById("homeWeatherSummary");
+  const highEl = document.getElementById("homeWeatherHigh");
+  const lowEl = document.getElementById("homeWeatherLow");
+  const windEl = document.getElementById("homeWeatherWind");
+  if (!tempEl || !summaryEl || !highEl || !lowEl || !windEl) return;
+
+  try {
+    const params = new URLSearchParams({
+      latitude: "40.4898",
+      longitude: "-81.4457",
+      current: "temperature_2m,weather_code,wind_speed_10m",
+      daily: "temperature_2m_max,temperature_2m_min",
+      temperature_unit: "fahrenheit",
+      wind_speed_unit: "mph",
+      forecast_days: "1",
+      timezone: "America/New_York",
+    });
+
+    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) throw new Error("Weather request failed");
+    const data = await response.json();
+
+    const current = data.current || {};
+    const daily = data.daily || {};
+
+    tempEl.textContent = `${Math.round(current.temperature_2m)}°`;
+    summaryEl.textContent = weatherCodeSummary(current.weather_code);
+    highEl.textContent = `${Math.round(daily.temperature_2m_max?.[0])}°`;
+    lowEl.textContent = `${Math.round(daily.temperature_2m_min?.[0])}°`;
+    windEl.textContent = `${Math.round(current.wind_speed_10m)} mph`;
+  } catch (error) {
+    tempEl.textContent = "--°";
+    highEl.textContent = "--°";
+    lowEl.textContent = "--°";
+    windEl.textContent = "-- mph";
+    summaryEl.textContent = "Weather unavailable";
+  }
 }
 
 function initializeGroupedUnitSelectors() {
