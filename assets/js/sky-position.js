@@ -53,15 +53,14 @@
     ) * DEG;
     const obliquity = (23.439 - 0.0000004 * n) * DEG;
 
-    const ra = Math.atan2(
-      Math.cos(obliquity) * Math.sin(eclipticLongitude),
-      Math.cos(eclipticLongitude)
-    ) * RAD;
-    const dec = Math.asin(Math.sin(obliquity) * Math.sin(eclipticLongitude)) * RAD;
-
     return {
-      ra: normalizeDegrees(ra),
-      dec,
+      ra: normalizeDegrees(
+        Math.atan2(
+          Math.cos(obliquity) * Math.sin(eclipticLongitude),
+          Math.cos(eclipticLongitude)
+        ) * RAD
+      ),
+      dec: Math.asin(Math.sin(obliquity) * Math.sin(eclipticLongitude)) * RAD,
     };
   }
 
@@ -97,87 +96,252 @@
     };
   }
 
-  function skyToPictograph(position) {
-    const azimuth = position.azimuth;
-    const altitude = position.altitude;
-
-    // Map east-south-west to left-center-right. North-side objects stay near the nearest edge.
-    let x;
-    if (azimuth <= 180) {
-      x = azimuth / 180;
-    } else {
-      x = (360 - azimuth) / 180;
-      x = azimuth > 270 ? 0 : 1;
-    }
-
-    const visibleAltitude = Math.max(-12, Math.min(75, altitude));
-    const y = Math.max(0, Math.min(1, (visibleAltitude + 12) / 87));
-
-    return { x, y, visible: altitude >= 0 };
-  }
-
-  function applySkyPosition(element, cssPrefix, position) {
-    if (!element) return;
-    const mapped = skyToPictograph(position);
-    element.style.setProperty(`--${cssPrefix}-progress`, mapped.x.toFixed(3));
-    element.style.setProperty(`--${cssPrefix}-y`, mapped.y.toFixed(3));
-    element.dataset.belowHorizon = mapped.visible ? "false" : "true";
-  }
-
-  function updateTrueSkyPositions() {
-    const now = new Date();
-    const sun = equatorialToHorizontal(
-      solarEquatorial(now).ra,
-      solarEquatorial(now).dec,
-      now
-    );
-    const moon = equatorialToHorizontal(
-      moonEquatorial(now).ra,
-      moonEquatorial(now).dec,
-      now
-    );
-
-    applySkyPosition(document.getElementById("homeSunPath"), "sun", sun);
-    applySkyPosition(document.getElementById("homeMoonPosition"), "moon", moon);
-
-    const moonLabel = document.querySelector(".moon-position-card .mini-label");
-    const moonNote = document.getElementById("homeMoonNote");
-    if (moonLabel) moonLabel.textContent = "Moon in sky";
-    if (moonNote) moonNote.textContent = "Phase shown on the disc; position tracks current sky location.";
-  }
-
-  function injectSkyPositionStyles() {
+  function injectOrbitalStyles() {
     if (document.getElementById("trueSkyPositionStyles")) return;
+
     const style = document.createElement("style");
     style.id = "trueSkyPositionStyles";
     style.textContent = `
-      .sun-path::before,
-      .moon-position-visual::before {
-        content: "";
-        position: absolute;
-        inset: 10px 10px 18px;
-        border-radius: 14px;
+      .sun-position-card {
+        display: grid;
+        gap: 0.8rem;
+      }
+
+      .sky-orbit-graphic {
+        position: relative;
+        min-height: 220px;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.08);
         background:
-          linear-gradient(90deg, transparent 49.5%, rgba(255,255,255,.08) 49.5%, rgba(255,255,255,.08) 50.5%, transparent 50.5%),
-          linear-gradient(180deg, transparent 49.5%, rgba(255,255,255,.055) 49.5%, rgba(255,255,255,.055) 50.5%, transparent 50.5%);
-        pointer-events: none;
+          radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015) 46%, transparent 47%),
+          linear-gradient(180deg, rgba(110, 145, 220, 0.08), rgba(255, 255, 255, 0.02));
       }
-      .sun-dot,
-      .moon-dot {
-        opacity: 1;
-        transition: left .45s ease, bottom .45s ease, opacity .25s ease, filter .25s ease;
+
+      .sky-orbit-ring {
+        position: absolute;
+        inset: 50% auto auto 50%;
+        width: min(160px, 74%);
+        aspect-ratio: 1;
+        border-radius: 999px;
+        border: 1.5px solid rgba(255, 255, 255, 0.15);
+        transform: translate(-50%, -50%);
       }
-      .sun-path[data-below-horizon="true"] .sun-dot,
-      .moon-position-visual[data-below-horizon="true"] .moon-dot {
-        opacity: .38;
-        filter: grayscale(.35);
+
+      .sky-orbit-axis {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .sky-orbit-axis-h {
+        left: 50%;
+        top: 50%;
+        width: min(190px, 86%);
+        height: 1px;
+        transform: translate(-50%, -50%);
+      }
+
+      .sky-orbit-axis-v {
+        left: 50%;
+        top: 50%;
+        width: 1px;
+        height: min(190px, 86%);
+        transform: translate(-50%, -50%);
+      }
+
+      .sky-orbit-cardinal {
+        position: absolute;
+        color: var(--ink-soft);
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .sky-orbit-cardinal.north { left: 50%; bottom: 10px; transform: translateX(-50%); }
+      .sky-orbit-cardinal.south { left: 50%; top: 10px; transform: translateX(-50%); }
+      .sky-orbit-cardinal.east { left: 12px; top: 50%; transform: translateY(-50%); }
+      .sky-orbit-cardinal.west { right: 12px; top: 50%; transform: translateY(-50%); }
+
+      .earth-core {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 58px;
+        height: 58px;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--ink);
+        font-size: 0.75rem;
+        font-weight: 700;
+        background:
+          radial-gradient(circle at 35% 30%, rgba(87, 163, 255, 0.45), rgba(48, 97, 156, 0.85) 52%, rgba(20, 36, 56, 0.95));
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22), inset 0 1px 8px rgba(255, 255, 255, 0.14);
+        transform: translate(-50%, -50%);
+      }
+
+      .sky-body {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        transition: left 0.45s ease, top 0.45s ease, opacity 0.25s ease, filter 0.25s ease;
+      }
+
+      .sun-body {
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: #ffca5f;
+        box-shadow: 0 0 24px rgba(255, 202, 95, 0.7);
+      }
+
+      .moon-body {
+        width: 34px;
+        height: 34px;
+        display: grid;
+        place-items: center;
+      }
+
+      .moon-body .moon-disc {
+        width: 100%;
+        height: auto;
+      }
+
+      .sky-body[data-below-horizon="true"] {
+        opacity: 0.34;
+        filter: grayscale(0.25);
+      }
+
+      .combined-sky-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+      }
+
+      .combined-sky-meta .moon-inline-info {
+        display: grid;
+        gap: 0.28rem;
+        min-width: 0;
+        padding: 0.72rem;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.065);
+        background: rgba(255, 255, 255, 0.035);
+      }
+
+      .combined-sky-meta .moon-inline-info small {
+        display: block;
+        color: var(--ink-soft);
+      }
+
+      @media (max-width: 720px) {
+        .sky-orbit-graphic {
+          min-height: 200px;
+        }
+
+        .combined-sky-meta {
+          grid-template-columns: 1fr;
+        }
       }
     `;
+
     document.head.appendChild(style);
   }
 
+  function buildCombinedSkyGraphic() {
+    const sunCard = document.querySelector(".sun-position-card");
+    const orbitGraphic = document.getElementById("homeSunPath");
+    const sunTimesGrid = sunCard?.querySelector(".sun-times-grid");
+    const moonCard = document.querySelector(".moon-position-card");
+    const moonDisc = document.getElementById("homeMoonDisc");
+    const moonPhase = document.getElementById("homeMoonPhase");
+    const moonPercent = document.getElementById("homeMoonPercent");
+    const moonNote = document.getElementById("homeMoonNote");
+
+    if (!sunCard || !orbitGraphic || !sunTimesGrid) return null;
+
+    if (!orbitGraphic.dataset.combinedOrbitBuilt) {
+      orbitGraphic.dataset.combinedOrbitBuilt = "true";
+      orbitGraphic.setAttribute("aria-label", "Live sun and moon position around Earth");
+      orbitGraphic.className = "sky-orbit-graphic";
+      orbitGraphic.innerHTML = `
+        <span class="sky-orbit-ring"></span>
+        <span class="sky-orbit-axis sky-orbit-axis-h"></span>
+        <span class="sky-orbit-axis sky-orbit-axis-v"></span>
+        <span class="sky-orbit-cardinal north">N</span>
+        <span class="sky-orbit-cardinal east">E</span>
+        <span class="sky-orbit-cardinal south">S</span>
+        <span class="sky-orbit-cardinal west">W</span>
+        <span class="earth-core">Earth</span>
+        <span class="sky-body sun-body" id="homeSkyOrbitSun" aria-hidden="true"></span>
+        <span class="sky-body moon-body" id="homeSkyOrbitMoon" aria-hidden="true"></span>
+      `;
+
+      const meta = document.createElement("div");
+      meta.className = "combined-sky-meta";
+      const moonInfo = document.createElement("div");
+      moonInfo.className = "moon-inline-info";
+      moonInfo.innerHTML = `<span class="mini-label">Moon phase</span>`;
+
+      if (moonPhase) moonInfo.appendChild(moonPhase);
+      if (moonPercent) moonInfo.appendChild(moonPercent);
+      if (moonNote) {
+        moonNote.textContent = "Live orbit view around Earth; phase shown on the moon disc.";
+        moonInfo.appendChild(moonNote);
+      }
+
+      sunCard.appendChild(meta);
+      meta.appendChild(sunTimesGrid);
+      meta.appendChild(moonInfo);
+    }
+
+    const moonBody = document.getElementById("homeSkyOrbitMoon");
+    if (moonDisc && moonBody && moonDisc.parentElement !== moonBody) {
+      moonBody.appendChild(moonDisc);
+    }
+
+    if (moonCard) {
+      moonCard.style.display = "none";
+    }
+
+    return {
+      sunElement: document.getElementById("homeSkyOrbitSun"),
+      moonElement: document.getElementById("homeSkyOrbitMoon"),
+    };
+  }
+
+  function applyOrbitPosition(element, position) {
+    if (!element || !position) return;
+
+    const angle = (position.azimuth - 180) * DEG;
+    const radius = 39;
+    const x = 50 + radius * Math.sin(angle);
+    const y = 50 - radius * Math.cos(angle);
+
+    element.style.left = `${x}%`;
+    element.style.top = `${y}%`;
+    element.dataset.belowHorizon = position.altitude >= 0 ? "false" : "true";
+  }
+
+  function updateTrueSkyPositions() {
+    const bodies = buildCombinedSkyGraphic();
+    if (!bodies) return;
+
+    const now = new Date();
+    const sunEq = solarEquatorial(now);
+    const moonEq = moonEquatorial(now);
+
+    const sun = equatorialToHorizontal(sunEq.ra, sunEq.dec, now);
+    const moon = equatorialToHorizontal(moonEq.ra, moonEq.dec, now);
+
+    applyOrbitPosition(bodies.sunElement, sun);
+    applyOrbitPosition(bodies.moonElement, moon);
+  }
+
   function startTrueSkyPositions() {
-    injectSkyPositionStyles();
+    injectOrbitalStyles();
     updateTrueSkyPositions();
     window.setInterval(updateTrueSkyPositions, 60000);
   }
