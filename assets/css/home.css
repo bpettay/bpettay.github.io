@@ -26,7 +26,6 @@
 .home-weather-card {
   padding: var(--space-5);
   border-radius: var(--radius);
-  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .home-clock-card,
@@ -99,12 +98,16 @@
   text-transform: none;
 }
 
-.dashboard-card:hover,
+.action-tile {
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
 .action-tile:hover,
-.status-tile:hover {
+.action-tile:focus-visible {
   background: rgba(255, 255, 255, 0.065);
   border-color: rgba(255, 255, 255, 0.12);
   box-shadow: 0 18px 34px rgba(0, 0, 0, 0.24);
+  transform: translateY(-1px);
 }
 
 .dashboard-card h2 {
@@ -212,10 +215,13 @@ select optgroup {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dashboard-card,
-  .action-tile,
-  .status-tile {
+  .action-tile {
     transition: none;
+  }
+
+  .action-tile:hover,
+  .action-tile:focus-visible {
+    transform: none;
   }
 }
 
