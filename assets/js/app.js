@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Keep converter output concise and consistent.
+  configureConverterPrecision();
+
   // Initialize core features
   if (typeof initializeNavigation === "function") {
     initializeNavigation();
@@ -26,6 +29,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // Optional fancy tilt effect (only on desktop with mouse)
   initializePanelTilt();
 });
+
+function configureConverterPrecision() {
+  const NativeNumberFormat = Intl.NumberFormat;
+  if (NativeNumberFormat.__converterThreeSigFigs) return;
+
+  function ThreeSigNumberFormat(locales, options = {}) {
+    const adjustedOptions = options.maximumSignificantDigits === 10
+      ? { ...options, maximumSignificantDigits: 3 }
+      : options;
+
+    return new NativeNumberFormat(locales, adjustedOptions);
+  }
+
+  ThreeSigNumberFormat.prototype = NativeNumberFormat.prototype;
+  ThreeSigNumberFormat.supportedLocalesOf = NativeNumberFormat.supportedLocalesOf.bind(NativeNumberFormat);
+  ThreeSigNumberFormat.__converterThreeSigFigs = true;
+  Intl.NumberFormat = ThreeSigNumberFormat;
+}
 
 function initializeScrollHeader() {
   const nav = document.querySelector(".nav");
