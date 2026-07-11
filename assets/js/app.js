@@ -50,30 +50,30 @@ function initializeHomeDashboard() {
   if (!home) return;
 
   home.innerHTML = `
-    <section class="home-hero surface">
+    <section class="home-hero surface utility-hero">
       <div class="home-hero-copy">
-        <p class="eyebrow">Engineering workspace</p>
-        <h1>Brock Pettay</h1>
+        <p class="eyebrow">Control Center</p>
+        <h1>Dashboard</h1>
         <p class="hero-text">
-          Practical tools, project interfaces, and quick-reference utilities in one clean dashboard.
+          Fast access to the stuff I actually use: tools, weather, time, and the Pyro console.
         </p>
         <div class="hero-links">
-          <button class="cta-button" type="button" data-page-target="tools">Open Unit Converter</button>
-          <button class="cta-button secondary" type="button" data-page-target="pyro">Open Pyro Console</button>
+          <button class="cta-button" type="button" data-page-target="tools">Unit Converter</button>
+          <button class="cta-button secondary" type="button" data-page-target="pyro">Pyro Console</button>
         </div>
       </div>
 
       <aside class="home-now-card" aria-label="Current time and weather">
         <div class="home-clock-card">
-          <span class="dashboard-label">New Philadelphia, OH</span>
+          <span class="dashboard-label">Local Time</span>
           <strong id="homeClockTime">--:--</strong>
-          <small id="homeClockDate">Loading local time</small>
+          <small id="homeClockDate">Loading</small>
         </div>
         <div class="home-weather-card">
           <div>
             <span class="dashboard-label">Weather</span>
             <strong id="homeWeatherTemp">--°</strong>
-            <small id="homeWeatherSummary">Loading forecast</small>
+            <small id="homeWeatherSummary">Loading</small>
           </div>
           <div class="weather-mini-grid">
             <span>High <strong id="homeWeatherHigh">--°</strong></span>
@@ -87,43 +87,43 @@ function initializeHomeDashboard() {
     <section class="home-dashboard-grid">
       <article class="dashboard-card surface quick-actions-card">
         <div class="section-heading">
-          <p class="section-label">Quick Actions</p>
-          <h2>Jump straight in.</h2>
+          <p class="section-label">Shortcuts</p>
+          <h2>Open what matters.</h2>
         </div>
         <div class="action-grid">
           <button class="action-tile" type="button" data-page-target="tools">
             <span>Tools</span>
             <strong>Unit converter</strong>
-            <small>Fast engineering conversions with equation preview.</small>
+            <small>Quick conversions, 3 sig figs, equation preview.</small>
           </button>
           <button class="action-tile" type="button" data-page-target="pyro">
             <span>Pyro</span>
-            <strong>Operator console</strong>
-            <small>Login-gated HMI concept with audit-style activity.</small>
+            <strong>Console</strong>
+            <small>Operator login, cue bank, activity log.</small>
           </button>
         </div>
       </article>
 
       <article class="dashboard-card surface site-status-card">
         <div class="section-heading">
-          <p class="section-label">Site Status</p>
-          <h2>What is live.</h2>
+          <p class="section-label">System</p>
+          <h2>Current setup.</h2>
         </div>
         <div class="status-tile-grid">
           <div class="status-tile">
-            <span>Cache</span>
-            <strong>Runtime busted</strong>
-            <small>Fresh local CSS/JS requested every load.</small>
+            <span>Assets</span>
+            <strong>Fresh load</strong>
+            <small>CSS/JS refresh automatically each page load.</small>
           </div>
           <div class="status-tile">
             <span>Pyro</span>
-            <strong>Login gated</strong>
-            <small>Operator session tags recordable actions.</small>
+            <strong>Login required</strong>
+            <small>Actions attach to the logged-in operator.</small>
           </div>
           <div class="status-tile">
-            <span>Cue bank</span>
-            <strong>3 × 10</strong>
-            <small>Three zones, ten cues per zone.</small>
+            <span>Cues</span>
+            <strong>30 total</strong>
+            <small>3 zones × 10 cues.</small>
           </div>
         </div>
       </article>
@@ -132,23 +132,32 @@ function initializeHomeDashboard() {
     <section class="home-dashboard-grid lower-dashboard-grid">
       <article class="dashboard-card surface">
         <div class="section-heading">
-          <p class="section-label">Current Build</p>
-          <h2>What this site is for.</h2>
+          <p class="section-label">Today</p>
+          <h2>Useful glance.</h2>
         </div>
-        <p>
-          This is a lightweight engineering hub: useful calculators, live interface concepts, and project-ready layouts without the clutter of a portfolio dump.
-        </p>
+        <div class="status-tile-grid compact-status-grid">
+          <div class="status-tile">
+            <span>Location</span>
+            <strong>New Philadelphia</strong>
+            <small>Clock and weather are pinned here.</small>
+          </div>
+          <div class="status-tile">
+            <span>Mode</span>
+            <strong>Personal utility</strong>
+            <small>No portfolio filler. Just tools.</small>
+          </div>
+        </div>
       </article>
 
       <article class="dashboard-card surface">
         <div class="section-heading">
-          <p class="section-label">Next Improvements</p>
-          <h2>Good places to build.</h2>
+          <p class="section-label">Next Up</p>
+          <h2>Build list.</h2>
         </div>
         <ul class="home-task-list">
-          <li>Project pages for actual engineering work</li>
-          <li>More shop and lab reference calculators</li>
-          <li>Cleaner operator-interface demos with exportable logs</li>
+          <li>Add more calculators that are useful in the shop or lab</li>
+          <li>Add local-only scratchpad or checklist widgets</li>
+          <li>Add exportable logs for the Pyro console</li>
         </ul>
       </article>
     </section>
