@@ -8,6 +8,12 @@
   border-radius: var(--radius);
 }
 
+.utility-hero {
+  background:
+    radial-gradient(circle at 85% 10%, rgba(120, 255, 190, 0.09), transparent 34%),
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.035));
+}
+
 .home-hero-copy {
   display: grid;
   align-content: center;
@@ -192,7 +198,7 @@
   color: inherit;
   cursor: pointer;
   text-align: left;
-  min-height: 150px;
+  min-height: 132px;
 }
 
 .action-tile span,
@@ -214,6 +220,10 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-3);
+}
+
+.compact-status-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .status-tile {
@@ -278,7 +288,8 @@ select optgroup {
 
   .hero-links,
   .action-grid,
-  .status-tile-grid {
+  .status-tile-grid,
+  .compact-status-grid {
     grid-template-columns: 1fr;
   }
 
