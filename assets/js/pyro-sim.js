@@ -46,7 +46,6 @@ function initializePyroSimulator() {
       const cue = index + 1;
       const id = zoneIndex * cuesPerZone + cue;
       const key = `${zone}-${String(cue).padStart(2, "0")}`;
-
       return {
         id,
         zone,
@@ -75,13 +74,11 @@ function initializePyroSimulator() {
 
   function setOperatorSession(operator) {
     if (!operator) return;
-
     authorizedOperator = {
       id: operator.id || operator.initials || operator.value || "OP",
       name: operator.name,
       loginAt: operator.loginAt || new Date().toISOString(),
     };
-
     window.pyroOperatorSession = authorizedOperator;
     window.dispatchEvent(new CustomEvent("pyro-operator-session", { detail: authorizedOperator }));
     updateAuthDisplay();
@@ -95,20 +92,16 @@ function initializePyroSimulator() {
 
   function addLog(message, options = {}) {
     if (!eventLog) return;
-
     const item = document.createElement("li");
     const time = new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
     });
-
     const operator = options.system ? null : activeOperator();
     const actor = operator ? `${operator.name} · ` : "";
-
     item.innerHTML = `<span>${time}</span>${actor}${message}`;
     eventLog.prepend(item);
-
     while (eventLog.children.length > 8) {
       eventLog.removeChild(eventLog.lastElementChild);
     }
@@ -121,15 +114,10 @@ function initializePyroSimulator() {
   function selectChannelById(id, announce = true) {
     const target = channels.find((channel) => channel.id === Number(id));
     if (!target) return;
-
     channels.forEach((channel) => {
       channel.selected = channel.id === target.id;
     });
-
-    if (announce) {
-      addLog(`${cueLabel(target)} selected.`);
-    }
-
+    if (announce) addLog(`${cueLabel(target)} selected.`);
     render();
   }
 
@@ -168,12 +156,9 @@ function initializePyroSimulator() {
     if (authPinDisplay) {
       authPinDisplay.textContent = pendingPin ? "•".repeat(pendingPin.length) : "----";
     }
-
     if (operatorStatusText) {
       const operator = activeOperator();
-      operatorStatusText.textContent = operator
-        ? `Logged in: ${operator.name}`
-        : "Operator login required";
+      operatorStatusText.textContent = operator ? `Logged in: ${operator.name}` : "Operator login required";
     }
   }
 
@@ -184,11 +169,10 @@ function initializePyroSimulator() {
     if (title) title.textContent = purpose === "access" ? "Operator Login" : "Operator Keypad";
     if (authStatus) {
       authStatus.textContent = purpose === "access"
-        ? "Operator login required before opening Pyro."
-        : "Select operator and enter PIN.";
+        ? "Operator login required before opening Pyro. Use keypad or keyboard."
+        : "Select operator and enter PIN. Use keypad or keyboard.";
     }
     updateAuthDisplay();
-
     if (typeof authDialog?.showModal === "function") {
       authDialog.showModal();
     } else {
@@ -204,6 +188,10 @@ function initializePyroSimulator() {
     }
   }
 
+  function isAuthDialogOpen() {
+    return Boolean(authDialog?.open || authDialog?.classList.contains("open"));
+  }
+
   function finishLogin(success) {
     if (loginResolver) {
       loginResolver(success ? activeOperator() : null);
@@ -211,14 +199,39 @@ function initializePyroSimulator() {
     }
   }
 
+  function appendPinDigit(digit) {
+    if (!/^\d$/.test(digit) || pendingPin.length >= 6) return;
+    pendingPin += digit;
+    if (authStatus) authStatus.textContent = "Enter operator PIN.";
+    updateAuthDisplay();
+  }
+
+  function backspacePin() {
+    pendingPin = pendingPin.slice(0, -1);
+    if (authStatus) authStatus.textContent = pendingPin ? "Enter operator PIN." : "PIN cleared.";
+    updateAuthDisplay();
+  }
+
+  function clearPin() {
+    pendingPin = "";
+    if (authStatus) authStatus.textContent = "PIN cleared.";
+    updateAuthDisplay();
+  }
+
+  function cancelAuthorization() {
+    pendingPin = "";
+    keyEnable.checked = false;
+    closeAuthorizationDialog();
+    finishLogin(false);
+    render();
+  }
+
   function submitAuthorization() {
     const selectedOperator = operatorCodes[authOperator?.value];
-
     if (!selectedOperator) {
       if (authStatus) authStatus.textContent = "Select a valid operator.";
       return;
     }
-
     if (pendingPin === selectedOperator.code) {
       setOperatorSession({ id: authOperator.value, name: selectedOperator.name });
       if (pendingAuthPurpose === "key") {
@@ -232,7 +245,6 @@ function initializePyroSimulator() {
       render();
       return;
     }
-
     pendingPin = "";
     if (authStatus) authStatus.textContent = "Invalid code. Try again.";
     updateAuthDisplay();
@@ -246,10 +258,7 @@ function initializePyroSimulator() {
   };
 
   window.requestPyroOperatorLogin = function requestPyroOperatorLogin() {
-    if (activeOperator()) {
-      return Promise.resolve(activeOperator());
-    }
-
+    if (activeOperator()) return Promise.resolve(activeOperator());
     return new Promise((resolve) => {
       loginResolver = resolve;
       openAuthorizationDialog("access");
@@ -266,83 +275,23 @@ function initializePyroSimulator() {
 
   function injectCueBankStyles() {
     if (document.getElementById("zoneCueBankStyles")) return;
-
     const style = document.createElement("style");
     style.id = "zoneCueBankStyles";
     style.textContent = `
-      .channel-grid.zone-cue-bank {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.85rem;
-      }
-
-      .cue-zone-group {
-        display: grid;
-        gap: 0.55rem;
-        min-width: 0;
-      }
-
-      .cue-zone-title {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 0.75rem;
-        margin: 0;
-        color: var(--ink);
-        font-size: 0.86rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .cue-zone-title span {
-        color: var(--ink-soft);
-        font-size: 0.68rem;
-        font-weight: 500;
-      }
-
-      .zone-channel-grid {
-        display: grid;
-        grid-template-columns: repeat(10, minmax(0, 1fr));
-        gap: 0.45rem;
-      }
-
-      .zone-channel-grid .channel-button {
-        min-height: 64px;
-        padding: 0.5rem 0.35rem;
-        border-radius: 12px;
-      }
-
-      .zone-channel-grid .channel-number {
-        font-size: 0.98rem;
-      }
-
-      .channel-zone-label {
-        color: var(--ink-soft);
-        font-size: 0.58rem;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      @media (max-width: 980px) {
-        .zone-channel-grid {
-          grid-template-columns: repeat(5, minmax(0, 1fr));
-        }
-      }
-
+      .channel-grid.zone-cue-bank { display: grid; grid-template-columns: 1fr; gap: 0.85rem; }
+      .cue-zone-group { display: grid; gap: 0.55rem; min-width: 0; }
+      .cue-zone-title { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin: 0; color: var(--ink); font-size: 0.86rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+      .cue-zone-title span { color: var(--ink-soft); font-size: 0.68rem; font-weight: 500; }
+      .zone-channel-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 0.45rem; }
+      .zone-channel-grid .channel-button { min-height: 64px; padding: 0.5rem 0.35rem; border-radius: 12px; }
+      .zone-channel-grid .channel-number { font-size: 0.98rem; }
+      .channel-zone-label { color: var(--ink-soft); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; }
+      @media (max-width: 980px) { .zone-channel-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
       @media (max-width: 420px) {
-        .zone-channel-grid {
-          grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: 0.38rem;
-        }
-
-        .zone-channel-grid .channel-button {
-          min-height: 58px;
-          padding: 0.42rem 0.25rem;
-        }
+        .zone-channel-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.38rem; }
+        .zone-channel-grid .channel-button { min-height: 58px; padding: 0.42rem 0.25rem; }
       }
     `;
-
     document.head.appendChild(style);
   }
 
@@ -355,16 +304,12 @@ function initializePyroSimulator() {
   function injectCueWheel() {
     const commandPanel = document.querySelector(".command-panel");
     if (!commandPanel || document.getElementById("cueQuickSelect")) return;
-
     const fireButton = document.getElementById("simFireBtn");
     const wheel = document.createElement("section");
     wheel.id = "cueQuickSelect";
     wheel.className = "cue-quick-select";
     wheel.innerHTML = `
-      <div class="cue-quick-header">
-        <span>Quick Select</span>
-        <strong>Zone / Cue</strong>
-      </div>
+      <div class="cue-quick-header"><span>Quick Select</span><strong>Zone / Cue</strong></div>
       <div class="cue-wheel-row">
         <button id="cueWheelPrev" class="cue-wheel-step" type="button" aria-label="Previous cue">‹</button>
         <select id="cueWheelSelect" class="cue-wheel-select" aria-label="Select zone and cue to command"></select>
@@ -372,12 +317,8 @@ function initializePyroSimulator() {
       </div>
       <p id="cueWheelStatus" class="cue-wheel-status">Cue status loading.</p>
     `;
-
-    if (fireButton) {
-      commandPanel.insertBefore(wheel, fireButton);
-    } else {
-      commandPanel.appendChild(wheel);
-    }
+    if (fireButton) commandPanel.insertBefore(wheel, fireButton);
+    else commandPanel.appendChild(wheel);
 
     cueWheelSelect = document.getElementById("cueWheelSelect");
     cueWheelStatus = document.getElementById("cueWheelStatus");
@@ -392,22 +333,15 @@ function initializePyroSimulator() {
           `).join("")}
         </optgroup>
       `).join("");
-
-      cueWheelSelect.addEventListener("change", () => {
-        selectChannelById(cueWheelSelect.value);
-      });
+      cueWheelSelect.addEventListener("change", () => selectChannelById(cueWheelSelect.value));
     }
-
     cueWheelPrev?.addEventListener("click", () => nudgeSelectedCue(-1));
     cueWheelNext?.addEventListener("click", () => nudgeSelectedCue(1));
   }
 
   function updateCueWheel() {
     const selected = selectedChannel();
-    if (cueWheelSelect) {
-      cueWheelSelect.value = String(selected.id);
-    }
-
+    if (cueWheelSelect) cueWheelSelect.value = String(selected.id);
     if (cueWheelStatus) {
       const status = selected.used ? "Used" : selected.continuity ? "Continuity good" : "Continuity open";
       cueWheelStatus.textContent = `${cueLabel(selected)} · ${status}`;
@@ -419,45 +353,27 @@ function initializePyroSimulator() {
 
   function renderChannels() {
     if (!channelGrid) return;
-
     channelGrid.classList.add("zone-cue-bank");
     channelGrid.innerHTML = "";
-
     zoneLabels.forEach((zone) => {
       const zoneChannels = channels.filter((channel) => channel.zone === zone);
       const zoneGroup = document.createElement("section");
       zoneGroup.className = "cue-zone-group";
-      zoneGroup.innerHTML = `
-        <h4 class="cue-zone-title">Zone ${zone}<span>10 cues</span></h4>
-        <div class="zone-channel-grid"></div>
-      `;
-
+      zoneGroup.innerHTML = `<h4 class="cue-zone-title">Zone ${zone}<span>10 cues</span></h4><div class="zone-channel-grid"></div>`;
       const zoneGrid = zoneGroup.querySelector(".zone-channel-grid");
-
       zoneChannels.forEach((channel) => {
         const button = document.createElement("button");
         button.type = "button";
-        button.className = [
-          "channel-button",
-          channel.selected ? "selected" : "",
-          channel.continuity ? "continuity-good" : "continuity-open",
-          channel.used ? "channel-used" : "",
-        ].filter(Boolean).join(" ");
-
+        button.className = ["channel-button", channel.selected ? "selected" : "", channel.continuity ? "continuity-good" : "continuity-open", channel.used ? "channel-used" : ""].filter(Boolean).join(" ");
         button.innerHTML = `
           <span class="channel-lamp" aria-hidden="true"></span>
           <span class="channel-number">${String(channel.cue).padStart(2, "0")}</span>
           <span class="channel-zone-label">Zone ${channel.zone}</span>
           <span class="channel-status">${channel.used ? "Used" : channel.continuity ? "Good" : "Open"}</span>
         `;
-
-        button.addEventListener("click", () => {
-          selectChannelById(channel.id);
-        });
-
+        button.addEventListener("click", () => selectChannelById(channel.id));
         zoneGrid.appendChild(button);
       });
-
       channelGrid.appendChild(zoneGroup);
     });
   }
@@ -483,23 +399,13 @@ function initializePyroSimulator() {
       setLights("safe");
     }
 
-    if (selectedCueText) {
-      selectedCueText.textContent = cueLabel(selected, true);
-    }
-
-    if (continuitySummaryText) {
-      continuitySummaryText.textContent = `${counts.good} GOOD / ${counts.open} OPEN`;
-    }
-
-    if (continuityLamp) {
-      continuityLamp.classList.toggle("active", counts.good > 0);
-    }
+    if (selectedCueText) selectedCueText.textContent = cueLabel(selected, true);
+    if (continuitySummaryText) continuitySummaryText.textContent = `${counts.good} GOOD / ${counts.open} OPEN`;
+    if (continuityLamp) continuityLamp.classList.toggle("active", counts.good > 0);
 
     updateAuthDisplay();
-
     armBtn.disabled = !ready || armed;
     fireBtn.disabled = !armed || !selected.continuity || selected.used;
-
     renderChannels();
     updateCueWheel();
   }
@@ -510,15 +416,10 @@ function initializePyroSimulator() {
     render();
   }
 
-  [masterPower, trainingMode, zoneClear].forEach((control) => {
-    control?.addEventListener("change", render);
-  });
+  [masterPower, trainingMode, zoneClear].forEach((control) => control?.addEventListener("change", render));
 
   keyEnable?.addEventListener("click", (event) => {
-    if (activeOperator()) {
-      return;
-    }
-
+    if (activeOperator()) return;
     event.preventDefault();
     keyEnable.checked = false;
     openAuthorizationDialog("key");
@@ -534,35 +435,49 @@ function initializePyroSimulator() {
   });
 
   authKeypadButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      if (pendingPin.length >= 6) return;
-      pendingPin += button.dataset.authKey;
-      if (authStatus) authStatus.textContent = "Enter operator PIN.";
-      updateAuthDisplay();
-    });
+    button.addEventListener("click", () => appendPinDigit(button.dataset.authKey));
   });
 
-  authClearBtn?.addEventListener("click", () => {
-    pendingPin = "";
-    if (authStatus) authStatus.textContent = "PIN cleared.";
-    updateAuthDisplay();
-  });
-
-  authCancelBtn?.addEventListener("click", () => {
-    pendingPin = "";
-    keyEnable.checked = false;
-    closeAuthorizationDialog();
-    finishLogin(false);
-    render();
-  });
-
+  authClearBtn?.addEventListener("click", clearPin);
+  authCancelBtn?.addEventListener("click", cancelAuthorization);
   authSubmitBtn?.addEventListener("click", submitAuthorization);
 
+  document.addEventListener("keydown", (event) => {
+    if (!isAuthDialogOpen()) return;
+    if (event.ctrlKey || event.altKey || event.metaKey) return;
+
+    if (/^\d$/.test(event.key)) {
+      event.preventDefault();
+      appendPinDigit(event.key);
+      return;
+    }
+
+    if (event.key === "Backspace") {
+      event.preventDefault();
+      backspacePin();
+      return;
+    }
+
+    if (event.key === "Delete") {
+      event.preventDefault();
+      clearPin();
+      return;
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+      submitAuthorization();
+      return;
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      cancelAuthorization();
+    }
+  });
+
   authDialog?.addEventListener("cancel", () => {
-    pendingPin = "";
-    keyEnable.checked = false;
-    finishLogin(false);
-    render();
+    cancelAuthorization();
   });
 
   continuityBtn?.addEventListener("click", runContinuityCheck);
@@ -583,7 +498,6 @@ function initializePyroSimulator() {
   fireBtn?.addEventListener("click", () => {
     const selected = selectedChannel();
     if (!armed || !selected.continuity || selected.used) return;
-
     selected.used = true;
     armed = false;
     addLog(`${cueLabel(selected)} command recorded.`);
@@ -592,9 +506,7 @@ function initializePyroSimulator() {
 
   scrambleBtn?.addEventListener("click", () => {
     channels.forEach((channel) => {
-      if (!channel.used) {
-        channel.continuity = Math.random() > 0.22;
-      }
+      if (!channel.used) channel.continuity = Math.random() > 0.22;
     });
     addLog("Continuity state randomized across all zones for display testing.");
     render();
