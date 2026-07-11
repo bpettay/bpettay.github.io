@@ -50,23 +50,51 @@ function initializeHomeDashboard() {
   if (!home) return;
 
   home.innerHTML = `
-    <section class="home-dashboard-only simplified-dashboard" aria-label="Personal dashboard">
+    <section class="home-dashboard-only enhanced-dashboard" aria-label="Personal dashboard">
       <article class="home-clock-card dashboard-card surface">
-        <span class="dashboard-label">Local Time</span>
-        <strong id="homeClockTime">--:--</strong>
-        <small id="homeClockDate">Loading</small>
+        <div class="dashboard-card-head">
+          <span class="dashboard-label">Local Time</span>
+          <strong>New Philadelphia</strong>
+        </div>
+        <div class="clock-layout">
+          <div class="analog-clock" aria-hidden="true">
+            <div class="clock-face">
+              <span class="clock-marker twelve"></span>
+              <span class="clock-marker three"></span>
+              <span class="clock-marker six"></span>
+              <span class="clock-marker nine"></span>
+              <span class="clock-hand hour" id="clockHourHand"></span>
+              <span class="clock-hand minute" id="clockMinuteHand"></span>
+              <span class="clock-hand second" id="clockSecondHand"></span>
+              <span class="clock-center"></span>
+            </div>
+          </div>
+          <div class="digital-clock">
+            <strong id="homeClockTime">--:--</strong>
+            <small id="homeClockDate">Loading</small>
+          </div>
+        </div>
       </article>
 
       <article class="home-weather-card dashboard-card surface">
-        <div>
-          <span class="dashboard-label">Weather</span>
-          <strong id="homeWeatherTemp">--°</strong>
-          <small id="homeWeatherSummary">Loading</small>
+        <div class="dashboard-card-head">
+          <span class="dashboard-label">Conditions</span>
+          <strong>Weather</strong>
+        </div>
+        <div class="weather-current-row">
+          <div class="condition-pictogram" id="homeWeatherIcon" aria-hidden="true">--</div>
+          <div>
+            <strong id="homeWeatherTemp">--°</strong>
+            <small id="homeWeatherSummary">Loading</small>
+          </div>
         </div>
         <div class="weather-mini-grid">
           <span>High <strong id="homeWeatherHigh">--°</strong></span>
           <span>Low <strong id="homeWeatherLow">--°</strong></span>
           <span>Wind <strong id="homeWeatherWind">-- mph</strong></span>
+          <span>Humidity <strong id="homeWeatherHumidity">--%</strong></span>
+          <span>AQI <strong id="homeWeatherAqi">--</strong></span>
+          <span>UV <strong id="homeWeatherUv">--</strong></span>
         </div>
       </article>
 
@@ -98,10 +126,15 @@ function initializeHomeDashboard() {
 function startHomeClock() {
   const timeEl = document.getElementById("homeClockTime");
   const dateEl = document.getElementById("homeClockDate");
+  const hourHand = document.getElementById("clockHourHand");
+  const minuteHand = document.getElementById("clockMinuteHand");
+  const secondHand = document.getElementById("clockSecondHand");
+
   if (!timeEl || !dateEl) return;
 
   const updateClock = () => {
     const now = new Date();
+
     timeEl.textContent = new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
       minute: "2-digit",
@@ -116,36 +149,67 @@ function startHomeClock() {
       day: "numeric",
       timeZone: "America/New_York",
     }).format(now);
+
+    const easternParts = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false,
+      timeZone: "America/New_York",
+    }).formatToParts(now);
+
+    const partValue = (type) => Number(easternParts.find((part) => part.type === type)?.value || 0);
+    const hours = partValue("hour");
+    const minutes = partValue("minute");
+    const seconds = partValue("second");
+
+    const hourDeg = ((hours % 12) * 30) + (minutes * 0.5);
+    const minuteDeg = (minutes * 6) + (seconds * 0.1);
+    const secondDeg = seconds * 6;
+
+    if (hourHand) hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+    if (minuteHand) minuteHand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+    if (secondHand) secondHand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
   };
 
   updateClock();
   window.setInterval(updateClock, 1000);
 }
 
-function weatherCodeSummary(code) {
-  const summaries = {
-    0: "Clear",
-    1: "Mostly clear",
-    2: "Partly cloudy",
-    3: "Cloudy",
-    45: "Fog",
-    48: "Rime fog",
-    51: "Light drizzle",
-    53: "Drizzle",
-    55: "Heavy drizzle",
-    61: "Light rain",
-    63: "Rain",
-    65: "Heavy rain",
-    71: "Light snow",
-    73: "Snow",
-    75: "Heavy snow",
-    80: "Rain showers",
-    81: "Showers",
-    82: "Heavy showers",
-    95: "Thunderstorms",
+function weatherCodeDetails(code) {
+  const details = {
+    0: { summary: "Clear", icon: "sun" },
+    1: { summary: "Mostly clear", icon: "sun" },
+    2: { summary: "Partly cloudy", icon: "partly" },
+    3: { summary: "Cloudy", icon: "cloud" },
+    45: { summary: "Fog", icon: "fog" },
+    48: { summary: "Rime fog", icon: "fog" },
+    51: { summary: "Light drizzle", icon: "rain" },
+    53: { summary: "Drizzle", icon: "rain" },
+    55: { summary: "Heavy drizzle", icon: "rain" },
+    61: { summary: "Light rain", icon: "rain" },
+    63: { summary: "Rain", icon: "rain" },
+    65: { summary: "Heavy rain", icon: "rain" },
+    71: { summary: "Light snow", icon: "snow" },
+    73: { summary: "Snow", icon: "snow" },
+    75: { summary: "Heavy snow", icon: "snow" },
+    80: { summary: "Rain showers", icon: "rain" },
+    81: { summary: "Showers", icon: "rain" },
+    82: { summary: "Heavy showers", icon: "rain" },
+    95: { summary: "Thunderstorms", icon: "storm" },
   };
 
-  return summaries[code] || "Current conditions";
+  return details[code] || { summary: "Current conditions", icon: "partly" };
+}
+
+function formatAqi(aqi) {
+  if (!Number.isFinite(aqi)) return "--";
+  const rounded = Math.round(aqi);
+  if (rounded <= 50) return `${rounded} good`;
+  if (rounded <= 100) return `${rounded} mod`;
+  if (rounded <= 150) return `${rounded} USG`;
+  if (rounded <= 200) return `${rounded} bad`;
+  return `${rounded} high`;
 }
 
 async function loadHomeWeather() {
@@ -154,13 +218,18 @@ async function loadHomeWeather() {
   const highEl = document.getElementById("homeWeatherHigh");
   const lowEl = document.getElementById("homeWeatherLow");
   const windEl = document.getElementById("homeWeatherWind");
-  if (!tempEl || !summaryEl || !highEl || !lowEl || !windEl) return;
+  const humidityEl = document.getElementById("homeWeatherHumidity");
+  const aqiEl = document.getElementById("homeWeatherAqi");
+  const uvEl = document.getElementById("homeWeatherUv");
+  const iconEl = document.getElementById("homeWeatherIcon");
+
+  if (!tempEl || !summaryEl || !highEl || !lowEl || !windEl || !humidityEl || !aqiEl || !uvEl || !iconEl) return;
 
   try {
-    const params = new URLSearchParams({
+    const forecastParams = new URLSearchParams({
       latitude: "40.4898",
       longitude: "-81.4457",
-      current: "temperature_2m,weather_code,wind_speed_10m",
+      current: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,uv_index",
       daily: "temperature_2m_max,temperature_2m_min",
       temperature_unit: "fahrenheit",
       wind_speed_unit: "mph",
@@ -168,20 +237,33 @@ async function loadHomeWeather() {
       timezone: "America/New_York",
     });
 
-    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`, {
-      cache: "no-store",
+    const airParams = new URLSearchParams({
+      latitude: "40.4898",
+      longitude: "-81.4457",
+      current: "us_aqi",
+      timezone: "America/New_York",
     });
 
-    if (!response.ok) throw new Error("Weather request failed");
-    const data = await response.json();
+    const [forecastResponse, airResponse] = await Promise.all([
+      fetch(`https://api.open-meteo.com/v1/forecast?${forecastParams.toString()}`, { cache: "no-store" }),
+      fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?${airParams.toString()}`, { cache: "no-store" }),
+    ]);
 
-    const current = data.current || {};
-    const daily = data.daily || {};
+    if (!forecastResponse.ok) throw new Error("Weather request failed");
+
+    const forecastData = await forecastResponse.json();
+    const airData = airResponse.ok ? await airResponse.json() : {};
+    const current = forecastData.current || {};
+    const daily = forecastData.daily || {};
+    const condition = weatherCodeDetails(current.weather_code);
 
     tempEl.textContent = Number.isFinite(current.temperature_2m)
       ? `${Math.round(current.temperature_2m)}°`
       : "--°";
-    summaryEl.textContent = weatherCodeSummary(current.weather_code);
+    summaryEl.textContent = condition.summary;
+    iconEl.dataset.condition = condition.icon;
+    iconEl.setAttribute("aria-label", condition.summary);
+
     highEl.textContent = Number.isFinite(daily.temperature_2m_max?.[0])
       ? `${Math.round(daily.temperature_2m_max[0])}°`
       : "--°";
@@ -191,12 +273,23 @@ async function loadHomeWeather() {
     windEl.textContent = Number.isFinite(current.wind_speed_10m)
       ? `${Math.round(current.wind_speed_10m)} mph`
       : "-- mph";
+    humidityEl.textContent = Number.isFinite(current.relative_humidity_2m)
+      ? `${Math.round(current.relative_humidity_2m)}%`
+      : "--%";
+    uvEl.textContent = Number.isFinite(current.uv_index)
+      ? `${Math.round(current.uv_index)}`
+      : "--";
+    aqiEl.textContent = formatAqi(airData.current?.us_aqi);
   } catch (error) {
     tempEl.textContent = "--°";
     highEl.textContent = "--°";
     lowEl.textContent = "--°";
     windEl.textContent = "-- mph";
+    humidityEl.textContent = "--%";
+    uvEl.textContent = "--";
+    aqiEl.textContent = "--";
     summaryEl.textContent = "Weather unavailable";
+    iconEl.dataset.condition = "unknown";
   }
 }
 
