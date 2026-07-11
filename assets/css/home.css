@@ -15,7 +15,8 @@
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.09);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025));
+    radial-gradient(circle at 12% 12%, rgba(120, 255, 190, 0.06), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.026));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.055),
     0 14px 28px rgba(0, 0, 0, 0.18);
@@ -31,14 +32,26 @@
 .home-clock-card,
 .home-weather-card {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.9rem;
   align-content: start;
 }
 
 .home-weather-card,
-.quick-actions-card,
-.site-status-card {
+.quick-actions-card {
   grid-column: span 2;
+}
+
+.dashboard-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.dashboard-card-head strong {
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .dashboard-label,
@@ -51,39 +64,249 @@
   font-weight: 500;
 }
 
-.home-clock-card strong,
-.home-weather-card > div:first-child > strong {
+.clock-layout {
+  display: grid;
+  grid-template-columns: 136px minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.analog-clock {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+}
+
+.clock-face {
+  position: relative;
+  width: 128px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08), transparent 8%),
+    radial-gradient(circle at 28% 24%, rgba(255, 255, 255, 0.12), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.22));
+  box-shadow:
+    inset 0 1px 8px rgba(255, 255, 255, 0.08),
+    inset 0 -14px 28px rgba(0, 0, 0, 0.18),
+    0 16px 28px rgba(0, 0, 0, 0.22);
+}
+
+.clock-marker {
+  position: absolute;
+  background: rgba(243, 245, 247, 0.48);
+  border-radius: 999px;
+}
+
+.clock-marker.twelve,
+.clock-marker.six {
+  left: 50%;
+  width: 3px;
+  height: 12px;
+  transform: translateX(-50%);
+}
+
+.clock-marker.twelve { top: 11px; }
+.clock-marker.six { bottom: 11px; }
+
+.clock-marker.three,
+.clock-marker.nine {
+  top: 50%;
+  width: 12px;
+  height: 3px;
+  transform: translateY(-50%);
+}
+
+.clock-marker.three { right: 11px; }
+.clock-marker.nine { left: 11px; }
+
+.clock-hand {
+  position: absolute;
+  left: 50%;
+  bottom: 50%;
+  border-radius: 999px;
+  transform-origin: bottom center;
+}
+
+.clock-hand.hour {
+  width: 5px;
+  height: 34px;
+  background: rgba(243, 245, 247, 0.96);
+  z-index: 3;
+}
+
+.clock-hand.minute {
+  width: 3px;
+  height: 48px;
+  background: rgba(210, 222, 228, 0.9);
+  z-index: 2;
+}
+
+.clock-hand.second {
+  width: 2px;
+  height: 54px;
+  background: #ff7a59;
+  z-index: 4;
+}
+
+.clock-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  background: #f3f5f7;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  box-shadow: 0 0 0 4px rgba(243, 245, 247, 0.08);
+}
+
+.digital-clock {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.digital-clock > strong,
+.home-weather-card .weather-current-row strong {
   display: block;
   color: var(--ink);
   font-size: clamp(2rem, 5vw, 3rem);
   line-height: 1;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
 }
 
-.home-clock-card small,
+.digital-clock small,
 .home-weather-card small,
-.status-tile small,
 .action-tile small {
   color: var(--ink-soft);
   line-height: 1.45;
 }
 
+.weather-current-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.condition-pictogram {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 86px;
+  aspect-ratio: 1;
+  border-radius: 24px;
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(120, 255, 190, 0.10), rgba(255, 255, 255, 0.035));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  font-size: 0;
+}
+
+.condition-pictogram::before,
+.condition-pictogram::after {
+  content: "";
+  position: absolute;
+  display: block;
+}
+
+.condition-pictogram[data-condition="sun"]::before,
+.condition-pictogram:not([data-condition])::before {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: #ffca5f;
+  box-shadow: 0 0 28px rgba(255, 202, 95, 0.42);
+}
+
+.condition-pictogram[data-condition="partly"]::before {
+  width: 34px;
+  height: 34px;
+  left: 19px;
+  top: 18px;
+  border-radius: 999px;
+  background: #ffca5f;
+  box-shadow: 0 0 24px rgba(255, 202, 95, 0.36);
+}
+
+.condition-pictogram[data-condition="partly"]::after,
+.condition-pictogram[data-condition="cloud"]::before,
+.condition-pictogram[data-condition="rain"]::before,
+.condition-pictogram[data-condition="storm"]::before,
+.condition-pictogram[data-condition="snow"]::before,
+.condition-pictogram[data-condition="fog"]::before,
+.condition-pictogram[data-condition="unknown"]::before {
+  width: 48px;
+  height: 24px;
+  left: 21px;
+  top: 36px;
+  border-radius: 999px;
+  background: #d7dde3;
+  box-shadow:
+    -13px 4px 0 -3px #d7dde3,
+    13px 5px 0 -5px #d7dde3;
+}
+
+.condition-pictogram[data-condition="rain"]::after {
+  width: 3px;
+  height: 14px;
+  left: 35px;
+  top: 62px;
+  border-radius: 999px;
+  background: #72b7ff;
+  box-shadow: 13px -1px 0 #72b7ff, 26px 0 0 #72b7ff;
+  transform: rotate(12deg);
+}
+
+.condition-pictogram[data-condition="storm"]::after {
+  width: 18px;
+  height: 30px;
+  left: 37px;
+  top: 55px;
+  background: #ffd45c;
+  clip-path: polygon(44% 0, 100% 0, 62% 42%, 100% 42%, 30% 100%, 48% 55%, 0 55%);
+}
+
+.condition-pictogram[data-condition="snow"]::after {
+  width: 6px;
+  height: 6px;
+  left: 32px;
+  top: 65px;
+  border-radius: 999px;
+  background: #e8f8ff;
+  box-shadow: 17px -1px 0 #e8f8ff, 34px 0 0 #e8f8ff;
+}
+
+.condition-pictogram[data-condition="fog"]::after {
+  width: 52px;
+  height: 3px;
+  left: 17px;
+  top: 63px;
+  border-radius: 999px;
+  background: rgba(243, 245, 247, 0.62);
+  box-shadow: 0 10px 0 rgba(243, 245, 247, 0.42), 0 20px 0 rgba(243, 245, 247, 0.28);
+}
+
 .weather-mini-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.45rem;
-  margin-top: 0.35rem;
+  gap: 0.55rem;
+  margin-top: 0.1rem;
 }
 
 .weather-mini-grid span {
   display: grid;
-  gap: 0.18rem;
-  padding: 0.55rem;
-  border-radius: 12px;
+  gap: 0.2rem;
+  padding: 0.65rem;
+  border-radius: 13px;
   color: var(--ink-soft);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   background: rgba(255, 255, 255, 0.04);
@@ -96,6 +319,7 @@
   font-size: 0.92rem;
   letter-spacing: 0;
   text-transform: none;
+  line-height: 1.15;
 }
 
 .action-tile {
@@ -136,31 +360,17 @@
   min-height: 120px;
 }
 
-.action-tile span,
-.status-tile span {
+.action-tile span {
   color: var(--ink-soft);
   font-size: 0.68rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
-.action-tile strong,
-.status-tile strong {
+.action-tile strong {
   color: var(--ink);
   font-size: 1.05rem;
   font-weight: 600;
-}
-
-.status-tile-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-3);
-}
-
-.status-tile {
-  display: grid;
-  gap: 0.35rem;
-  padding: var(--space-3);
 }
 
 select {
@@ -179,27 +389,38 @@ select optgroup {
   .home-dashboard-only {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .home-weather-card,
+  .quick-actions-card {
+    grid-column: span 2;
+  }
 }
 
 @media (max-width: 720px) {
   .home-dashboard-only,
   .action-grid,
-  .status-tile-grid,
   .weather-mini-grid {
     grid-template-columns: 1fr;
   }
 
   .home-weather-card,
-  .quick-actions-card,
-  .site-status-card {
+  .quick-actions-card {
     grid-column: auto;
+  }
+
+  .clock-layout,
+  .weather-current-row {
+    grid-template-columns: 1fr;
+  }
+
+  .analog-clock {
+    justify-content: start;
   }
 
   .dashboard-card,
   .home-clock-card,
   .home-weather-card,
-  .action-tile,
-  .status-tile {
+  .action-tile {
     padding: var(--space-4);
   }
 }
@@ -208,8 +429,7 @@ select optgroup {
   .dashboard-card,
   .home-clock-card,
   .home-weather-card,
-  .action-tile,
-  .status-tile {
+  .action-tile {
     padding: var(--space-3);
   }
 }
