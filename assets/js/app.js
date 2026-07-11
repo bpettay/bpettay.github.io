@@ -50,56 +50,41 @@ function initializeHomeDashboard() {
   if (!home) return;
 
   home.innerHTML = `
-    <section class="home-hero surface utility-hero">
-      <div class="home-hero-copy">
-        <p class="eyebrow">Control Center</p>
-        <h1>Dashboard</h1>
-        <p class="hero-text">
-          Fast access to the stuff I actually use: tools, weather, time, and the Pyro console.
-        </p>
-        <div class="hero-links">
-          <button class="cta-button" type="button" data-page-target="tools">Unit Converter</button>
-          <button class="cta-button secondary" type="button" data-page-target="pyro">Pyro Console</button>
-        </div>
-      </div>
+    <section class="home-dashboard-only" aria-label="Personal dashboard">
+      <article class="home-clock-card dashboard-card surface">
+        <span class="dashboard-label">Local Time</span>
+        <strong id="homeClockTime">--:--</strong>
+        <small id="homeClockDate">Loading</small>
+      </article>
 
-      <aside class="home-now-card" aria-label="Current time and weather">
-        <div class="home-clock-card">
-          <span class="dashboard-label">Local Time</span>
-          <strong id="homeClockTime">--:--</strong>
-          <small id="homeClockDate">Loading</small>
+      <article class="home-weather-card dashboard-card surface">
+        <div>
+          <span class="dashboard-label">Weather</span>
+          <strong id="homeWeatherTemp">--°</strong>
+          <small id="homeWeatherSummary">Loading</small>
         </div>
-        <div class="home-weather-card">
-          <div>
-            <span class="dashboard-label">Weather</span>
-            <strong id="homeWeatherTemp">--°</strong>
-            <small id="homeWeatherSummary">Loading</small>
-          </div>
-          <div class="weather-mini-grid">
-            <span>High <strong id="homeWeatherHigh">--°</strong></span>
-            <span>Low <strong id="homeWeatherLow">--°</strong></span>
-            <span>Wind <strong id="homeWeatherWind">-- mph</strong></span>
-          </div>
+        <div class="weather-mini-grid">
+          <span>High <strong id="homeWeatherHigh">--°</strong></span>
+          <span>Low <strong id="homeWeatherLow">--°</strong></span>
+          <span>Wind <strong id="homeWeatherWind">-- mph</strong></span>
         </div>
-      </aside>
-    </section>
+      </article>
 
-    <section class="home-dashboard-grid">
       <article class="dashboard-card surface quick-actions-card">
         <div class="section-heading">
           <p class="section-label">Shortcuts</p>
-          <h2>Open what matters.</h2>
+          <h2>Open</h2>
         </div>
-        <div class="action-grid">
+        <div class="action-grid compact-action-grid">
           <button class="action-tile" type="button" data-page-target="tools">
             <span>Tools</span>
             <strong>Unit converter</strong>
-            <small>Quick conversions, 3 sig figs, equation preview.</small>
+            <small>3 sig figs, equation preview, grouped units.</small>
           </button>
           <button class="action-tile" type="button" data-page-target="pyro">
             <span>Pyro</span>
             <strong>Console</strong>
-            <small>Operator login, cue bank, activity log.</small>
+            <small>Login, cue bank, activity log.</small>
           </button>
         </div>
       </article>
@@ -107,18 +92,18 @@ function initializeHomeDashboard() {
       <article class="dashboard-card surface site-status-card">
         <div class="section-heading">
           <p class="section-label">System</p>
-          <h2>Current setup.</h2>
+          <h2>Status</h2>
         </div>
-        <div class="status-tile-grid">
+        <div class="status-tile-grid compact-status-grid">
           <div class="status-tile">
             <span>Assets</span>
             <strong>Fresh load</strong>
-            <small>CSS/JS refresh automatically each page load.</small>
+            <small>CSS/JS refresh every page load.</small>
           </div>
           <div class="status-tile">
             <span>Pyro</span>
             <strong>Login required</strong>
-            <small>Actions attach to the logged-in operator.</small>
+            <small>Actions attach to active operator.</small>
           </div>
           <div class="status-tile">
             <span>Cues</span>
@@ -126,39 +111,6 @@ function initializeHomeDashboard() {
             <small>3 zones × 10 cues.</small>
           </div>
         </div>
-      </article>
-    </section>
-
-    <section class="home-dashboard-grid lower-dashboard-grid">
-      <article class="dashboard-card surface">
-        <div class="section-heading">
-          <p class="section-label">Today</p>
-          <h2>Useful glance.</h2>
-        </div>
-        <div class="status-tile-grid compact-status-grid">
-          <div class="status-tile">
-            <span>Location</span>
-            <strong>New Philadelphia</strong>
-            <small>Clock and weather are pinned here.</small>
-          </div>
-          <div class="status-tile">
-            <span>Mode</span>
-            <strong>Personal utility</strong>
-            <small>No portfolio filler. Just tools.</small>
-          </div>
-        </div>
-      </article>
-
-      <article class="dashboard-card surface">
-        <div class="section-heading">
-          <p class="section-label">Next Up</p>
-          <h2>Build list.</h2>
-        </div>
-        <ul class="home-task-list">
-          <li>Add more calculators that are useful in the shop or lab</li>
-          <li>Add local-only scratchpad or checklist widgets</li>
-          <li>Add exportable logs for the Pyro console</li>
-        </ul>
       </article>
     </section>
   `;
@@ -250,11 +202,19 @@ async function loadHomeWeather() {
     const current = data.current || {};
     const daily = data.daily || {};
 
-    tempEl.textContent = `${Math.round(current.temperature_2m)}°`;
+    tempEl.textContent = Number.isFinite(current.temperature_2m)
+      ? `${Math.round(current.temperature_2m)}°`
+      : "--°";
     summaryEl.textContent = weatherCodeSummary(current.weather_code);
-    highEl.textContent = `${Math.round(daily.temperature_2m_max?.[0])}°`;
-    lowEl.textContent = `${Math.round(daily.temperature_2m_min?.[0])}°`;
-    windEl.textContent = `${Math.round(current.wind_speed_10m)} mph`;
+    highEl.textContent = Number.isFinite(daily.temperature_2m_max?.[0])
+      ? `${Math.round(daily.temperature_2m_max[0])}°`
+      : "--°";
+    lowEl.textContent = Number.isFinite(daily.temperature_2m_min?.[0])
+      ? `${Math.round(daily.temperature_2m_min[0])}°`
+      : "--°";
+    windEl.textContent = Number.isFinite(current.wind_speed_10m)
+      ? `${Math.round(current.wind_speed_10m)} mph`
+      : "-- mph";
   } catch (error) {
     tempEl.textContent = "--°";
     highEl.textContent = "--°";
