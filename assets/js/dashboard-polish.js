@@ -1,134 +1,227 @@
 (() => {
-  const NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);
-  const LUNAR_CYCLE_DAYS = 29.530588853;
-  const EARTH_ORBIT_DAYS = 365.2422;
+  const LAT = 40.4898;
+  const LON = -81.4457;
+  const TIME_ZONE = "America/New_York";
+  const DEG = Math.PI / 180;
+  const RAD = 180 / Math.PI;
   const SVG_NS = "http://www.w3.org/2000/svg";
 
-  function dayFraction(date = new Date()) {
-    const start = Date.UTC(date.getUTCFullYear(), 0, 1);
-    return ((date.getTime() - start) / 86400000) / EARTH_ORBIT_DAYS;
-  }
+  const normalize = (value) => ((value % 360) + 360) % 360;
+  const julian = (date) => date.getTime() / 86400000 + 2440587.5;
+  const gmst = (date) => normalize(280.46061837 + 360.98564736629 * (julian(date) - 2451545));
 
-  function lunarFraction(date = new Date()) {
-    const age = (((date.getTime() - NEW_MOON) / 86400000) % LUNAR_CYCLE_DAYS + LUNAR_CYCLE_DAYS) % LUNAR_CYCLE_DAYS;
-    return { age, fraction: age / LUNAR_CYCLE_DAYS };
-  }
-
-  function ellipsePoint(fraction, cx, cy, rx, ry, phaseOffset = -Math.PI / 2) {
-    const angle = fraction * Math.PI * 2 + phaseOffset;
+  function solarEquatorial(date) {
+    const n = julian(date) - 2451545;
+    const meanLongitude = normalize(280.46 + 0.9856474 * n);
+    const meanAnomaly = normalize(357.528 + 0.9856003 * n) * DEG;
+    const lambda = normalize(meanLongitude + 1.915 * Math.sin(meanAnomaly) + 0.02 * Math.sin(2 * meanAnomaly)) * DEG;
+    const obliquity = (23.439 - 0.0000004 * n) * DEG;
     return {
-      x: cx + rx * Math.cos(angle),
-      y: cy + ry * Math.sin(angle),
+      ra: normalize(Math.atan2(Math.cos(obliquity) * Math.sin(lambda), Math.cos(lambda)) * RAD),
+      dec: Math.asin(Math.sin(obliquity) * Math.sin(lambda)) * RAD,
     };
   }
 
-  function circlePoint(fraction, cx, cy, radius, phaseOffset = -Math.PI / 2) {
-    const angle = fraction * Math.PI * 2 + phaseOffset;
+  function moonEquatorial(date) {
+    const d = julian(date) - 2451543.5;
+    const node = normalize(125.1228 - 0.0529538083 * d) * DEG;
+    const inclination = 5.1454 * DEG;
+    const periapsis = normalize(318.0634 + 0.1643573223 * d) * DEG;
+    const eccentricity = 0.0549;
+    const meanAnomaly = normalize(115.3654 + 13.0649929509 * d) * DEG;
+    const eccentricAnomaly = meanAnomaly + eccentricity * Math.sin(meanAnomaly) * (1 + eccentricity * Math.cos(meanAnomaly));
+    const xv = 60.2666 * (Math.cos(eccentricAnomaly) - eccentricity);
+    const yv = 60.2666 * Math.sqrt(1 - eccentricity * eccentricity) * Math.sin(eccentricAnomaly);
+    const trueAnomaly = Math.atan2(yv, xv);
+    const radius = Math.hypot(xv, yv);
+    const xh = radius * (Math.cos(node) * Math.cos(trueAnomaly + periapsis) - Math.sin(node) * Math.sin(trueAnomaly + periapsis) * Math.cos(inclination));
+    const yh = radius * (Math.sin(node) * Math.cos(trueAnomaly + periapsis) + Math.cos(node) * Math.sin(trueAnomaly + periapsis) * Math.cos(inclination));
+    const zh = radius * Math.sin(trueAnomaly + periapsis) * Math.sin(inclination);
+    const obliquity = (23.4393 - 3.563e-7 * d) * DEG;
+    const xe = xh;
+    const ye = yh * Math.cos(obliquity) - zh * Math.sin(obliquity);
+    const ze = yh * Math.sin(obliquity) + zh * Math.cos(obliquity);
     return {
-      x: cx + radius * Math.cos(angle),
-      y: cy + radius * Math.sin(angle),
+      ra: normalize(Math.atan2(ye, xe) * RAD),
+      dec: Math.atan2(ze, Math.hypot(xe, ye)) * RAD,
     };
   }
 
-  function ensureSunCentricScene() {
+  function altitude(equatorial, date) {
+    const latitude = LAT * DEG;
+    const declination = equatorial.dec * DEG;
+    let hourAngle = normalize(gmst(date) + LON - equatorial.ra);
+    if (hourAngle > 180) hourAngle -= 360;
+    const h = hourAngle * DEG;
+    return Math.asin(
+      Math.sin(latitude) * Math.sin(declination) +
+      Math.cos(latitude) * Math.cos(declination) * Math.cos(h)
+    ) * RAD;
+  }
+
+  function localParts(date = new Date()) {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: TIME_ZONE,
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false,
+    }).formatToParts(date);
+    const value = (type) => Number(parts.find((part) => part.type === type)?.value || 0);
+    return { year: value("year"), month: value("month"), day: value("day"), hour: value("hour"), minute: value("minute"), second: value("second") };
+  }
+
+  function timezoneOffsetMs(date) {
+    const p = localParts(date);
+    const representedAsUtc = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
+    return representedAsUtc - date.getTime();
+  }
+
+  function localMidnightUtc(date = new Date()) {
+    const p = localParts(date);
+    let guess = new Date(Date.UTC(p.year, p.month - 1, p.day, 0, 0, 0));
+    guess = new Date(guess.getTime() - timezoneOffsetMs(guess));
+    return guess;
+  }
+
+  function formatTime(date) {
+    return new Intl.DateTimeFormat("en-US", {
+      timeZone: TIME_ZONE,
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(date);
+  }
+
+  function pathPoint(hour, alt, rowTop) {
+    const x = 46 + (hour / 24) * 808;
+    const clamped = Math.max(-28, Math.min(90, alt));
+    const y = rowTop + 151 - ((clamped + 28) / 118) * 126;
+    return { x, y };
+  }
+
+  function createBodyPath(kind, midnight, rowTop) {
+    const samples = [];
+    let maxAltitude = -90;
+    let maxDate = midnight;
+    const crossings = [];
+    let previous = null;
+
+    for (let index = 0; index <= 96; index += 1) {
+      const hour = index / 4;
+      const date = new Date(midnight.getTime() + hour * 3600000);
+      const equatorial = kind === "sun" ? solarEquatorial(date) : moonEquatorial(date);
+      const alt = altitude(equatorial, date);
+      if (alt > maxAltitude) {
+        maxAltitude = alt;
+        maxDate = date;
+      }
+      if (previous && previous.alt * alt < 0) {
+        const fraction = Math.abs(previous.alt) / (Math.abs(previous.alt) + Math.abs(alt));
+        crossings.push(new Date(previous.date.getTime() + fraction * (date.getTime() - previous.date.getTime())));
+      }
+      samples.push({ hour, alt, date });
+      previous = { alt, date };
+    }
+
+    const points = samples.map((sample) => pathPoint(sample.hour, sample.alt, rowTop));
+    const path = points.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
+    return { path, maxAltitude, maxDate, crossings };
+  }
+
+  function markerPoint(kind, now, midnight, rowTop) {
+    const hours = (now.getTime() - midnight.getTime()) / 3600000;
+    const equatorial = kind === "sun" ? solarEquatorial(now) : moonEquatorial(now);
+    const alt = altitude(equatorial, now);
+    return { ...pathPoint(hours, alt, rowTop), altitude: alt };
+  }
+
+  function ensureSkyPathScene() {
     const svg = document.querySelector(".v2-orbit");
     if (!svg) return null;
+    if (svg.dataset.skyPathsBuilt === "true") return svg;
 
-    if (svg.dataset.sunCentricBuilt === "true") {
-      return {
-        svg,
-        earthGroup: document.getElementById("v2EarthSystem"),
-        moonMarker: document.getElementById("v2MoonMarker"),
-      };
-    }
-
-    svg.dataset.sunCentricBuilt = "true";
-    svg.setAttribute("aria-label", "Live sun-centric view with Earth orbiting the Sun and Moon orbiting Earth");
+    svg.dataset.skyPathsBuilt = "true";
+    svg.setAttribute("viewBox", "0 0 900 430");
+    svg.setAttribute("aria-label", "Live daily altitude paths for the Sun and Moon in New Philadelphia, Ohio");
     svg.innerHTML = `
       <defs>
-        <radialGradient id="v2SunFill" cx="36%" cy="32%" r="70%">
-          <stop offset="0" stop-color="#fff6b0" />
-          <stop offset="0.35" stop-color="#ffd34d" />
-          <stop offset="1" stop-color="#f39a18" />
-        </radialGradient>
-        <radialGradient id="v2EarthFill" cx="35%" cy="30%" r="75%">
-          <stop offset="0" stop-color="#8bd3ff" />
-          <stop offset="0.5" stop-color="#347fba" />
-          <stop offset="1" stop-color="#102d47" />
-        </radialGradient>
-        <radialGradient id="v2MoonFill" cx="35%" cy="30%" r="75%">
-          <stop offset="0" stop-color="#f3f4f6" />
-          <stop offset="0.55" stop-color="#b8bec6" />
-          <stop offset="1" stop-color="#5c636b" />
-        </radialGradient>
-        <filter id="v2SunGlow" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur stdDeviation="10" result="blur" />
+        <filter id="v2SunGlow" x="-150%" y="-150%" width="400%" height="400%">
+          <feGaussianBlur stdDeviation="7" result="blur" />
           <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
+        <radialGradient id="v2MoonFill" cx="35%" cy="30%" r="72%">
+          <stop offset="0" stop-color="#f5f7fa" />
+          <stop offset="0.58" stop-color="#c4cbd3" />
+          <stop offset="1" stop-color="#69727c" />
+        </radialGradient>
       </defs>
 
-      <text x="450" y="34" text-anchor="middle" class="v2-sun-centric-title">Sun-Centric View</text>
-      <ellipse cx="450" cy="225" rx="350" ry="145" class="v2-earth-orbit" />
-      <line x1="100" y1="225" x2="800" y2="225" class="v2-axis" />
-      <line x1="450" y1="80" x2="450" y2="370" class="v2-axis" />
-
-      <g id="v2SunCenter">
-        <circle cx="450" cy="225" r="37" class="v2-sun-halo" />
-        <circle cx="450" cy="225" r="27" fill="url(#v2SunFill)" class="v2-sun-center" filter="url(#v2SunGlow)" />
-      </g>
-
-      <g id="v2EarthSystem">
-        <circle id="v2MoonOrbit" cx="0" cy="0" r="48" class="v2-moon-orbit" />
-        <circle cx="0" cy="0" r="23" fill="url(#v2EarthFill)" class="v2-earth-body" />
-        <text x="0" y="4" text-anchor="middle" class="v2-earth-label">Earth</text>
-        <g id="v2MoonMarker">
-          <circle r="10" fill="url(#v2MoonFill)" class="v2-moon-body" />
+      <g class="v2-sky-row v2-sun-row">
+        <text x="46" y="28" class="v2-row-title">Sun</text>
+        <text id="v2SunPeakLabel" x="854" y="28" text-anchor="end" class="v2-row-meta">Peak --</text>
+        <rect x="36" y="40" width="828" height="154" rx="16" class="v2-row-bg" />
+        <line x1="46" y1="169" x2="854" y2="169" class="v2-horizon" />
+        <path id="v2SunPathLine" class="v2-sky-path sun" />
+        <g id="v2SunLiveMarker" class="v2-live-marker">
+          <circle r="18" class="v2-sun-glow" />
+          <circle r="10" class="v2-sun-disc" />
         </g>
+        <text id="v2SunStatus" x="46" y="188" class="v2-status-text">--</text>
       </g>
 
-      <text x="450" y="410" text-anchor="middle" class="v2-orbit-caption">Earth completes one orbit per year · Moon completes one orbit every 29.5 days</text>
+      <g class="v2-sky-row v2-moon-row">
+        <text x="46" y="232" class="v2-row-title">Moon</text>
+        <text id="v2MoonPeakLabel" x="854" y="232" text-anchor="end" class="v2-row-meta">Peak --</text>
+        <rect x="36" y="244" width="828" height="154" rx="16" class="v2-row-bg" />
+        <line x1="46" y1="373" x2="854" y2="373" class="v2-horizon" />
+        <path id="v2MoonPathLine" class="v2-sky-path moon" />
+        <g id="v2MoonLiveMarker" class="v2-live-marker">
+          <circle r="12" fill="url(#v2MoonFill)" class="v2-moon-disc-live" />
+        </g>
+        <text id="v2MoonStatus" x="46" y="392" class="v2-status-text">--</text>
+      </g>
+
+      <g class="v2-time-labels">
+        <text x="46" y="418">12 AM</text>
+        <text x="248" y="418" text-anchor="middle">6 AM</text>
+        <text x="450" y="418" text-anchor="middle">12 PM</text>
+        <text x="652" y="418" text-anchor="middle">6 PM</text>
+        <text x="854" y="418" text-anchor="end">12 AM</text>
+      </g>
     `;
-
-    return {
-      svg,
-      earthGroup: document.getElementById("v2EarthSystem"),
-      moonMarker: document.getElementById("v2MoonMarker"),
-    };
+    return svg;
   }
 
-  function addOrbitTicks(svg) {
-    if (!svg || svg.querySelector(".orbit-tick-layer")) return;
-    const layer = document.createElementNS(SVG_NS, "g");
-    layer.classList.add("orbit-tick-layer");
-
-    for (let index = 0; index < 36; index += 1) {
-      const angle = (index / 36) * Math.PI * 2;
-      const major = index % 9 === 0;
-      const line = document.createElementNS(SVG_NS, "line");
-      line.setAttribute("x1", String(450 + (major ? 330 : 338) * Math.cos(angle)));
-      line.setAttribute("y1", String(225 + (major ? 136 : 140) * Math.sin(angle)));
-      line.setAttribute("x2", String(450 + 350 * Math.cos(angle)));
-      line.setAttribute("y2", String(225 + 145 * Math.sin(angle)));
-      line.classList.add("orbit-tick");
-      if (major) line.classList.add("major");
-      layer.appendChild(line);
-    }
-
-    const orbit = svg.querySelector(".v2-earth-orbit");
-    orbit?.after(layer);
-  }
-
-  function updateSunCentricScene() {
-    const scene = ensureSunCentricScene();
-    if (!scene?.earthGroup || !scene.moonMarker) return;
+  function updateSkyPaths() {
+    const svg = ensureSkyPathScene();
+    if (!svg) return;
 
     const now = new Date();
-    const earth = ellipsePoint(dayFraction(now), 450, 225, 350, 145);
-    const moon = lunarFraction(now);
-    const moonPoint = circlePoint(moon.fraction, 0, 0, 48);
+    const midnight = localMidnightUtc(now);
+    const sun = createBodyPath("sun", midnight, 40);
+    const moon = createBodyPath("moon", midnight, 244);
+    const sunMarker = markerPoint("sun", now, midnight, 40);
+    const moonMarker = markerPoint("moon", now, midnight, 244);
 
-    scene.earthGroup.setAttribute("transform", `translate(${earth.x.toFixed(2)} ${earth.y.toFixed(2)})`);
-    scene.moonMarker.setAttribute("transform", `translate(${moonPoint.x.toFixed(2)} ${moonPoint.y.toFixed(2)})`);
+    document.getElementById("v2SunPathLine")?.setAttribute("d", sun.path);
+    document.getElementById("v2MoonPathLine")?.setAttribute("d", moon.path);
+    document.getElementById("v2SunLiveMarker")?.setAttribute("transform", `translate(${sunMarker.x.toFixed(1)} ${sunMarker.y.toFixed(1)})`);
+    document.getElementById("v2MoonLiveMarker")?.setAttribute("transform", `translate(${moonMarker.x.toFixed(1)} ${moonMarker.y.toFixed(1)})`);
+
+    const sunUp = sunMarker.altitude >= 0;
+    const moonUp = moonMarker.altitude >= 0;
+    document.getElementById("v2SunLiveMarker")?.classList.toggle("below", !sunUp);
+    document.getElementById("v2MoonLiveMarker")?.classList.toggle("below", !moonUp);
+
+    const sunRiseSet = sun.crossings.length >= 2 ? `${formatTime(sun.crossings[0])} rise · ${formatTime(sun.crossings[1])} set` : "No horizon crossings today";
+    const moonRiseSet = moon.crossings.length >= 2 ? `${formatTime(moon.crossings[0])} rise · ${formatTime(moon.crossings[1])} set` : moon.crossings.length === 1 ? `Horizon crossing ${formatTime(moon.crossings[0])}` : "No horizon crossings today";
+    document.getElementById("v2SunStatus").textContent = `${sunUp ? "Above" : "Below"} horizon · ${Math.abs(sunMarker.altitude).toFixed(0)}° · ${sunRiseSet}`;
+    document.getElementById("v2MoonStatus").textContent = `${moonUp ? "Above" : "Below"} horizon · ${Math.abs(moonMarker.altitude).toFixed(0)}° · ${moonRiseSet}`;
+    document.getElementById("v2SunPeakLabel").textContent = `Peak ${sun.maxAltitude.toFixed(0)}° at ${formatTime(sun.maxDate)}`;
+    document.getElementById("v2MoonPeakLabel").textContent = `Peak ${moon.maxAltitude.toFixed(0)}° at ${formatTime(moon.maxDate)}`;
   }
 
   function injectStyles() {
@@ -136,27 +229,29 @@
     const style = document.createElement("style");
     style.id = "dashboardPolishStyles";
     style.textContent = `
-      #home { max-width: 1540px !important; margin: 0 auto !important; padding: 12px !important; }
-      .v2-dashboard { grid-template-columns: minmax(250px,290px) minmax(0,1fr) !important; gap:12px !important; align-items:start !important; }
+      #home { max-width:1540px !important; margin:0 auto !important; padding:12px !important; }
+      .v2-dashboard { grid-template-columns:minmax(250px,290px) minmax(0,1fr) !important; gap:12px !important; align-items:start !important; }
       .v2-card { border-radius:20px !important; border-color:rgba(115,170,225,.23) !important; background:linear-gradient(145deg,rgba(10,22,34,.97),rgba(5,13,22,.99)) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 18px 42px rgba(0,0,0,.26) !important; }
       .v2-time-panel,.v2-weather-panel,.v2-calculator-panel,.v2-shortcuts-panel { padding:22px !important; }
       .v2-weather-strip { grid-template-columns:minmax(145px,1.45fr) repeat(6,minmax(82px,1fr)) minmax(130px,1.15fr) !important; gap:0 !important; border-top:1px solid rgba(255,255,255,.12); border-bottom:1px solid rgba(255,255,255,.12); }
       .v2-current,.v2-stat,.v2-go { border:0 !important; border-right:1px solid rgba(255,255,255,.11) !important; border-radius:0 !important; padding:17px 13px !important; }
       .v2-go { border-right:0 !important; }
+      .v2-orbit-wrap { margin-top:12px; }
       .v2-orbit { width:100%; max-height:430px; overflow:visible; }
-      .v2-earth-orbit { fill:none; stroke:#f6c945; stroke-width:2.5; opacity:.9; }
-      .v2-axis { stroke:rgba(255,255,255,.10); stroke-width:1; stroke-dasharray:6 8; }
-      .v2-moon-orbit { fill:none; stroke:rgba(220,230,242,.38); stroke-width:1.4; stroke-dasharray:5 5; }
-      .v2-sun-halo { fill:rgba(255,190,50,.12); }
-      .v2-sun-center { stroke:rgba(255,240,170,.8); stroke-width:1.2; }
-      .v2-earth-body { stroke:rgba(170,220,255,.55); stroke-width:1.2; }
-      .v2-moon-body { stroke:rgba(255,255,255,.55); stroke-width:.8; }
-      .v2-sun-centric-title { fill:#f4f7fb; font-size:24px; font-weight:700; }
-      .v2-orbit-caption { fill:rgba(220,228,238,.72); font-size:13px; }
-      .v2-earth-label { fill:#f7fbff; font-size:10px; font-weight:700; pointer-events:none; }
-      .orbit-tick { stroke:rgba(255,255,255,.18); stroke-width:1; }
-      .orbit-tick.major { stroke:rgba(255,255,255,.42); stroke-width:2; }
-      #v2EarthSystem,#v2MoonMarker { transition:transform .7s ease; }
+      .v2-row-bg { fill:rgba(255,255,255,.025); stroke:rgba(255,255,255,.08); stroke-width:1; }
+      .v2-horizon { stroke:rgba(255,255,255,.22); stroke-width:1.2; }
+      .v2-sky-path { fill:none; stroke-width:5; stroke-linecap:round; stroke-linejoin:round; }
+      .v2-sky-path.sun { stroke:url(#v2SunPathGradient); stroke:#f5bd45; }
+      .v2-sky-path.moon { stroke:#aeb8c7; }
+      .v2-row-title { fill:#f4f7fb; font-size:20px; font-weight:700; }
+      .v2-row-meta { fill:rgba(220,228,238,.72); font-size:12px; }
+      .v2-status-text { fill:rgba(220,228,238,.68); font-size:10px; }
+      .v2-time-labels text { fill:rgba(220,228,238,.58); font-size:11px; }
+      .v2-sun-glow { fill:rgba(255,198,71,.18); filter:url(#v2SunGlow); }
+      .v2-sun-disc { fill:#ffd05b; stroke:#fff1ae; stroke-width:1.2; }
+      .v2-moon-disc-live { stroke:rgba(255,255,255,.55); stroke-width:1; }
+      .v2-live-marker { transition:transform .7s ease,opacity .4s ease; }
+      .v2-live-marker.below { opacity:.35; }
       .v2-sky-footer { margin-top:2px !important; }
       .v2-calculator-panel { grid-column:1 !important; }
       .v2-shortcuts-panel { grid-column:2 !important; }
@@ -181,8 +276,9 @@
         .v2-weather-strip{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
         .v2-current,.v2-go{grid-column:1/-1;}
         .v2-shortcut-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
-        .v2-sun-centric-title{font-size:18px;}
-        .v2-orbit-caption{font-size:11px;}
+        .v2-row-title{font-size:17px;}
+        .v2-row-meta{font-size:10px;}
+        .v2-status-text{font-size:8px;}
       }
     `;
     document.head.appendChild(style);
@@ -193,12 +289,10 @@
       setTimeout(start, 50);
       return;
     }
-
     injectStyles();
-    const scene = ensureSunCentricScene();
-    addOrbitTicks(scene?.svg);
-    updateSunCentricScene();
-    setInterval(updateSunCentricScene, 60000);
+    ensureSkyPathScene();
+    updateSkyPaths();
+    setInterval(updateSkyPaths, 60000);
   }
 
   if (document.readyState === "loading") {
