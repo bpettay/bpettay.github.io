@@ -1,93 +1,46 @@
-# Brock Pettay - Engineering Site
+# Personal Website
 
-Minimal personal website focused on practical engineering tools and a clean presentation.
+This repository contains the source code for my personal website. It serves as a place to showcase my work, experiment with web technologies, and build useful tools and visualizations.
 
-## Overview
+The site is designed with an emphasis on:
 
-This site is intentionally simple.
+- Clean, responsive design for desktop and mobile devices
+- Fast performance with minimal dependencies
+- A modern, consistent user interface
+- Interactive utilities and visualizations
+- Continuous refinement and feature development
 
-It is built to be clean, fast, and useful without unnecessary effects or extra clutter.
-The current layout includes a landing page and a tools section, with room to expand over time.
+## Technologies
 
-## Structure
+The website is built using standard web technologies:
 
-```text
-root/
-|-- assets/
-|   |-- css/
-|   |   |-- home.css
-|   |   |-- style.css
-|   |   `-- tools.css
-|   |-- img/
-|   |   `-- bp-monogram.png
-|   |-- js/
-|   |   |-- app.js
-|   |   |-- converter-data.js
-|   |   |-- converter.js
-|   |   `-- navigation.js
-|   `-- pdf/
-|       `-- brock-pettay-resume.pdf
-|-- CNAME
-|-- Favicon.png
-|-- README.md
-`-- index.html
-```
+- HTML5
+- CSS3
+- JavaScript (ES6+)
 
-## Current Pages
+The project intentionally keeps the stack lightweight while taking advantage of modern browser capabilities.
 
-- `home`: landing page, overview, roadmap, and resume entry point
-- `tools`: engineering utilities, currently centered on the unit converter
+## Development
 
-Navigation is hash-based so each page state can be linked directly with URLs like `#home` or `#tools`.
+This website is actively maintained and regularly updated as I improve the interface, add new functionality, and refine the overall user experience. The codebase continues to evolve as I experiment with new ideas and improve existing features.
 
-## JavaScript Responsibilities
+## Goals
 
-- `assets/js/app.js`: site bootstrap and feature initialization
-- `assets/js/navigation.js`: page switching and URL synchronization
-- `assets/js/converter-data.js`: converter categories, aliases, and defaults
-- `assets/js/converter.js`: converter rendering, parsing, and live preview behavior
+The long-term goals of this website are to:
 
-## Styling Responsibilities
-
-- `assets/css/style.css`: shared tokens, layout primitives, navigation, and global responsiveness
-- `assets/css/home.css`: landing page sections and roadmap layout
-- `assets/css/tools.css`: converter layout, result panels, and tool-specific responsiveness
-
-## Features
-
-- Clean landing page
-- Tools section with direct URL state
-- Live unit converter
-- Responsive layout
-- Pure HTML, CSS, and JavaScript
-- No frameworks or build step
-
-## Planned Additions
-
-Possible future tools:
-
-- Drill / tap helper
-- Shop math calculator
-- Torque / bolt helper
-- Material reference lookup
-- Density and mass calculator
+- Maintain a polished and professional online presence
+- Create practical, browser-based tools
+- Explore modern user-interface and user-experience design
+- Provide a fast, accessible, and responsive experience across devices
 
 ## Deployment
 
-This site is hosted with GitHub Pages.
-
-To update the site:
-1. Edit the files.
-2. Push changes to the `main` branch.
-3. GitHub Pages updates the site automatically.
+The website is hosted with GitHub Pages and is automatically updated when changes are pushed to the main branch.
 
 ## Author
 
 Brock Pettay
-Mechanical Engineering - University of Akron
 
 ## License
 
-This project is for personal and portfolio use.
-
-Site: https://brockpettay.com
+This repository is intended for personal and portfolio use.
