@@ -9,6 +9,10 @@
   let timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
   const normalize = (value) => ((value % 360) + 360) % 360;
+  const signedAngle = (value) => {
+    const normalized = normalize(value);
+    return normalized > 180 ? normalized - 360 : normalized;
+  };
   const julian = (date) => date.getTime() / 86400000 + 2440587.5;
   const gmst = (date) => normalize(280.46061837 + 360.98564736629 * (julian(date) - 2451545));
 
@@ -49,12 +53,22 @@
     };
   }
 
-  function altitude(equatorial, date) {
+  function horizontalPosition(equatorial, date) {
     const latitudeRad = latitude * DEG;
     const declination = equatorial.dec * DEG;
-    let hourAngle = normalize(gmst(date) + longitude - equatorial.ra);
-    if (hourAngle > 180) hourAngle -= 360;
+    const hourAngle = signedAngle(gmst(date) + longitude - equatorial.ra);
     const h = hourAngle * DEG;
+    const altitude = Math.asin(
+      Math.sin(latitudeRad) * Math.sin(declination) +
+      Math.cos(latitudeRad) * Math.cos(declination) * Math.cos(h)
+    ) * RAD;
+    return { altitude, hourAngle };
+  }
+
+  function altitudeAtHourAngle(declinationDegrees, hourAngleDegrees) {
+    const latitudeRad = latitude * DEG;
+    const declination = declinationDegrees * DEG;
+    const h = hourAngleDegrees * DEG;
     return Math.asin(
       Math.sin(latitudeRad) * Math.sin(declination) +
       Math.cos(latitudeRad) * Math.cos(declination) * Math.cos(h)
@@ -83,7 +97,7 @@
 
   function localMidnightUtc(date = new Date()) {
     const p = localParts(date);
-    let guess = new Date(Date.UTC(p.year, p.month - 1, p.day));
+    const guess = new Date(Date.UTC(p.year, p.month - 1, p.day));
     return new Date(guess.getTime() - timezoneOffsetMs(guess));
   }
 
@@ -92,36 +106,39 @@
     return new Intl.DateTimeFormat("en-US", { timeZone, hour: "numeric", minute: "2-digit" }).format(new Date(value));
   }
 
-  function pathPoint(hour, alt, rowTop) {
-    const x = 46 + (hour / 24) * 808;
-    const clamped = Math.max(-28, Math.min(90, alt));
-    return { x, y: rowTop + 151 - ((clamped + 28) / 118) * 126 };
+  function trackPoint(hourAngle, altitude, rowTop) {
+    const x = 46 + ((hourAngle + 180) / 360) * 808;
+    const clamped = Math.max(-28, Math.min(90, altitude));
+    const y = rowTop + 151 - ((clamped + 28) / 118) * 126;
+    return { x, y };
   }
 
-  function bodyPath(kind, midnight, rowTop) {
-    const samples = [];
-    const crossings = [];
+  function bodyTrack(equatorial, rowTop) {
+    const points = [];
     let maxAltitude = -90;
-    let maxDate = midnight;
+    for (let hourAngle = -180; hourAngle <= 180; hourAngle += 3) {
+      const altitude = altitudeAtHourAngle(equatorial.dec, hourAngle);
+      maxAltitude = Math.max(maxAltitude, altitude);
+      points.push(trackPoint(hourAngle, altitude, rowTop));
+    }
+    const path = points.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" ");
+    return { path, maxAltitude };
+  }
+
+  function dailyCrossings(kind, midnight) {
+    const crossings = [];
     let previous = null;
-    for (let index = 0; index <= 96; index += 1) {
-      const hour = index / 4;
-      const date = new Date(midnight.getTime() + hour * 3600000);
+    for (let index = 0; index <= 144; index += 1) {
+      const date = new Date(midnight.getTime() + index * 10 * 60000);
       const equatorial = kind === "sun" ? solarEquatorial(date) : moonEquatorial(date);
-      const alt = altitude(equatorial, date);
-      if (alt > maxAltitude) { maxAltitude = alt; maxDate = date; }
-      if (previous && previous.alt * alt < 0) {
-        const fraction = Math.abs(previous.alt) / (Math.abs(previous.alt) + Math.abs(alt));
+      const altitude = horizontalPosition(equatorial, date).altitude;
+      if (previous && previous.altitude * altitude < 0) {
+        const fraction = Math.abs(previous.altitude) / (Math.abs(previous.altitude) + Math.abs(altitude));
         crossings.push(new Date(previous.date.getTime() + fraction * (date.getTime() - previous.date.getTime())));
       }
-      samples.push({ hour, alt });
-      previous = { alt, date };
+      previous = { altitude, date };
     }
-    const path = samples.map((sample, index) => {
-      const point = pathPoint(sample.hour, sample.alt, rowTop);
-      return `${index ? "L" : "M"}${point.x.toFixed(1)},${point.y.toFixed(1)}`;
-    }).join(" ");
-    return { path, crossings, maxAltitude, maxDate };
+    return crossings;
   }
 
   function ensureScene() {
@@ -130,16 +147,26 @@
     if (svg.dataset.skyPathsBuilt === "true") return svg;
     svg.dataset.skyPathsBuilt = "true";
     svg.setAttribute("viewBox", "0 0 900 430");
-    svg.setAttribute("aria-label", "Live daily Sun and Moon altitude paths for your current location");
+    svg.setAttribute("aria-label", "Live Sun and Moon positions on separate sky tracks for your current location");
     svg.innerHTML = `
       <defs>
         <filter id="v2SunGlow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="7" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         <radialGradient id="v2MoonFill" cx="35%" cy="30%" r="72%"><stop offset="0" stop-color="#f5f7fa"/><stop offset=".58" stop-color="#c4cbd3"/><stop offset="1" stop-color="#69727c"/></radialGradient>
       </defs>
       <text id="v2SkyLocation" x="450" y="15" text-anchor="middle" class="v2-location-note">Requesting current location…</text>
-      <g><text x="46" y="39" class="v2-row-title">Sun</text><text id="v2SunPeakLabel" x="854" y="39" text-anchor="end" class="v2-row-meta">Peak --</text><rect x="36" y="50" width="828" height="144" rx="16" class="v2-row-bg"/><line x1="46" y1="169" x2="854" y2="169" class="v2-horizon"/><path id="v2SunPathLine" class="v2-sky-path sun"/><g id="v2SunLiveMarker" class="v2-live-marker"><circle r="18" class="v2-sun-glow"/><circle r="10" class="v2-sun-disc"/></g><text id="v2SunStatus" x="46" y="188" class="v2-status-text">Waiting for location</text></g>
-      <g><text x="46" y="232" class="v2-row-title">Moon</text><text id="v2MoonPeakLabel" x="854" y="232" text-anchor="end" class="v2-row-meta">Peak --</text><rect x="36" y="244" width="828" height="154" rx="16" class="v2-row-bg"/><line x1="46" y1="373" x2="854" y2="373" class="v2-horizon"/><path id="v2MoonPathLine" class="v2-sky-path moon"/><g id="v2MoonLiveMarker" class="v2-live-marker"><circle r="12" fill="url(#v2MoonFill)" class="v2-moon-disc-live"/></g><text id="v2MoonStatus" x="46" y="392" class="v2-status-text">Waiting for location</text></g>
-      <g class="v2-time-labels"><text x="46" y="418">12 AM</text><text x="248" y="418" text-anchor="middle">6 AM</text><text x="450" y="418" text-anchor="middle">12 PM</text><text x="652" y="418" text-anchor="middle">6 PM</text><text x="854" y="418" text-anchor="end">12 AM</text></g>`;
+      <g>
+        <text x="46" y="39" class="v2-row-title">Sun</text><text id="v2SunPeakLabel" x="854" y="39" text-anchor="end" class="v2-row-meta">Peak --</text>
+        <rect x="36" y="50" width="828" height="144" rx="16" class="v2-row-bg"/><line x1="46" y1="169" x2="854" y2="169" class="v2-horizon"/>
+        <path id="v2SunPathLine" class="v2-sky-path sun"/><g id="v2SunLiveMarker" class="v2-live-marker"><circle r="18" class="v2-sun-glow"/><circle r="10" class="v2-sun-disc"/></g>
+        <text id="v2SunStatus" x="46" y="188" class="v2-status-text">Waiting for location</text>
+      </g>
+      <g>
+        <text x="46" y="232" class="v2-row-title">Moon</text><text id="v2MoonPeakLabel" x="854" y="232" text-anchor="end" class="v2-row-meta">Peak --</text>
+        <rect x="36" y="244" width="828" height="154" rx="16" class="v2-row-bg"/><line x1="46" y1="373" x2="854" y2="373" class="v2-horizon"/>
+        <path id="v2MoonPathLine" class="v2-sky-path moon"/><g id="v2MoonLiveMarker" class="v2-live-marker"><circle r="12" fill="url(#v2MoonFill)" class="v2-moon-disc-live"/></g>
+        <text id="v2MoonStatus" x="46" y="392" class="v2-status-text">Waiting for location</text>
+      </g>
+      <g class="v2-time-labels"><text x="46" y="418">East</text><text x="450" y="418" text-anchor="middle">Highest point</text><text x="854" y="418" text-anchor="end">West</text></g>`;
     return svg;
   }
 
@@ -147,24 +174,32 @@
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
     const now = new Date();
     const midnight = localMidnightUtc(now);
-    const sun = bodyPath("sun", midnight, 50);
-    const moon = bodyPath("moon", midnight, 244);
-    const hours = (now - midnight) / 3600000;
-    const sunAlt = altitude(solarEquatorial(now), now);
-    const moonAlt = altitude(moonEquatorial(now), now);
-    const sunPoint = pathPoint(hours, sunAlt, 50);
-    const moonPoint = pathPoint(hours, moonAlt, 244);
-    document.getElementById("v2SunPathLine")?.setAttribute("d", sun.path);
-    document.getElementById("v2MoonPathLine")?.setAttribute("d", moon.path);
+    const sunEquatorial = solarEquatorial(now);
+    const moonEquatorialNow = moonEquatorial(now);
+    const sunPosition = horizontalPosition(sunEquatorial, now);
+    const moonPosition = horizontalPosition(moonEquatorialNow, now);
+    const sunTrack = bodyTrack(sunEquatorial, 50);
+    const moonTrack = bodyTrack(moonEquatorialNow, 244);
+    const sunPoint = trackPoint(sunPosition.hourAngle, sunPosition.altitude, 50);
+    const moonPoint = trackPoint(moonPosition.hourAngle, moonPosition.altitude, 244);
+
+    document.getElementById("v2SunPathLine")?.setAttribute("d", sunTrack.path);
+    document.getElementById("v2MoonPathLine")?.setAttribute("d", moonTrack.path);
     document.getElementById("v2SunLiveMarker")?.setAttribute("transform", `translate(${sunPoint.x.toFixed(1)} ${sunPoint.y.toFixed(1)})`);
     document.getElementById("v2MoonLiveMarker")?.setAttribute("transform", `translate(${moonPoint.x.toFixed(1)} ${moonPoint.y.toFixed(1)})`);
-    document.getElementById("v2SunLiveMarker")?.classList.toggle("below", sunAlt < 0);
-    document.getElementById("v2MoonLiveMarker")?.classList.toggle("below", moonAlt < 0);
-    const crossingText = (crossings) => crossings.length >= 2 ? `${formatTime(crossings[0])} rise · ${formatTime(crossings[1])} set` : crossings.length === 1 ? `Horizon crossing ${formatTime(crossings[0])}` : "No horizon crossings today";
-    document.getElementById("v2SunStatus").textContent = `${sunAlt >= 0 ? "Above" : "Below"} horizon · ${Math.abs(sunAlt).toFixed(0)}° · ${crossingText(sun.crossings)}`;
-    document.getElementById("v2MoonStatus").textContent = `${moonAlt >= 0 ? "Above" : "Below"} horizon · ${Math.abs(moonAlt).toFixed(0)}° · ${crossingText(moon.crossings)}`;
-    document.getElementById("v2SunPeakLabel").textContent = `Peak ${sun.maxAltitude.toFixed(0)}° at ${formatTime(sun.maxDate)}`;
-    document.getElementById("v2MoonPeakLabel").textContent = `Peak ${moon.maxAltitude.toFixed(0)}° at ${formatTime(moon.maxDate)}`;
+    document.getElementById("v2SunLiveMarker")?.classList.toggle("below", sunPosition.altitude < 0);
+    document.getElementById("v2MoonLiveMarker")?.classList.toggle("below", moonPosition.altitude < 0);
+
+    const sunCrossings = dailyCrossings("sun", midnight);
+    const moonCrossings = dailyCrossings("moon", midnight);
+    const crossingText = (crossings) => crossings.length >= 2
+      ? `${formatTime(crossings[0])} rise · ${formatTime(crossings[1])} set`
+      : crossings.length === 1 ? `Horizon crossing ${formatTime(crossings[0])}` : "No horizon crossings today";
+
+    document.getElementById("v2SunStatus").textContent = `${sunPosition.altitude >= 0 ? "Above" : "Below"} horizon · ${Math.abs(sunPosition.altitude).toFixed(0)}° · ${crossingText(sunCrossings)}`;
+    document.getElementById("v2MoonStatus").textContent = `${moonPosition.altitude >= 0 ? "Above" : "Below"} horizon · ${Math.abs(moonPosition.altitude).toFixed(0)}° · ${crossingText(moonCrossings)}`;
+    document.getElementById("v2SunPeakLabel").textContent = `Peak ${sunTrack.maxAltitude.toFixed(0)}°`;
+    document.getElementById("v2MoonPeakLabel").textContent = `Peak ${moonTrack.maxAltitude.toFixed(0)}°`;
   }
 
   function lunarPhase(date = new Date()) {
@@ -201,7 +236,10 @@
     try {
       const forecastParams = new URLSearchParams({ latitude, longitude, current: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,uv_index", daily: "temperature_2m_max,temperature_2m_min,sunrise,sunset", temperature_unit: "fahrenheit", wind_speed_unit: "mph", timezone: "auto", forecast_days: "1" });
       const airParams = new URLSearchParams({ latitude, longitude, current: "us_aqi", timezone: "auto" });
-      const [forecastResponse, airResponse] = await Promise.all([fetch(`https://api.open-meteo.com/v1/forecast?${forecastParams}`, { cache: "no-store" }), fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?${airParams}`, { cache: "no-store" })]);
+      const [forecastResponse, airResponse] = await Promise.all([
+        fetch(`https://api.open-meteo.com/v1/forecast?${forecastParams}`, { cache: "no-store" }),
+        fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?${airParams}`, { cache: "no-store" }),
+      ]);
       if (!forecastResponse.ok) throw new Error("Weather request failed");
       const forecast = await forecastResponse.json();
       const air = airResponse.ok ? await airResponse.json() : {};
