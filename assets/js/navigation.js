@@ -47,9 +47,7 @@ function initializeNavigation() {
 
     if (!force && !(await canOpenPage(pageId))) {
       const fallbackPage = normalizePage(document.querySelector(".page.active")?.id || defaultPage);
-      if (updateUrl) {
-        syncUrl(fallbackPage, true);
-      }
+      if (updateUrl) syncUrl(fallbackPage, true);
       return fallbackPage;
     }
 
@@ -65,20 +63,12 @@ function initializeNavigation() {
       page.hidden = !isActive;
     });
 
-    if (updateUrl) {
-      syncUrl(pageId, replaceState);
-    }
-
+    if (updateUrl) syncUrl(pageId, replaceState);
     return pageId;
   }
 
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => openPage(tab.dataset.page));
-  });
-
-  pageButtons.forEach((button) => {
-    button.addEventListener("click", () => openPage(button.dataset.pageTarget));
-  });
+  tabs.forEach((tab) => tab.addEventListener("click", () => openPage(tab.dataset.page)));
+  pageButtons.forEach((button) => button.addEventListener("click", () => openPage(button.dataset.pageTarget)));
 
   window.addEventListener("popstate", () => {
     openPage(getCurrentPageFromUrl(), { updateUrl: false });
@@ -88,18 +78,17 @@ function initializeNavigation() {
   openPage(initialPage, { updateUrl: true, replaceState: true });
 
   window.siteNavigation = { openPage, pages: validPages };
-
   return window.siteNavigation;
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   window.setTimeout(() => {
-    if (document.getElementById("skyPositionScript")) return;
+    if (document.getElementById("homeDashboardV2Script")) return;
     const script = document.createElement("script");
-    script.id = "skyPositionScript";
+    script.id = "homeDashboardV2Script";
     script.src = window.versionedAsset
-      ? window.versionedAsset("./assets/js/sky-position.js")
-      : "./assets/js/sky-position.js";
+      ? window.versionedAsset("./assets/js/home-dashboard-v2.js")
+      : "./assets/js/home-dashboard-v2.js";
     document.body.appendChild(script);
   }, 0);
 });
