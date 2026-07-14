@@ -2,12 +2,11 @@
   const DEG = Math.PI / 180;
   const RAD = 180 / Math.PI;
   const DAY_MS = 86400000;
-  const LEFT = 46;
-  const WIDTH = 808;
-  const SUN_TOP = 50;
-  const MOON_TOP = 244;
-  const HORIZON_OFFSET = 119;
-  const ALTITUDE_HEIGHT = 126;
+  const NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);
+  const LUNAR_CYCLE = 29.530588853;
+  const LEFT = 78;
+  const RIGHT = 822;
+  const WIDTH = RIGHT - LEFT;
 
   let latitude = null;
   let longitude = null;
@@ -71,25 +70,62 @@
     ) * RAD;
   }
 
+  function localParts(date = new Date()) {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: false,
+    }).formatToParts(date);
+    const value = (type) => Number(parts.find((part) => part.type === type)?.value || 0);
+    return { year: value("year"), month: value("month"), day: value("day"), hour: value("hour"), minute: value("minute"), second: value("second") };
+  }
+
+  function timezoneOffsetMs(date) {
+    const p = localParts(date);
+    return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - date.getTime();
+  }
+
+  function localMidnightUtc(date = new Date()) {
+    const p = localParts(date);
+    const guess = new Date(Date.UTC(p.year, p.month - 1, p.day));
+    return new Date(guess.getTime() - timezoneOffsetMs(guess));
+  }
+
   function formatTime(date) {
     if (!date) return "--:--";
-    return new Intl.DateTimeFormat("en-US", {
-      timeZone,
-      hour: "numeric",
-      minute: "2-digit",
-    }).format(date);
+    return new Intl.DateTimeFormat("en-US", { timeZone, hour: "numeric", minute: "2-digit" }).format(date);
+  }
+
+  function lunarPhase(date = new Date()) {
+    const age = (((date.getTime() - NEW_MOON) / DAY_MS) % LUNAR_CYCLE + LUNAR_CYCLE) % LUNAR_CYCLE;
+    const fraction = age / LUNAR_CYCLE;
+    const illumination = Math.round(((1 - Math.cos(2 * Math.PI * fraction)) / 2) * 100);
+    let name = "New Moon";
+    if (fraction > 0.03 && fraction < 0.22) name = "Waxing Crescent";
+    else if (fraction < 0.28) name = "First Quarter";
+    else if (fraction < 0.47) name = "Waxing Gibbous";
+    else if (fraction < 0.53) name = "Full Moon";
+    else if (fraction < 0.72) name = "Waning Gibbous";
+    else if (fraction < 0.78) name = "Last Quarter";
+    else if (fraction < 0.97) name = "Waning Crescent";
+    return { age, fraction, illumination, name };
   }
 
   function refineCrossing(kind, before, after) {
     let low = before.getTime();
     let high = after.getTime();
-    let lowAltitude = altitude(kind, new Date(low));
+    let lowAlt = altitude(kind, new Date(low));
     for (let i = 0; i < 18; i += 1) {
       const mid = (low + high) / 2;
-      const midAltitude = altitude(kind, new Date(mid));
-      if ((lowAltitude < 0 && midAltitude < 0) || (lowAltitude >= 0 && midAltitude >= 0)) {
+      const midAlt = altitude(kind, new Date(mid));
+      if ((lowAlt < 0) === (midAlt < 0)) {
         low = mid;
-        lowAltitude = midAltitude;
+        lowAlt = midAlt;
       } else {
         high = mid;
       }
@@ -97,171 +133,217 @@
     return new Date((low + high) / 2);
   }
 
-  function findVisibilityArcs(kind, now) {
-    const start = new Date(now.getTime() - DAY_MS);
-    const end = new Date(now.getTime() + 2 * DAY_MS);
-    const stepMs = 10 * 60000;
-    const crossings = [];
-    let previousDate = start;
-    let previousAltitude = altitude(kind, previousDate);
-
-    for (let time = start.getTime() + stepMs; time <= end.getTime(); time += stepMs) {
-      const date = new Date(time);
-      const currentAltitude = altitude(kind, date);
-      if ((previousAltitude < 0 && currentAltitude >= 0) || (previousAltitude >= 0 && currentAltitude < 0)) {
-        crossings.push({
-          date: refineCrossing(kind, previousDate, date),
-          type: previousAltitude < currentAltitude ? "rise" : "set",
-        });
-      }
-      previousDate = date;
-      previousAltitude = currentAltitude;
-    }
-
-    const arcs = [];
-    for (let i = 0; i < crossings.length; i += 1) {
-      if (crossings[i].type !== "rise") continue;
-      const set = crossings.slice(i + 1).find((event) => event.type === "set");
-      if (set) arcs.push({ rise: crossings[i].date, set: set.date });
-    }
-    return arcs;
-  }
-
-  function chooseArc(kind, now) {
-    const arcs = findVisibilityArcs(kind, now);
-    const active = arcs.find((arc) => now >= arc.rise && now <= arc.set);
-    if (active) return { ...active, active: true };
-
-    const next = arcs.find((arc) => arc.rise > now);
-    if (next) return { ...next, active: false };
-
-    const previous = [...arcs].reverse().find((arc) => arc.set < now);
-    return previous ? { ...previous, active: false } : null;
-  }
-
-  function buildArc(kind, arc, rowTop) {
+  function buildDailyTrack(kind, midnight, cardTop) {
+    const end = new Date(midnight.getTime() + DAY_MS);
+    const step = 5 * 60000;
     const samples = [];
-    const duration = arc.set - arc.rise;
-    const stepMs = Math.max(60000, duration / 180);
+    const crossings = [];
     let peak = null;
 
-    for (let time = arc.rise.getTime(); time <= arc.set.getTime(); time += stepMs) {
+    for (let time = midnight.getTime(); time <= end.getTime(); time += step) {
       const date = new Date(time);
-      const alt = Math.max(0, altitude(kind, date));
-      const progress = Math.max(0, Math.min(1, (date - arc.rise) / duration));
-      const x = LEFT + progress * WIDTH;
-      const horizonY = rowTop + HORIZON_OFFSET;
-      const y = horizonY - (Math.min(90, alt) / 90) * ALTITUDE_HEIGHT;
-      const sample = { date, altitude: alt, x, y };
+      const alt = altitude(kind, date);
+      const sample = { date, altitude: alt };
       samples.push(sample);
       if (!peak || alt > peak.altitude) peak = sample;
+      const prev = samples[samples.length - 2];
+      if (prev && ((prev.altitude < 0 && alt >= 0) || (prev.altitude >= 0 && alt < 0))) {
+        crossings.push({
+          date: refineCrossing(kind, prev.date, date),
+          type: prev.altitude < alt ? "rise" : "set",
+        });
+      }
     }
 
-    const finalAltitude = Math.max(0, altitude(kind, arc.set));
-    samples.push({
-      date: arc.set,
-      altitude: finalAltitude,
-      x: LEFT + WIDTH,
-      y: rowTop + HORIZON_OFFSET,
+    const graphTop = cardTop + 108;
+    const horizonY = cardTop + 285;
+    const graphHeight = horizonY - graphTop;
+    const commands = [];
+    let open = false;
+    samples.forEach((sample) => {
+      if (sample.altitude >= 0) {
+        const progress = (sample.date - midnight) / DAY_MS;
+        const x = LEFT + progress * WIDTH;
+        const y = horizonY - (Math.min(90, sample.altitude) / 90) * graphHeight;
+        commands.push(`${open ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`);
+        open = true;
+      } else {
+        open = false;
+      }
     });
 
-    const path = samples.map((sample, index) => `${index ? "L" : "M"}${sample.x.toFixed(1)},${sample.y.toFixed(1)}`).join(" ");
-    return { path, peak, duration };
+    const rise = crossings.find((event) => event.type === "rise")?.date || null;
+    const set = crossings.find((event) => event.type === "set" && (!rise || event.date > rise))?.date || crossings.find((event) => event.type === "set")?.date || null;
+    return { path: commands.join(" "), crossings, rise, set, peak, graphTop, horizonY, graphHeight };
   }
 
-  function markerPoint(kind, now, arc, rowTop) {
-    const duration = arc.set - arc.rise;
-    const progress = Math.max(0, Math.min(1, (now - arc.rise) / duration));
-    const alt = Math.max(0, altitude(kind, now));
-    const x = LEFT + progress * WIDTH;
-    const y = rowTop + HORIZON_OFFSET - (Math.min(90, alt) / 90) * ALTITUDE_HEIGHT;
-    return { x, y, progress, altitude: alt };
+  function pointFor(kind, date, midnight, track) {
+    const progress = Math.max(0, Math.min(1, (date - midnight) / DAY_MS));
+    const alt = altitude(kind, date);
+    return {
+      x: LEFT + progress * WIDTH,
+      y: track.horizonY - (Math.max(0, Math.min(90, alt)) / 90) * track.graphHeight,
+      altitude: alt,
+    };
   }
 
-  function installAxisLabels() {
-    const labels = document.querySelector(".v2-time-labels");
-    if (!labels) return;
-    labels.innerHTML = `
-      <text id="v2AxisRise" x="46" y="418">Rise</text>
-      <text id="v2AxisPeak" x="450" y="418" text-anchor="middle">Peak</text>
-      <text id="v2AxisSet" x="854" y="418" text-anchor="end">Set</text>`;
+  function directionLabel(now, peakDate, altitudeValue) {
+    if (altitudeValue < 0) return { text: "Below horizon", arrow: "", className: "muted" };
+    const delta = (now - peakDate) / 60000;
+    if (Math.abs(delta) <= 30) return { text: "Near peak", arrow: "•", className: "peak" };
+    if (delta < 0) return { text: "Rising", arrow: "↗", className: "rising" };
+    return { text: "Setting", arrow: "↘", className: "setting" };
   }
 
-  function setRowTimeLabels(kind, arcData) {
-    const rowTop = kind === "sun" ? SUN_TOP : MOON_TOP;
-    const prefix = kind === "sun" ? "Sun" : "Moon";
-    const old = document.getElementById(`v2${prefix}ArcTimes`);
-    old?.remove();
+  function phaseContext(phase) {
+    if (phase.illumination <= 8) return "The Moon is close to the Sun in the sky and follows a similar daily path.";
+    if (phase.illumination >= 92) return "The Moon is opposite the Sun and typically rises near sunset.";
+    if (phase.fraction < 0.5) return "A waxing Moon generally trails the Sun and remains visible later each day.";
+    return "A waning Moon generally leads the Sun and is often visible before sunrise.";
+  }
 
-    const path = document.getElementById(kind === "sun" ? "v2SunPathLine" : "v2MoonPathLine");
-    const parent = path?.parentElement;
-    if (!parent || !arcData?.peak) return;
+  function installScene() {
+    const svg = document.querySelector(".v2-orbit");
+    if (!svg) return null;
+    svg.setAttribute("viewBox", "0 0 900 900");
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", "Large live Sun and Moon sky-position cards");
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="skySunFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc43d" stop-opacity=".22"/><stop offset="1" stop-color="#ffc43d" stop-opacity="0"/></linearGradient>
+        <linearGradient id="skyMoonFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fc7ff" stop-opacity=".18"/><stop offset="1" stop-color="#9fc7ff" stop-opacity="0"/></linearGradient>
+        <filter id="skyGlow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <text id="skyLocation" x="450" y="25" text-anchor="middle" class="sky-location">Current location</text>
 
+      <g id="sunCard" class="sky-card">
+        <rect x="28" y="42" width="844" height="382" rx="24" class="sky-card-bg"/>
+        <text x="58" y="88" class="sky-title sun-title">☀ Sun</text>
+        <text id="sunDirection" x="842" y="85" text-anchor="end" class="sky-direction sun-direction">Loading</text>
+        <text id="sunPeakTop" x="842" y="112" text-anchor="end" class="sky-peak-meta">Peak --</text>
+        <line x1="78" y1="327" x2="822" y2="327" class="sky-horizon"/>
+        <g id="sunTicks" class="sky-ticks"></g>
+        <path id="sunArea" class="sky-area sun-area"/>
+        <path id="sunPath" class="sky-path sun-path"/>
+        <g id="sunPeakMarker"><circle r="6" class="sun-point"/><text y="30" text-anchor="middle" class="sky-marker-label">Peak</text><text id="sunPeakValue" y="53" text-anchor="middle" class="sky-marker-value">--</text></g>
+        <g id="sunLiveMarker" class="sky-live-marker"><circle r="24" class="sun-glow"/><circle r="13" class="sun-disc"/></g>
+        <text id="sunRiseLabel" x="78" y="305" class="sky-event-label">Rise --</text>
+        <text id="sunSetLabel" x="822" y="305" text-anchor="end" class="sky-event-label">Set --</text>
+        <g class="sky-axis-labels"><text x="78" y="352">12 AM</text><text x="264" y="352" text-anchor="middle">6 AM</text><text x="450" y="352" text-anchor="middle">12 PM</text><text x="636" y="352" text-anchor="middle">6 PM</text><text x="822" y="352" text-anchor="end">12 AM</text></g>
+        <rect x="52" y="370" width="796" height="38" rx="12" class="sky-info-strip"/>
+        <text id="sunFooter" x="450" y="395" text-anchor="middle" class="sky-footer-text">Loading Sun data…</text>
+      </g>
+
+      <g id="moonCard" class="sky-card">
+        <rect x="28" y="446" width="844" height="426" rx="24" class="sky-card-bg"/>
+        <text x="58" y="492" class="sky-title moon-title">☾ Moon</text>
+        <text id="moonDirection" x="842" y="489" text-anchor="end" class="sky-direction moon-direction">Loading</text>
+        <text id="moonPeakTop" x="842" y="516" text-anchor="end" class="sky-peak-meta">Peak --</text>
+        <line x1="78" y1="731" x2="822" y2="731" class="sky-horizon"/>
+        <g id="moonTicks" class="sky-ticks"></g>
+        <path id="moonArea" class="sky-area moon-area"/>
+        <path id="moonPath" class="sky-path moon-path"/>
+        <g id="moonPeakMarker"><circle r="6" class="moon-point"/><text y="30" text-anchor="middle" class="sky-marker-label">Peak</text><text id="moonPeakValue" y="53" text-anchor="middle" class="sky-marker-value">--</text></g>
+        <g id="moonLiveMarker" class="sky-live-marker"><circle r="23" class="moon-glow"/><circle r="13" class="moon-disc-large"/></g>
+        <text id="moonRiseLabel" x="78" y="709" class="sky-event-label">Rise --</text>
+        <text id="moonSetLabel" x="822" y="709" text-anchor="end" class="sky-event-label">Set --</text>
+        <g class="sky-axis-labels"><text x="78" y="756">12 AM</text><text x="264" y="756" text-anchor="middle">6 AM</text><text x="450" y="756" text-anchor="middle">12 PM</text><text x="636" y="756" text-anchor="middle">6 PM</text><text x="822" y="756" text-anchor="end">12 AM</text></g>
+        <rect x="52" y="774" width="796" height="78" rx="14" class="sky-info-strip"/>
+        <text id="moonFooterTitle" x="72" y="803" class="sky-footer-title">Moon context</text>
+        <text id="moonFooter" x="72" y="830" class="sky-footer-text left">Loading Moon data…</text>
+      </g>`;
+    return svg;
+  }
+
+  function installStyles() {
+    document.getElementById("largeSkyCardStyles")?.remove();
+    const style = document.createElement("style");
+    style.id = "largeSkyCardStyles";
+    style.textContent = `
+      .v2-orbit-wrap{margin-top:18px!important;overflow:visible!important}.v2-orbit{width:100%!important;height:auto!important;min-height:0!important;display:block!important;overflow:visible!important}
+      .sky-card-bg{fill:rgba(5,16,27,.9);stroke:rgba(102,158,215,.3);stroke-width:1.5}.sky-location{fill:rgba(219,229,241,.55);font-size:12px}.sky-title{font-size:28px;font-weight:750;fill:#f6f8fc}.sun-title{fill:#ffd35d}.moon-title{fill:#d9e8ff}.sky-direction{font-size:22px;font-weight:700}.sun-direction{fill:#ffbf34}.moon-direction{fill:#8fbcff}.sky-peak-meta{fill:rgba(232,239,247,.72);font-size:15px}.sky-horizon{stroke:rgba(225,235,247,.52);stroke-width:1.5}.sky-path{fill:none;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}.sun-path{stroke:#ffc13d}.moon-path{stroke:#9fc7ff}.sky-area{opacity:.7}.sun-area{fill:url(#skySunFill)}.moon-area{fill:url(#skyMoonFill)}.sky-axis-labels text{fill:rgba(224,233,244,.76);font-size:15px}.sky-event-label{fill:#f1f5fa;font-size:16px;font-weight:650}.sky-marker-label{fill:rgba(245,248,252,.78);font-size:14px}.sky-marker-value{fill:#fff;font-size:19px;font-weight:700}.sun-point{fill:#ffc13d}.moon-point{fill:#9fc7ff}.sun-glow{fill:rgba(255,190,40,.3);filter:url(#skyGlow)}.sun-disc{fill:#ffd15a;stroke:#fff0a7;stroke-width:2}.moon-glow{fill:rgba(159,199,255,.28);filter:url(#skyGlow)}.moon-disc-large{fill:#dce9f7;stroke:#fff;stroke-width:1.5}.sky-info-strip{fill:rgba(255,255,255,.035);stroke:rgba(255,255,255,.08)}.sky-footer-text{fill:rgba(231,238,247,.76);font-size:15px}.sky-footer-text.left{text-anchor:start}.sky-footer-title{fill:#f5f8fc;font-size:16px;font-weight:700}.sky-live-marker{transition:transform .7s ease,opacity .35s ease}.sky-ticks line{stroke:rgba(226,235,246,.2);stroke-width:1}
+      @media(max-width:680px){.v2-orbit-wrap{margin:14px -4px 0!important}.v2-orbit{width:calc(100% + 8px)!important;max-width:none!important}.v2-weather-panel{padding-left:12px!important;padding-right:12px!important}.sky-title{font-size:30px}.sky-direction{font-size:23px}.sky-axis-labels text{font-size:17px}.sky-event-label{font-size:17px}.sky-footer-text{font-size:16px}.sky-footer-title{font-size:17px}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function addTicks(groupId, horizonY) {
+    const group = document.getElementById(groupId);
+    if (!group) return;
+    group.innerHTML = "";
     const ns = "http://www.w3.org/2000/svg";
-    const group = document.createElementNS(ns, "g");
-    group.id = `v2${prefix}ArcTimes`;
-    group.setAttribute("class", "v2-time-labels");
-
-    const labels = [
-      { x: LEFT, anchor: "start", text: formatTime(arcData.rise) },
-      { x: LEFT + WIDTH / 2, anchor: "middle", text: formatTime(arcData.peak.date) },
-      { x: LEFT + WIDTH, anchor: "end", text: formatTime(arcData.set) },
-    ];
-
-    labels.forEach((item) => {
-      const text = document.createElementNS(ns, "text");
-      text.setAttribute("x", String(item.x));
-      text.setAttribute("y", String(rowTop + 140));
-      text.setAttribute("text-anchor", item.anchor);
-      text.textContent = item.text;
-      group.appendChild(text);
-    });
-    parent.appendChild(group);
+    for (let hour = 0; hour <= 24; hour += 1) {
+      const x = LEFT + (hour / 24) * WIDTH;
+      const line = document.createElementNS(ns, "line");
+      line.setAttribute("x1", x.toFixed(1));
+      line.setAttribute("x2", x.toFixed(1));
+      line.setAttribute("y1", String(horizonY - (hour % 6 === 0 ? 8 : 4)));
+      line.setAttribute("y2", String(horizonY + (hour % 6 === 0 ? 8 : 4)));
+      group.appendChild(line);
+    }
   }
 
-  function renderBody(kind, now) {
-    const rowTop = kind === "sun" ? SUN_TOP : MOON_TOP;
-    const path = document.getElementById(kind === "sun" ? "v2SunPathLine" : "v2MoonPathLine");
-    const marker = document.getElementById(kind === "sun" ? "v2SunLiveMarker" : "v2MoonLiveMarker");
-    const status = document.getElementById(kind === "sun" ? "v2SunStatus" : "v2MoonStatus");
-    const peakLabel = document.getElementById(kind === "sun" ? "v2SunPeakLabel" : "v2MoonPeakLabel");
-    if (!path || !marker) return;
+  function fillArea(path, track) {
+    if (!path) return "";
+    const firstMatch = path.match(/^M([\d.]+),([\d.]+)/);
+    const lastMatch = path.match(/L([\d.]+),([\d.]+)$/) || firstMatch;
+    if (!firstMatch || !lastMatch) return "";
+    return `${path} L${lastMatch[1]},${track.horizonY} L${firstMatch[1]},${track.horizonY} Z`;
+  }
 
-    const arc = chooseArc(kind, now);
-    if (!arc) return;
-    const built = buildArc(kind, arc, rowTop);
-    path.setAttribute("d", built.path);
+  function renderBody(kind, now, midnight, cardTop) {
+    const isSun = kind === "sun";
+    const prefix = isSun ? "sun" : "moon";
+    const track = buildDailyTrack(kind, midnight, cardTop);
+    const current = pointFor(kind, now, midnight, track);
+    const peakPoint = pointFor(kind, track.peak.date, midnight, track);
+    const direction = directionLabel(now, track.peak.date, current.altitude);
 
-    const liveAltitude = altitude(kind, now);
-    if (arc.active && liveAltitude >= 0) {
-      const point = markerPoint(kind, now, arc, rowTop);
-      marker.setAttribute("transform", `translate(${point.x.toFixed(1)} ${point.y.toFixed(1)})`);
-      marker.style.opacity = "1";
-    } else {
-      marker.style.opacity = "0";
+    document.getElementById(`${prefix}Path`)?.setAttribute("d", track.path);
+    document.getElementById(`${prefix}Area`)?.setAttribute("d", fillArea(track.path, track));
+
+    const liveMarker = document.getElementById(`${prefix}LiveMarker`);
+    if (liveMarker) {
+      liveMarker.setAttribute("transform", `translate(${current.x.toFixed(1)} ${current.y.toFixed(1)})`);
+      liveMarker.style.opacity = current.altitude >= 0 ? "1" : "0";
     }
 
-    setRowTimeLabels(kind, { ...arc, peak: built.peak });
+    const peakMarker = document.getElementById(`${prefix}PeakMarker`);
+    if (peakMarker) peakMarker.setAttribute("transform", `translate(${peakPoint.x.toFixed(1)} ${peakPoint.y.toFixed(1)})`);
 
-    const bodyName = kind === "sun" ? "Sun" : "Moon";
-    if (status) {
-      status.textContent = arc.active
-        ? `${bodyName} up now · ${Math.max(0, liveAltitude).toFixed(0)}° altitude · ${formatTime(arc.rise)} rise · ${formatTime(arc.set)} set`
-        : `${bodyName} below horizon · next rise ${formatTime(arc.rise)}`;
-    }
-    if (peakLabel && built.peak) {
-      peakLabel.textContent = `Peak ${built.peak.altitude.toFixed(0)}° at ${formatTime(built.peak.date)}`;
-    }
+    const directionEl = document.getElementById(`${prefix}Direction`);
+    if (directionEl) directionEl.textContent = `${direction.text} ${direction.arrow}  ${Math.max(0, current.altitude).toFixed(0)}°`;
+    const peakTop = document.getElementById(`${prefix}PeakTop`);
+    if (peakTop) peakTop.textContent = `Peak ${track.peak.altitude.toFixed(0)}° at ${formatTime(track.peak.date)}`;
+    const peakValue = document.getElementById(`${prefix}PeakValue`);
+    if (peakValue) peakValue.textContent = `${track.peak.altitude.toFixed(0)}° · ${formatTime(track.peak.date)}`;
+    const riseLabel = document.getElementById(`${prefix}RiseLabel`);
+    if (riseLabel) riseLabel.textContent = `Rise ${formatTime(track.rise)}`;
+    const setLabel = document.getElementById(`${prefix}SetLabel`);
+    if (setLabel) setLabel.textContent = `Set ${formatTime(track.set)}`;
+
+    return { track, current, direction };
   }
 
   function render() {
     if (rendering || !Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
     rendering = true;
     try {
-      installAxisLabels();
       const now = new Date();
-      renderBody("sun", now);
-      renderBody("moon", now);
+      const midnight = localMidnightUtc(now);
+      const sun = renderBody("sun", now, midnight, 42);
+      const moon = renderBody("moon", now, midnight, 446);
+      const phase = lunarPhase(now);
+
+      addTicks("sunTicks", sun.track.horizonY);
+      addTicks("moonTicks", moon.track.horizonY);
+
+      const sunFooter = document.getElementById("sunFooter");
+      if (sunFooter) sunFooter.textContent = `${formatTime(sun.track.rise)} sunrise  ·  ${formatTime(sun.track.set)} sunset  ·  ${sun.direction.text.toLowerCase()} now`;
+      const moonFooterTitle = document.getElementById("moonFooterTitle");
+      if (moonFooterTitle) moonFooterTitle.textContent = `${phase.name} · ${phase.illumination}% illuminated`;
+      const moonFooter = document.getElementById("moonFooter");
+      if (moonFooter) moonFooter.textContent = phaseContext(phase);
     } finally {
       rendering = false;
     }
@@ -269,14 +351,20 @@
 
   function begin() {
     const svg = document.querySelector(".v2-orbit");
-    if (!svg || !navigator.geolocation) {
+    if (!svg) {
       window.setTimeout(begin, 100);
       return;
     }
 
+    installStyles();
+    installScene();
+
+    if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(async (position) => {
       latitude = position.coords.latitude;
       longitude = position.coords.longitude;
+      const locationLabel = document.getElementById("skyLocation");
+      if (locationLabel) locationLabel.textContent = `Current location · ${latitude.toFixed(2)}°, ${longitude.toFixed(2)}°`;
 
       try {
         const params = new URLSearchParams({ latitude, longitude, timezone: "auto", forecast_days: "1" });
@@ -286,7 +374,7 @@
           timeZone = data.timezone || timeZone;
         }
       } catch (_) {
-        // Browser timezone remains a suitable fallback.
+        // Browser timezone is a suitable fallback.
       }
 
       render();
@@ -294,17 +382,18 @@
 
       observer?.disconnect();
       observer = new MutationObserver(() => {
-        if (!rendering) window.requestAnimationFrame(render);
+        if (!rendering && document.querySelector(".v2-orbit")?.getAttribute("viewBox") !== "0 0 900 900") {
+          installScene();
+          render();
+        }
       });
-      observer.observe(svg, { attributes: true, subtree: true, attributeFilter: ["d", "transform"] });
+      observer.observe(svg, { attributes: true, childList: true, subtree: true });
     }, () => {
-      // Existing dashboard handles the location-permission message.
+      const locationLabel = document.getElementById("skyLocation");
+      if (locationLabel) locationLabel.textContent = "Enable location access for live sky positions";
     }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 900000 });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => window.setTimeout(begin, 100));
-  } else {
-    window.setTimeout(begin, 100);
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => window.setTimeout(begin, 100));
+  else window.setTimeout(begin, 100);
 })();
