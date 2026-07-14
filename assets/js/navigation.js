@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.setTimeout(() => {
     loadVersionedScript("homeDashboardV2Script", "./assets/js/home-dashboard-v2.js", () => {
       loadVersionedScript("dashboardPolishScript", "./assets/js/dashboard-polish.js", () => {
-        loadVersionedScript("celestialTrackFixScript", "./assets/js/celestial-track-fix.js");
+        loadVersionedScript("skyArcFixScript", "./assets/js/sky-arc-fix.js");
       });
     });
   }, 0);
