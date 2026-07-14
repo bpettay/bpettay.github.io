@@ -12,8 +12,8 @@
   let latitude = null;
   let longitude = null;
   let timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-  let observer = null;
   let rendering = false;
+  let observer = null;
 
   const normalize = (value) => ((value % 360) + 360) % 360;
   const signedAngle = (value) => {
@@ -71,39 +71,6 @@
     ) * RAD;
   }
 
-  function localParts(date = new Date()) {
-    const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone,
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      hour12: false,
-    }).formatToParts(date);
-    const value = (type) => Number(parts.find((part) => part.type === type)?.value || 0);
-    return {
-      year: value("year"),
-      month: value("month"),
-      day: value("day"),
-      hour: value("hour"),
-      minute: value("minute"),
-      second: value("second"),
-    };
-  }
-
-  function timezoneOffsetMs(date) {
-    const p = localParts(date);
-    return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) - date.getTime();
-  }
-
-  function localMidnightUtc(date = new Date()) {
-    const p = localParts(date);
-    const guess = new Date(Date.UTC(p.year, p.month - 1, p.day));
-    return new Date(guess.getTime() - timezoneOffsetMs(guess));
-  }
-
   function formatTime(date) {
     if (!date) return "--:--";
     return new Intl.DateTimeFormat("en-US", {
@@ -113,112 +80,188 @@
     }).format(date);
   }
 
-  function pointFor(date, altitudeDegrees, rowTop, midnight) {
-    const progress = Math.max(0, Math.min(1, (date - midnight) / DAY_MS));
-    const x = LEFT + progress * WIDTH;
-    const visibleAltitude = Math.max(0, Math.min(90, altitudeDegrees));
-    const horizonY = rowTop + HORIZON_OFFSET;
-    const y = horizonY - (visibleAltitude / 90) * ALTITUDE_HEIGHT;
-    return { x, y };
-  }
-
-  function buildTrack(kind, midnight, rowTop) {
-    const stepMs = 5 * 60000;
-    const end = new Date(midnight.getTime() + DAY_MS);
-    const samples = [];
-    const crossings = [];
-    let peak = null;
-
-    for (let time = midnight.getTime(); time <= end.getTime(); time += stepMs) {
-      const date = new Date(time);
-      const alt = altitude(kind, date);
-      const sample = { date, altitude: alt };
-      samples.push(sample);
-      if (!peak || alt > peak.altitude) peak = sample;
-
-      const previous = samples[samples.length - 2];
-      if (previous && previous.altitude * alt < 0) {
-        const fraction = Math.abs(previous.altitude) / (Math.abs(previous.altitude) + Math.abs(alt));
-        const crossingDate = new Date(previous.date.getTime() + fraction * (date - previous.date));
-        crossings.push({
-          date: crossingDate,
-          type: previous.altitude < alt ? "rise" : "set",
-        });
+  function refineCrossing(kind, before, after) {
+    let low = before.getTime();
+    let high = after.getTime();
+    let lowAltitude = altitude(kind, new Date(low));
+    for (let i = 0; i < 18; i += 1) {
+      const mid = (low + high) / 2;
+      const midAltitude = altitude(kind, new Date(mid));
+      if ((lowAltitude < 0 && midAltitude < 0) || (lowAltitude >= 0 && midAltitude >= 0)) {
+        low = mid;
+        lowAltitude = midAltitude;
+      } else {
+        high = mid;
       }
     }
+    return new Date((low + high) / 2);
+  }
 
-    const commands = [];
-    let segmentOpen = false;
-    samples.forEach((sample) => {
-      if (sample.altitude >= 0) {
-        const point = pointFor(sample.date, sample.altitude, rowTop, midnight);
-        commands.push(`${segmentOpen ? "L" : "M"}${point.x.toFixed(1)},${point.y.toFixed(1)}`);
-        segmentOpen = true;
-      } else {
-        segmentOpen = false;
+  function findVisibilityArcs(kind, now) {
+    const start = new Date(now.getTime() - DAY_MS);
+    const end = new Date(now.getTime() + 2 * DAY_MS);
+    const stepMs = 10 * 60000;
+    const crossings = [];
+    let previousDate = start;
+    let previousAltitude = altitude(kind, previousDate);
+
+    for (let time = start.getTime() + stepMs; time <= end.getTime(); time += stepMs) {
+      const date = new Date(time);
+      const currentAltitude = altitude(kind, date);
+      if ((previousAltitude < 0 && currentAltitude >= 0) || (previousAltitude >= 0 && currentAltitude < 0)) {
+        crossings.push({
+          date: refineCrossing(kind, previousDate, date),
+          type: previousAltitude < currentAltitude ? "rise" : "set",
+        });
       }
+      previousDate = date;
+      previousAltitude = currentAltitude;
+    }
+
+    const arcs = [];
+    for (let i = 0; i < crossings.length; i += 1) {
+      if (crossings[i].type !== "rise") continue;
+      const set = crossings.slice(i + 1).find((event) => event.type === "set");
+      if (set) arcs.push({ rise: crossings[i].date, set: set.date });
+    }
+    return arcs;
+  }
+
+  function chooseArc(kind, now) {
+    const arcs = findVisibilityArcs(kind, now);
+    const active = arcs.find((arc) => now >= arc.rise && now <= arc.set);
+    if (active) return { ...active, active: true };
+
+    const next = arcs.find((arc) => arc.rise > now);
+    if (next) return { ...next, active: false };
+
+    const previous = [...arcs].reverse().find((arc) => arc.set < now);
+    return previous ? { ...previous, active: false } : null;
+  }
+
+  function buildArc(kind, arc, rowTop) {
+    const samples = [];
+    const duration = arc.set - arc.rise;
+    const stepMs = Math.max(60000, duration / 180);
+    let peak = null;
+
+    for (let time = arc.rise.getTime(); time <= arc.set.getTime(); time += stepMs) {
+      const date = new Date(time);
+      const alt = Math.max(0, altitude(kind, date));
+      const progress = Math.max(0, Math.min(1, (date - arc.rise) / duration));
+      const x = LEFT + progress * WIDTH;
+      const horizonY = rowTop + HORIZON_OFFSET;
+      const y = horizonY - (Math.min(90, alt) / 90) * ALTITUDE_HEIGHT;
+      const sample = { date, altitude: alt, x, y };
+      samples.push(sample);
+      if (!peak || alt > peak.altitude) peak = sample;
+    }
+
+    const finalAltitude = Math.max(0, altitude(kind, arc.set));
+    samples.push({
+      date: arc.set,
+      altitude: finalAltitude,
+      x: LEFT + WIDTH,
+      y: rowTop + HORIZON_OFFSET,
     });
 
-    return { path: commands.join(" "), crossings, peak };
+    const path = samples.map((sample, index) => `${index ? "L" : "M"}${sample.x.toFixed(1)},${sample.y.toFixed(1)}`).join(" ");
+    return { path, peak, duration };
   }
 
-  function crossingSummary(crossings) {
-    if (!crossings.length) return "No horizon crossing today";
-    return crossings.map((crossing) => `${formatTime(crossing.date)} ${crossing.type}`).join(" · ");
+  function markerPoint(kind, now, arc, rowTop) {
+    const duration = arc.set - arc.rise;
+    const progress = Math.max(0, Math.min(1, (now - arc.rise) / duration));
+    const alt = Math.max(0, altitude(kind, now));
+    const x = LEFT + progress * WIDTH;
+    const y = rowTop + HORIZON_OFFSET - (Math.min(90, alt) / 90) * ALTITUDE_HEIGHT;
+    return { x, y, progress, altitude: alt };
   }
 
-  function installTimeAxis() {
+  function installAxisLabels() {
     const labels = document.querySelector(".v2-time-labels");
     if (!labels) return;
     labels.innerHTML = `
-      <text x="46" y="418">12 AM</text>
-      <text x="248" y="418" text-anchor="middle">6 AM</text>
-      <text x="450" y="418" text-anchor="middle">12 PM</text>
-      <text x="652" y="418" text-anchor="middle">6 PM</text>
-      <text x="854" y="418" text-anchor="end">12 AM</text>`;
+      <text id="v2AxisRise" x="46" y="418">Rise</text>
+      <text id="v2AxisPeak" x="450" y="418" text-anchor="middle">Peak</text>
+      <text id="v2AxisSet" x="854" y="418" text-anchor="end">Set</text>`;
+  }
+
+  function setRowTimeLabels(kind, arcData) {
+    const rowTop = kind === "sun" ? SUN_TOP : MOON_TOP;
+    const prefix = kind === "sun" ? "Sun" : "Moon";
+    const old = document.getElementById(`v2${prefix}ArcTimes`);
+    old?.remove();
+
+    const path = document.getElementById(kind === "sun" ? "v2SunPathLine" : "v2MoonPathLine");
+    const parent = path?.parentElement;
+    if (!parent || !arcData?.peak) return;
+
+    const ns = "http://www.w3.org/2000/svg";
+    const group = document.createElementNS(ns, "g");
+    group.id = `v2${prefix}ArcTimes`;
+    group.setAttribute("class", "v2-time-labels");
+
+    const labels = [
+      { x: LEFT, anchor: "start", text: formatTime(arcData.rise) },
+      { x: LEFT + WIDTH / 2, anchor: "middle", text: formatTime(arcData.peak.date) },
+      { x: LEFT + WIDTH, anchor: "end", text: formatTime(arcData.set) },
+    ];
+
+    labels.forEach((item) => {
+      const text = document.createElementNS(ns, "text");
+      text.setAttribute("x", String(item.x));
+      text.setAttribute("y", String(rowTop + 140));
+      text.setAttribute("text-anchor", item.anchor);
+      text.textContent = item.text;
+      group.appendChild(text);
+    });
+    parent.appendChild(group);
+  }
+
+  function renderBody(kind, now) {
+    const rowTop = kind === "sun" ? SUN_TOP : MOON_TOP;
+    const path = document.getElementById(kind === "sun" ? "v2SunPathLine" : "v2MoonPathLine");
+    const marker = document.getElementById(kind === "sun" ? "v2SunLiveMarker" : "v2MoonLiveMarker");
+    const status = document.getElementById(kind === "sun" ? "v2SunStatus" : "v2MoonStatus");
+    const peakLabel = document.getElementById(kind === "sun" ? "v2SunPeakLabel" : "v2MoonPeakLabel");
+    if (!path || !marker) return;
+
+    const arc = chooseArc(kind, now);
+    if (!arc) return;
+    const built = buildArc(kind, arc, rowTop);
+    path.setAttribute("d", built.path);
+
+    const liveAltitude = altitude(kind, now);
+    if (arc.active && liveAltitude >= 0) {
+      const point = markerPoint(kind, now, arc, rowTop);
+      marker.setAttribute("transform", `translate(${point.x.toFixed(1)} ${point.y.toFixed(1)})`);
+      marker.style.opacity = "1";
+    } else {
+      marker.style.opacity = "0";
+    }
+
+    setRowTimeLabels(kind, { ...arc, peak: built.peak });
+
+    const bodyName = kind === "sun" ? "Sun" : "Moon";
+    if (status) {
+      status.textContent = arc.active
+        ? `${bodyName} up now · ${Math.max(0, liveAltitude).toFixed(0)}° altitude · ${formatTime(arc.rise)} rise · ${formatTime(arc.set)} set`
+        : `${bodyName} below horizon · next rise ${formatTime(arc.rise)}`;
+    }
+    if (peakLabel && built.peak) {
+      peakLabel.textContent = `Peak ${built.peak.altitude.toFixed(0)}° at ${formatTime(built.peak.date)}`;
+    }
   }
 
   function render() {
     if (rendering || !Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
-    const sunPath = document.getElementById("v2SunPathLine");
-    const moonPath = document.getElementById("v2MoonPathLine");
-    if (!sunPath || !moonPath) return;
-
     rendering = true;
     try {
-      installTimeAxis();
+      installAxisLabels();
       const now = new Date();
-      const midnight = localMidnightUtc(now);
-      const sunAltitude = altitude("sun", now);
-      const moonAltitude = altitude("moon", now);
-      const sunTrack = buildTrack("sun", midnight, SUN_TOP);
-      const moonTrack = buildTrack("moon", midnight, MOON_TOP);
-      const sunPoint = pointFor(now, sunAltitude, SUN_TOP, midnight);
-      const moonPoint = pointFor(now, moonAltitude, MOON_TOP, midnight);
-
-      sunPath.setAttribute("d", sunTrack.path);
-      moonPath.setAttribute("d", moonTrack.path);
-
-      const sunMarker = document.getElementById("v2SunLiveMarker");
-      const moonMarker = document.getElementById("v2MoonLiveMarker");
-      if (sunMarker) {
-        sunMarker.setAttribute("transform", `translate(${sunPoint.x.toFixed(1)} ${sunPoint.y.toFixed(1)})`);
-        sunMarker.style.opacity = sunAltitude >= 0 ? "1" : "0";
-      }
-      if (moonMarker) {
-        moonMarker.setAttribute("transform", `translate(${moonPoint.x.toFixed(1)} ${moonPoint.y.toFixed(1)})`);
-        moonMarker.style.opacity = moonAltitude >= 0 ? "1" : "0";
-      }
-
-      const sunStatus = document.getElementById("v2SunStatus");
-      const moonStatus = document.getElementById("v2MoonStatus");
-      const sunPeak = document.getElementById("v2SunPeakLabel");
-      const moonPeak = document.getElementById("v2MoonPeakLabel");
-
-      if (sunStatus) sunStatus.textContent = `${sunAltitude >= 0 ? "Above" : "Below"} horizon · ${Math.abs(sunAltitude).toFixed(0)}° · ${crossingSummary(sunTrack.crossings)}`;
-      if (moonStatus) moonStatus.textContent = `${moonAltitude >= 0 ? "Above" : "Below"} horizon · ${Math.abs(moonAltitude).toFixed(0)}° · ${crossingSummary(moonTrack.crossings)}`;
-      if (sunPeak && sunTrack.peak) sunPeak.textContent = `Peak ${sunTrack.peak.altitude.toFixed(0)}° at ${formatTime(sunTrack.peak.date)}`;
-      if (moonPeak && moonTrack.peak) moonPeak.textContent = `Peak ${moonTrack.peak.altitude.toFixed(0)}° at ${formatTime(moonTrack.peak.date)}`;
+      renderBody("sun", now);
+      renderBody("moon", now);
     } finally {
       rendering = false;
     }
@@ -255,7 +298,7 @@
       });
       observer.observe(svg, { attributes: true, subtree: true, attributeFilter: ["d", "transform"] });
     }, () => {
-      // The existing dashboard displays the location-permission message.
+      // Existing dashboard handles the location-permission message.
     }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 900000 });
   }
 
