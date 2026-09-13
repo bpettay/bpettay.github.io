@@ -472,7 +472,7 @@ select optgroup {
   #tools .compact-tool-card {
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 7.25rem);
+    min-height: calc(100vh - 12.75rem);
     padding: 1rem 1.1rem;
   }
 
