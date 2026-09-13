@@ -80,26 +80,3 @@ function initializeNavigation() {
   window.siteNavigation = { openPage, pages: validPages };
   return window.siteNavigation;
 }
-
-function loadVersionedScript(id, path, onload) {
-  if (document.getElementById(id)) {
-    onload?.();
-    return;
-  }
-
-  const script = document.createElement("script");
-  script.id = id;
-  script.src = window.versionedAsset ? window.versionedAsset(path) : path;
-  if (onload) script.addEventListener("load", onload, { once: true });
-  document.body.appendChild(script);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  window.setTimeout(() => {
-    loadVersionedScript("homeDashboardV2Script", "./assets/js/home-dashboard-v2.js", () => {
-      loadVersionedScript("dashboardPolishScript", "./assets/js/dashboard-polish.js", () => {
-        loadVersionedScript("skyArcFixScript", "./assets/js/sky-arc-fix.js");
-      });
-    });
-  }, 0);
-});
