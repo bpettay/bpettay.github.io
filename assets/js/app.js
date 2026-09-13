@@ -133,18 +133,6 @@ function initializeHomeDashboard() {
               <span>UV <strong id="homeWeatherUv">--</strong></span>
             </div>
 
-            <div class="moon-position-card">
-              <div class="moon-position-visual" id="homeMoonPosition" aria-label="Moon phase cycle position">
-                <span class="moon-orbit"></span>
-                <span class="moon-dot" id="homeMoonDot"><span class="moon-disc" id="homeMoonDisc"></span></span>
-              </div>
-              <div>
-                <span class="mini-label">Moon phase track</span>
-                <strong id="homeMoonPhase">Loading</strong>
-                <small id="homeMoonPercent">--%</small>
-                <p id="homeMoonNote" class="dashboard-note">Phase-cycle estimate, not exact sky position.</p>
-              </div>
-            </div>
           </div>
         </div>
       </article>
@@ -215,7 +203,6 @@ function initializeHomeDashboard() {
 
   startHomeClock();
   updateTodayPanel();
-  updateMoonPanel();
   initializeMiniCalculator();
   initializeDashboardShortcuts();
   loadHomeWeather();
@@ -235,7 +222,7 @@ function injectHomeDashboardStyles() {
     .compact-today-grid { grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); }
     .weather-dashboard-layout { display: grid; grid-template-columns: minmax(230px, 0.85fr) minmax(0, 1.15fr); gap: 1rem; align-items: start; min-width: 0; }
     .compact-weather-grid { grid-template-columns: repeat(auto-fit, minmax(94px, 1fr)); }
-    .go-card, .sun-position-card, .moon-position-card { min-width: 0; padding: 0.8rem; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.07); background: rgba(255, 255, 255, 0.035); }
+    .go-card, .sun-position-card { min-width: 0; padding: 0.8rem; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.07); background: rgba(255, 255, 255, 0.035); }
     .go-card[data-status="go"] { border-color: rgba(120, 255, 190, 0.22); }
     .go-card[data-status="caution"] { border-color: rgba(255, 202, 95, 0.28); }
     .go-card-line { display: flex; align-items: center; justify-content: space-between; gap: 0.65rem; min-width: 0; }
@@ -247,21 +234,13 @@ function injectHomeDashboardStyles() {
     .dashboard-note { margin: 0; color: var(--ink-soft); line-height: 1.55; }
     .sun-times-grid, .today-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.65rem; }
     .sun-times-grid div, .today-grid div { display: grid; gap: 0.25rem; min-width: 0; padding: 0.72rem; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.065); background: rgba(255, 255, 255, 0.035); }
-    .sun-times-grid span, .today-grid span, .mini-label { color: var(--ink-soft); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
-    .sun-times-grid strong, .today-grid strong, .moon-position-card strong { color: var(--ink); font-size: 1rem; line-height: 1.2; overflow-wrap: anywhere; }
+    .sun-times-grid span, .today-grid span { color: var(--ink-soft); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .sun-times-grid strong, .today-grid strong { color: var(--ink); font-size: 1rem; line-height: 1.2; overflow-wrap: anywhere; }
     .sun-position-card { display: grid; gap: 0.7rem; }
     .sun-path { --sun-progress: 0.5; --sun-y: 1; position: relative; height: 88px; border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, rgba(255, 202, 95, 0.08), rgba(255, 255, 255, 0.025)); border: 1px solid rgba(255, 255, 255, 0.06); }
     .sun-path-line { position: absolute; left: 10%; right: 10%; bottom: 18px; height: 58px; border: 2px solid rgba(255, 202, 95, 0.28); border-bottom: 0; border-radius: 90px 90px 0 0; }
     .horizon-line { position: absolute; left: 8%; right: 8%; bottom: 18px; height: 1px; background: rgba(255, 255, 255, 0.16); }
     .sun-dot { position: absolute; left: calc(10% + (80% * var(--sun-progress))); bottom: calc(18px + (58px * var(--sun-y))); width: 18px; height: 18px; border-radius: 999px; background: #ffca5f; box-shadow: 0 0 26px rgba(255, 202, 95, 0.55); transform: translate(-50%, 50%); }
-    .moon-position-card { display: grid; grid-template-columns: 106px minmax(0, 1fr); gap: 0.8rem; align-items: center; }
-    .moon-position-card small { display: block; margin: 0.18rem 0; color: var(--ink-soft); }
-    .moon-position-visual { --moon-progress: 0.5; --moon-y: 1; position: relative; height: 86px; border-radius: 16px; background: linear-gradient(180deg, rgba(160, 190, 255, 0.08), rgba(255, 255, 255, 0.025)); border: 1px solid rgba(255, 255, 255, 0.06); overflow: hidden; }
-    .moon-orbit { position: absolute; left: 12%; right: 12%; bottom: 18px; height: 52px; border: 1px dashed rgba(220, 230, 255, 0.22); border-bottom: 0; border-radius: 80px 80px 0 0; }
-    .moon-dot { position: absolute; left: calc(12% + (76% * var(--moon-progress))); bottom: calc(18px + (52px * var(--moon-y))); transform: translate(-50%, 50%); }
-    .moon-disc { --moon-light: 50%; position: relative; display: block; width: 34px; aspect-ratio: 1; border-radius: 999px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.12); background: #101316; box-shadow: inset 0 1px 10px rgba(255, 255, 255, 0.08), 0 10px 18px rgba(0, 0, 0, 0.2); }
-    .moon-disc::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.15), transparent 10%), radial-gradient(circle at 65% 58%, rgba(255, 255, 255, 0.09), transparent 8%), #dbe3e8; clip-path: inset(0 calc(100% - var(--moon-light)) 0 0); }
-    .moon-disc[data-phase="waning"]::before { clip-path: inset(0 0 0 calc(100% - var(--moon-light))); }
     .calc-card { gap: 0.8rem; }
     .mini-calc { display: grid; gap: 0.72rem; min-width: 0; }
     .calc-display { display: grid; gap: 0.28rem; min-height: 72px; padding: 0.8rem; border-radius: 14px; border: 1px solid rgba(120, 255, 190, 0.14); background: rgba(5, 10, 9, 0.62); box-shadow: inset 0 1px 10px rgba(0, 0, 0, 0.22); }
@@ -274,7 +253,7 @@ function injectHomeDashboardStyles() {
     .calc-key-danger { color: #ffd2cf !important; border-color: rgba(255, 122, 89, 0.2) !important; }
     .calc-key-enter { color: #c8ffd8 !important; border-color: rgba(120, 255, 190, 0.24) !important; background: rgba(120, 255, 190, 0.08) !important; }
     @media (max-width: 980px) { .dashboard-span-2, .time-today-card, .weather-dashboard-card { grid-column: 1 / -1; } .weather-dashboard-layout { grid-template-columns: 1fr; } }
-    @media (max-width: 720px) { .compact-clock-layout, .moon-position-card { grid-template-columns: 1fr; } .calc-keypad { gap: 0.36rem; } .calc-keypad button { min-height: 40px; font-size: 0.82rem; } }
+    @media (max-width: 720px) { .compact-clock-layout { grid-template-columns: 1fr; } .calc-keypad { gap: 0.36rem; } .calc-keypad button { min-height: 40px; font-size: 0.82rem; } }
     @media (max-width: 420px) { .sun-times-grid, .today-grid { grid-template-columns: 1fr; } }
   `;
   document.head.appendChild(style);
@@ -551,42 +530,6 @@ function updateTodayPanel() {
     } else {
       weekendEl.textContent = `${daysUntilSaturday}d`;
     }
-  }
-}
-
-function updateMoonPanel() {
-  const phaseEl = document.getElementById("homeMoonPhase");
-  const percentEl = document.getElementById("homeMoonPercent");
-  const noteEl = document.getElementById("homeMoonNote");
-  const discEl = document.getElementById("homeMoonDisc");
-  const positionEl = document.getElementById("homeMoonPosition");
-  if (!phaseEl || !percentEl || !noteEl || !discEl) return;
-
-  const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14);
-  const lunarCycle = 29.530588853;
-  const days = (Date.now() - knownNewMoon) / 86400000;
-  const age = ((days % lunarCycle) + lunarCycle) % lunarCycle;
-  const fraction = age / lunarCycle;
-  const illumination = Math.round(((1 - Math.cos(2 * Math.PI * fraction)) / 2) * 100);
-
-  let name = "New Moon";
-  if (fraction > 0.03 && fraction < 0.22) name = "Waxing Crescent";
-  else if (fraction < 0.28) name = "First Quarter";
-  else if (fraction < 0.47) name = "Waxing Gibbous";
-  else if (fraction < 0.53) name = "Full Moon";
-  else if (fraction < 0.72) name = "Waning Gibbous";
-  else if (fraction < 0.78) name = "Last Quarter";
-  else if (fraction < 0.97) name = "Waning Crescent";
-
-  phaseEl.textContent = name;
-  percentEl.textContent = `${illumination}%`;
-  noteEl.textContent = `Lunar day ${age.toFixed(1)}. Phase-cycle estimate, not exact sky position.`;
-  discEl.dataset.phase = fraction > 0.5 ? "waning" : "waxing";
-  discEl.style.setProperty("--moon-light", `${Math.max(5, illumination)}%`);
-
-  if (positionEl) {
-    positionEl.style.setProperty("--moon-progress", fraction.toFixed(3));
-    positionEl.style.setProperty("--moon-y", Math.sin(fraction * Math.PI).toFixed(3));
   }
 }
 
