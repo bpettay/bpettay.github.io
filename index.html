@@ -151,7 +151,22 @@
   </main>
 
   <main id="tools" class="page" data-page-label="Tools" hidden>
-    <section class="tool-card compact-tool-card surface">
+    <section class="tool-switcher surface" aria-labelledby="toolSwitcherTitle">
+      <div>
+        <p class="tool-label">Toolbox</p>
+        <h2 id="toolSwitcherTitle">Choose a tool</h2>
+        <p id="toolSwitcherDescription">Convert between common engineering units.</p>
+      </div>
+      <div class="field-group tool-picker">
+        <label for="toolSelect">Active tool</label>
+        <select id="toolSelect">
+          <option value="converter">Unit Converter</option>
+          <option value="calculator">Calculator</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="tool-card compact-tool-card surface tool-panel" data-tool-panel="converter">
       <div class="tool-header">
         <div>
           <p class="tool-label">Converter</p>
@@ -201,6 +216,53 @@
             <p class="tool-label">Related</p>
             <div id="relatedResults" class="related-results"></div>
           </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="tool-card calculator-tool-card surface tool-panel" data-tool-panel="calculator" hidden>
+      <div class="tool-header">
+        <div>
+          <p class="tool-label">Calculator</p>
+          <h2>Scientific Calculator</h2>
+          <p class="tool-intro">A compact calculator for everyday arithmetic and common scientific functions.</p>
+        </div>
+      </div>
+
+      <div class="mini-calc" aria-label="Scientific calculator">
+        <div class="calc-display">
+          <div id="calcExpression" class="calc-expression">0</div>
+          <div id="calcResult" class="calc-result">Ready</div>
+        </div>
+        <div class="calc-keypad">
+          <button type="button" data-calc-key="sin(">sin</button>
+          <button type="button" data-calc-key="cos(">cos</button>
+          <button type="button" data-calc-key="tan(">tan</button>
+          <button type="button" data-calc-key="sqrt(">√</button>
+          <button type="button" data-calc-key="log(">log</button>
+          <button type="button" data-calc-key="ln(">ln</button>
+          <button type="button" data-calc-key="pi">π</button>
+          <button type="button" data-calc-key="^">^</button>
+          <button type="button" data-calc-key="7">7</button>
+          <button type="button" data-calc-key="8">8</button>
+          <button type="button" data-calc-key="9">9</button>
+          <button type="button" data-calc-key="/">÷</button>
+          <button type="button" data-calc-key="4">4</button>
+          <button type="button" data-calc-key="5">5</button>
+          <button type="button" data-calc-key="6">6</button>
+          <button type="button" data-calc-key="*">×</button>
+          <button type="button" data-calc-key="1">1</button>
+          <button type="button" data-calc-key="2">2</button>
+          <button type="button" data-calc-key="3">3</button>
+          <button type="button" data-calc-key="-">−</button>
+          <button type="button" data-calc-key="0">0</button>
+          <button type="button" data-calc-key=".">.</button>
+          <button type="button" data-calc-key="(">(</button>
+          <button type="button" data-calc-key=")">)</button>
+          <button type="button" data-calc-action="clear" class="calc-key-danger">CLR</button>
+          <button type="button" data-calc-action="backspace">DEL</button>
+          <button type="button" data-calc-key="+">+</button>
+          <button type="button" data-calc-action="equals" class="calc-key-enter">ENTER</button>
         </div>
       </div>
     </section>
