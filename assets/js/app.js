@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   configureConverterPrecision();
   initializeHomeDashboard();
+  initializeToolsSwitcher();
+  initializeMiniCalculator();
 
   if (typeof initializeNavigation === "function") initializeNavigation();
 
@@ -137,49 +139,6 @@ function initializeHomeDashboard() {
         </div>
       </article>
 
-      <article class="dashboard-card surface calc-card dashboard-span-2">
-        <div class="dashboard-card-head">
-          <span class="dashboard-label">Calculator</span>
-          <strong>TI-style</strong>
-        </div>
-        <div class="mini-calc" aria-label="Mini calculator">
-          <div class="calc-display">
-            <div id="calcExpression" class="calc-expression">0</div>
-            <div id="calcResult" class="calc-result">Ready</div>
-          </div>
-          <div class="calc-keypad">
-            <button type="button" data-calc-key="sin(">sin</button>
-            <button type="button" data-calc-key="cos(">cos</button>
-            <button type="button" data-calc-key="tan(">tan</button>
-            <button type="button" data-calc-key="sqrt(">√</button>
-            <button type="button" data-calc-key="log(">log</button>
-            <button type="button" data-calc-key="ln(">ln</button>
-            <button type="button" data-calc-key="pi">π</button>
-            <button type="button" data-calc-key="^">^</button>
-            <button type="button" data-calc-key="7">7</button>
-            <button type="button" data-calc-key="8">8</button>
-            <button type="button" data-calc-key="9">9</button>
-            <button type="button" data-calc-key="/">÷</button>
-            <button type="button" data-calc-key="4">4</button>
-            <button type="button" data-calc-key="5">5</button>
-            <button type="button" data-calc-key="6">6</button>
-            <button type="button" data-calc-key="*">×</button>
-            <button type="button" data-calc-key="1">1</button>
-            <button type="button" data-calc-key="2">2</button>
-            <button type="button" data-calc-key="3">3</button>
-            <button type="button" data-calc-key="-">−</button>
-            <button type="button" data-calc-key="0">0</button>
-            <button type="button" data-calc-key=".">.</button>
-            <button type="button" data-calc-key="(">(</button>
-            <button type="button" data-calc-key=")">)</button>
-            <button type="button" data-calc-action="clear" class="calc-key-danger">CLR</button>
-            <button type="button" data-calc-action="backspace">DEL</button>
-            <button type="button" data-calc-key="+">+</button>
-            <button type="button" data-calc-action="equals" class="calc-key-enter">ENTER</button>
-          </div>
-        </div>
-      </article>
-
       <article class="dashboard-card surface quick-actions-card shortcuts-card dashboard-span-2">
         <div class="section-heading">
           <p class="section-label">Shortcuts</p>
@@ -203,7 +162,6 @@ function initializeHomeDashboard() {
 
   startHomeClock();
   updateTodayPanel();
-  initializeMiniCalculator();
   initializeDashboardShortcuts();
   loadHomeWeather();
 }
@@ -241,19 +199,8 @@ function injectHomeDashboardStyles() {
     .sun-path-line { position: absolute; left: 10%; right: 10%; bottom: 18px; height: 58px; border: 2px solid rgba(255, 202, 95, 0.28); border-bottom: 0; border-radius: 90px 90px 0 0; }
     .horizon-line { position: absolute; left: 8%; right: 8%; bottom: 18px; height: 1px; background: rgba(255, 255, 255, 0.16); }
     .sun-dot { position: absolute; left: calc(10% + (80% * var(--sun-progress))); bottom: calc(18px + (58px * var(--sun-y))); width: 18px; height: 18px; border-radius: 999px; background: #ffca5f; box-shadow: 0 0 26px rgba(255, 202, 95, 0.55); transform: translate(-50%, 50%); }
-    .calc-card { gap: 0.8rem; }
-    .mini-calc { display: grid; gap: 0.72rem; min-width: 0; }
-    .calc-display { display: grid; gap: 0.28rem; min-height: 72px; padding: 0.8rem; border-radius: 14px; border: 1px solid rgba(120, 255, 190, 0.14); background: rgba(5, 10, 9, 0.62); box-shadow: inset 0 1px 10px rgba(0, 0, 0, 0.22); }
-    .calc-expression, .calc-result { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; line-height: 1.25; overflow-wrap: anywhere; }
-    .calc-expression { color: rgba(243, 245, 247, 0.92); font-size: 0.95rem; min-height: 1.25rem; }
-    .calc-result { color: #c8ffd8; font-size: 1.1rem; font-weight: 700; }
-    .calc-keypad { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.42rem; }
-    .calc-keypad button { min-width: 0; min-height: 42px; padding: 0.55rem 0.35rem; border-radius: 11px; border: 1px solid rgba(255, 255, 255, 0.08); color: var(--ink); background: rgba(255, 255, 255, 0.045); font: inherit; font-size: 0.86rem; cursor: pointer; transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease; }
-    .calc-keypad button:hover, .calc-keypad button:focus-visible { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.16); transform: translateY(-1px); outline: none; }
-    .calc-key-danger { color: #ffd2cf !important; border-color: rgba(255, 122, 89, 0.2) !important; }
-    .calc-key-enter { color: #c8ffd8 !important; border-color: rgba(120, 255, 190, 0.24) !important; background: rgba(120, 255, 190, 0.08) !important; }
     @media (max-width: 980px) { .dashboard-span-2, .time-today-card, .weather-dashboard-card { grid-column: 1 / -1; } .weather-dashboard-layout { grid-template-columns: 1fr; } }
-    @media (max-width: 720px) { .compact-clock-layout { grid-template-columns: 1fr; } .calc-keypad { gap: 0.36rem; } .calc-keypad button { min-height: 40px; font-size: 0.82rem; } }
+    @media (max-width: 720px) { .compact-clock-layout { grid-template-columns: 1fr; } }
     @media (max-width: 420px) { .sun-times-grid, .today-grid { grid-template-columns: 1fr; } }
   `;
   document.head.appendChild(style);
@@ -531,6 +478,32 @@ function updateTodayPanel() {
       weekendEl.textContent = `${daysUntilSaturday}d`;
     }
   }
+}
+
+function initializeToolsSwitcher() {
+  const select = document.getElementById("toolSelect");
+  const panels = document.querySelectorAll("[data-tool-panel]");
+  const description = document.getElementById("toolSwitcherDescription");
+  if (!select || !panels.length) return;
+
+  const descriptions = {
+    converter: "Convert between common engineering units.",
+    calculator: "Run arithmetic and common scientific functions.",
+  };
+
+  const showTool = (tool) => {
+    const available = Array.from(panels).some((panel) => panel.dataset.toolPanel === tool);
+    const activeTool = available ? tool : "converter";
+
+    select.value = activeTool;
+    panels.forEach((panel) => {
+      panel.hidden = panel.dataset.toolPanel !== activeTool;
+    });
+    if (description) description.textContent = descriptions[activeTool];
+  };
+
+  select.addEventListener("change", () => showTool(select.value));
+  showTool(select.value);
 }
 
 function initializeMiniCalculator() {
