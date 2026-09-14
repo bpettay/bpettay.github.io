@@ -1,5 +1,5 @@
 function initializeGroupedUnitSelectors() {
-  // Kept for compatibility with app.js. initializeConverter handles selector setup.
+  // Compatibility shim: initializeConverter owns selector setup.
 }
 
 function initializeConverter() {
@@ -15,6 +15,8 @@ function initializeConverter() {
   const queryStatusEl = document.getElementById("queryStatus");
   const previewSummaryEl = document.getElementById("previewSummary");
   const previewFactorEl = document.getElementById("previewFactor");
+  const controlGrid = categoryEl?.closest(".tool-grid");
+  const previewPanel = previewSummaryEl?.closest(".preview-panel");
 
   const required = [
     categoryEl,
@@ -26,26 +28,10 @@ function initializeConverter() {
     resultFactorEl,
     relatedResultsEl,
   ];
+
   if (required.some((el) => !el) || typeof unitData !== "object") return;
   if (categoryEl.dataset.converterReady === "true") return;
   categoryEl.dataset.converterReady = "true";
-
-  const controlGrid = categoryEl.closest(".tool-grid");
-  const queryRow = queryInputEl?.closest(".field-group");
-  const previewPanel = previewSummaryEl?.closest(".preview-panel");
-  const categoryGroup = categoryEl.closest(".field-group");
-  const valueGroup = inputValueEl.closest(".field-group");
-  const fromGroup = fromUnitEl.closest(".field-group");
-  const toGroup = toUnitEl.closest(".field-group");
-
-  queryRow?.classList.add("converter-query-row");
-  controlGrid?.classList.add("converter-controls-grid");
-  categoryGroup?.classList.add("converter-category-group");
-  valueGroup?.classList.add("converter-value-group");
-  fromGroup?.classList.add("converter-from-group");
-  toGroup?.classList.add("converter-to-group");
-
-  installConverterStyles();
 
   const getUnits = (category) => {
     const info = unitData[category];
@@ -93,21 +79,25 @@ function initializeConverter() {
     if (alias && !matches.some((match) => match.category === alias.category && match.unit === alias.unit)) {
       matches.unshift(alias);
     }
+
     return matches;
   }
 
   function resolveQueryUnits(fromRaw, toRaw) {
     const fromMatches = findUnitMatches(fromRaw);
     const toMatches = findUnitMatches(toRaw);
+
     for (const fromMatch of fromMatches) {
       const toMatch = toMatches.find((candidate) => candidate.category === fromMatch.category);
       if (toMatch) return { category: fromMatch.category, from: fromMatch.unit, to: toMatch.unit };
     }
+
     return null;
   }
 
   function populateCategories() {
     categoryEl.replaceChildren();
+
     Object.keys(unitData).forEach((category) => {
       const option = document.createElement("option");
       option.value = category;
@@ -119,12 +109,14 @@ function initializeConverter() {
   function populateUnitSelect(selectEl, category, preferred) {
     const units = getUnits(category);
     selectEl.replaceChildren();
+
     units.forEach((unit) => {
       const option = document.createElement("option");
       option.value = unit;
       option.textContent = unit;
       selectEl.appendChild(option);
     });
+
     selectEl.value = units.includes(preferred) ? preferred : (units[0] || "");
   }
 
@@ -146,8 +138,10 @@ function initializeConverter() {
     if (value === -Infinity) return "−∞";
     if (!Number.isFinite(value)) return "—";
     if (Object.is(value, -0)) value = 0;
+
     const abs = Math.abs(value);
     if (abs >= 1e9 || (abs > 0 && abs < 1e-6)) return value.toExponential(2);
+
     return new Intl.NumberFormat("en-US", {
       maximumSignificantDigits: 3,
       useGrouping: abs >= 10000,
@@ -185,15 +179,18 @@ function initializeConverter() {
   function validateInput(value, category, from) {
     if (!Number.isFinite(value)) return "Enter a valid numeric value.";
     if (category === "Fuel Economy" && value < 0) return "Fuel economy cannot be negative.";
+
     if (category === "Temperature" && toCelsius(value, from) < -273.15 - 1e-10) {
       return "Temperature cannot be below absolute zero.";
     }
+
     return "";
   }
 
   function convertUnits(value, category, from, to) {
     const info = unitData[category];
     const units = getUnits(category);
+
     if (!info || !units.includes(from) || !units.includes(to)) return NaN;
     if (from === to) return value;
     if (info.type === "temperature") return fromCelsius(toCelsius(value, from), to);
@@ -202,42 +199,57 @@ function initializeConverter() {
     const fromFactor = info.units[from];
     const toFactor = info.units[to];
     if (!Number.isFinite(fromFactor) || !Number.isFinite(toFactor) || toFactor === 0) return NaN;
+
     return (value * fromFactor) / toFactor;
   }
 
   function getFormulaText(value, category, from, to, converted) {
     const info = unitData[category];
+
     if (info.type === "temperature" || info.type === "fuelEconomy") {
       return `${formatNumber(value)} ${from} = ${formatNumber(converted)} ${to}`;
     }
+
     const factor = info.units[from] / info.units[to];
     return `${formatNumber(value)} ${from} × ${formatNumber(factor)} = ${formatNumber(converted)} ${to}`;
   }
 
   function getFactorText(category, from, to) {
     const info = unitData[category];
+
     if (info.type === "temperature") return "Offset scale — no single constant multiplier.";
+
     if (info.type === "fuelEconomy" && (from === "L/100 km" || to === "L/100 km")) {
       return "Inverse scale — result depends on the entered value.";
     }
+
     return `1 ${from} = ${formatNumber(convertUnits(1, category, from, to))} ${to}`;
   }
 
   function renderEquation(value, category, from, to, converted) {
     if (!previewPanel) return;
+
     let equation = document.getElementById("equationPreview");
     if (!equation) {
       equation = document.createElement("div");
       equation.id = "equationPreview";
       equation.setAttribute("aria-live", "polite");
+      equation.style.marginTop = "0.55rem";
+      equation.style.paddingTop = "0.55rem";
+      equation.style.borderTop = "1px solid var(--line)";
+      equation.style.color = "var(--ink)";
+      equation.style.fontFamily = '"Cambria Math", "STIX Two Math", serif';
+      equation.style.overflowX = "auto";
       previewPanel.appendChild(equation);
     }
+
     equation.textContent = getFormulaText(value, category, from, to, converted);
   }
 
   function renderRelatedConversions(value, category, from, to) {
     relatedResultsEl.replaceChildren();
     const common = unitData[category].common || getUnits(category);
+
     common
       .filter((unit) => unit !== from && unit !== to)
       .slice(0, 4)
@@ -268,6 +280,7 @@ function initializeConverter() {
 
   function renderConversion(value, category, from, to, updatePreview = false) {
     const problem = validateInput(value, category, from);
+
     if (problem) {
       clearResult(problem);
       if (updatePreview) document.getElementById("equationPreview")?.remove();
@@ -275,6 +288,7 @@ function initializeConverter() {
     }
 
     const converted = convertUnits(value, category, from, to);
+
     if (Number.isNaN(converted)) {
       clearResult("Those units are not compatible.");
       if (updatePreview) document.getElementById("equationPreview")?.remove();
@@ -285,6 +299,7 @@ function initializeConverter() {
     resultFormulaEl.textContent = getFormulaText(value, category, from, to, converted);
     resultFactorEl.textContent = getFactorText(category, from, to);
     renderRelatedConversions(value, category, from, to);
+
     if (updatePreview) renderEquation(value, category, from, to, converted);
     return converted;
   }
@@ -299,8 +314,12 @@ function initializeConverter() {
   }
 
   function parseQuickQuery(query) {
-    const match = query.trim().match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*(.+?)\s+(?:to|in|as|into)\s+(.+)$/i);
+    const match = query
+      .trim()
+      .match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*(.+?)\s+(?:to|in|as|into)\s+(.+)$/i);
+
     if (!match) return null;
+
     const value = Number(match[1]);
     const resolved = resolveQueryUnits(match[2], match[3]);
     return Number.isFinite(value) && resolved ? { value, ...resolved } : null;
@@ -308,6 +327,7 @@ function initializeConverter() {
 
   function updateLivePreview() {
     if (!queryInputEl || !previewSummaryEl || !previewFactorEl || !queryStatusEl) return;
+
     const query = queryInputEl.value.trim();
 
     if (!query) {
@@ -319,6 +339,7 @@ function initializeConverter() {
     }
 
     const parsed = parseQuickQuery(query);
+
     if (!parsed) {
       previewSummaryEl.textContent = "Waiting for a complete conversion…";
       previewFactorEl.textContent = "Format: value unit to unit";
@@ -329,6 +350,7 @@ function initializeConverter() {
 
     setUnitSelections(parsed.category, parsed.from, parsed.to);
     inputValueEl.value = parsed.value;
+
     const converted = renderConversion(parsed.value, parsed.category, parsed.from, parsed.to, true);
 
     if (Number.isNaN(converted)) {
@@ -342,32 +364,28 @@ function initializeConverter() {
   }
 
   function installSwapButton() {
-    if (!controlGrid || !toGroup) return null;
+    if (!controlGrid || document.getElementById("swapUnits")) return;
 
-    let wrapper = document.querySelector(".converter-swap-group");
-    let button = document.getElementById("swapUnits");
+    const row = document.createElement("div");
+    row.className = "converter-swap-row";
+    row.style.display = "flex";
+    row.style.justifyContent = "flex-end";
+    row.style.marginTop = "0.15rem";
 
-    if (!wrapper) {
-      wrapper = document.createElement("div");
-      wrapper.className = "field-group converter-swap-group";
+    const button = document.createElement("button");
+    button.id = "swapUnits";
+    button.type = "button";
+    button.textContent = "⇄ Swap units";
+    button.setAttribute("aria-label", "Swap source and destination units");
+    button.style.minHeight = "36px";
+    button.style.padding = "0.45rem 0.75rem";
+    button.style.border = "1px solid var(--line)";
+    button.style.borderRadius = "7px";
+    button.style.color = "var(--ink)";
+    button.style.background = "#141b24";
+    button.style.cursor = "pointer";
 
-      const label = document.createElement("label");
-      label.textContent = "Swap";
-      label.setAttribute("aria-hidden", "true");
-
-      button = document.createElement("button");
-      button.id = "swapUnits";
-      button.type = "button";
-      button.className = "converter-swap-button";
-      button.setAttribute("aria-label", "Swap source and destination units");
-      button.title = "Swap units";
-      button.textContent = "⇄";
-
-      wrapper.append(label, button);
-      controlGrid.insertBefore(wrapper, toGroup);
-    }
-
-    button?.addEventListener("click", () => {
+    button.addEventListener("click", () => {
       const previous = fromUnitEl.value;
       fromUnitEl.value = toUnitEl.value;
       toUnitEl.value = previous;
@@ -380,13 +398,15 @@ function initializeConverter() {
       }
     });
 
-    return button;
+    row.appendChild(button);
+    controlGrid.insertAdjacentElement("afterend", row);
   }
 
   categoryEl.addEventListener("change", () => {
     setDefaultUnits(categoryEl.value);
     convertValue();
   });
+
   fromUnitEl.addEventListener("change", () => convertValue(Boolean(queryInputEl?.value.trim())));
   toUnitEl.addEventListener("change", () => convertValue(Boolean(queryInputEl?.value.trim())));
   inputValueEl.addEventListener("input", () => convertValue(Boolean(queryInputEl?.value.trim())));
@@ -398,248 +418,4 @@ function initializeConverter() {
   installSwapButton();
   convertValue();
   updateLivePreview();
-}
-
-function installConverterStyles() {
-  if (document.getElementById("converter-layout-v2")) return;
-
-  const style = document.createElement("style");
-  style.id = "converter-layout-v2";
-  style.textContent = `
-    .compact-tool-card {
-      padding: .95rem 1rem !important;
-    }
-
-    .compact-tool-card .tool-header {
-      margin-bottom: .75rem !important;
-    }
-
-    .compact-tool-card .tool-header h2 {
-      font-size: clamp(1.35rem, 3vw, 1.9rem) !important;
-    }
-
-    .compact-tool-card .tool-intro {
-      margin-top: .3rem !important;
-      font-size: .84rem;
-      line-height: 1.45 !important;
-    }
-
-    .compact-converter-layout {
-      gap: .7rem !important;
-    }
-
-    .converter-query-row {
-      display: grid !important;
-      grid-template-columns: minmax(0, 1.3fr) minmax(260px, .9fr);
-      grid-template-areas:
-        "label preview"
-        "input preview";
-      gap: .35rem .7rem !important;
-      align-items: stretch;
-    }
-
-    .converter-query-row > label {
-      grid-area: label;
-      align-self: end;
-    }
-
-    .converter-query-row > #queryInput {
-      grid-area: input;
-      min-width: 0;
-      min-height: 40px !important;
-      padding: .58rem .7rem !important;
-      font-size: .9rem !important;
-    }
-
-    .converter-query-row > .preview-panel {
-      grid-area: preview;
-      min-width: 0;
-      min-height: 0;
-      padding: .55rem .7rem !important;
-      display: grid;
-      align-content: center;
-      gap: .12rem;
-    }
-
-    .preview-summary,
-    .preview-factor,
-    .query-status,
-    .result-formula,
-    .result-factor {
-      margin: 0 !important;
-      line-height: 1.32 !important;
-      font-size: .76rem !important;
-    }
-
-    .query-status {
-      font-size: .68rem !important;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-    }
-
-    #equationPreview {
-      margin-top: .25rem;
-      padding-top: .28rem;
-      border-top: 1px solid var(--line);
-      color: var(--ink);
-      font-family: "Cambria Math", "STIX Two Math", serif;
-      font-size: .9rem;
-      white-space: nowrap;
-      overflow-x: auto;
-    }
-
-    .converter-controls-grid {
-      display: grid !important;
-      grid-template-columns: minmax(135px, .95fr) minmax(110px, .72fr) minmax(130px, 1fr) 42px minmax(130px, 1fr) !important;
-      grid-template-areas: "category value from swap to";
-      gap: .55rem !important;
-      align-items: end;
-    }
-
-    .converter-category-group { grid-area: category; }
-    .converter-value-group { grid-area: value; }
-    .converter-from-group { grid-area: from; }
-    .converter-swap-group { grid-area: swap; }
-    .converter-to-group { grid-area: to; }
-
-    .converter-controls-grid .field-group {
-      min-width: 0;
-      gap: .25rem !important;
-    }
-
-    .converter-controls-grid .field-group label {
-      min-height: 1em;
-      font-size: .7rem !important;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-    }
-
-    .converter-controls-grid input,
-    .converter-controls-grid select {
-      width: 100%;
-      min-width: 0;
-      min-height: 40px !important;
-      padding: .5rem .58rem !important;
-      font-size: .84rem !important;
-      border-radius: 7px !important;
-    }
-
-    .converter-swap-button {
-      width: 42px;
-      min-width: 42px;
-      min-height: 40px;
-      padding: 0;
-      border: 1px solid var(--line);
-      border-radius: 7px;
-      color: var(--ink);
-      background: #141b24;
-      cursor: pointer;
-      font-size: 1.05rem;
-    }
-
-    .converter-swap-button:hover,
-    .converter-swap-button:focus-visible {
-      background: var(--surface-hover);
-      border-color: var(--line-strong);
-      outline: none;
-    }
-
-    .compact-results-grid {
-      grid-template-columns: minmax(250px, .85fr) minmax(0, 1.15fr) !important;
-      gap: .6rem !important;
-    }
-
-    .result-panel,
-    .related-panel {
-      padding: .72rem .8rem !important;
-    }
-
-    .result-value {
-      margin-bottom: .25rem !important;
-      font-size: clamp(1.45rem, 3.5vw, 2.15rem) !important;
-    }
-
-    .related-results {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: .35rem !important;
-    }
-
-    .related-item {
-      min-width: 0;
-      padding: .42rem .52rem !important;
-      gap: .45rem !important;
-      align-items: center !important;
-      font-size: .78rem;
-    }
-
-    .related-item-label,
-    .related-item-value {
-      min-width: 0;
-    }
-
-    @media (max-width: 900px) {
-      .converter-controls-grid {
-        grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) !important;
-        grid-template-areas:
-          "category value"
-          "from from"
-          "swap swap"
-          "to to";
-      }
-
-      .converter-swap-group {
-        justify-self: center;
-      }
-
-      .converter-swap-group label {
-        display: none;
-      }
-
-      .converter-swap-button {
-        width: 42px;
-      }
-    }
-
-    @media (max-width: 720px) {
-      .converter-query-row {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-          "label"
-          "input"
-          "preview";
-      }
-
-      .compact-results-grid {
-        grid-template-columns: 1fr !important;
-      }
-    }
-
-    @media (max-width: 520px) {
-      .compact-tool-card {
-        padding: .7rem !important;
-      }
-
-      .compact-tool-card .tool-intro {
-        display: none;
-      }
-
-      .converter-controls-grid {
-        grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr) !important;
-        grid-template-areas:
-          "category category category"
-          "value value value"
-          "from swap to";
-      }
-
-      .converter-swap-group {
-        align-self: end;
-      }
-
-      .related-results {
-        grid-template-columns: 1fr;
-      }
-    }
-  `;
-
-  document.head.appendChild(style);
 }
