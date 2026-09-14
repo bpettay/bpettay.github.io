@@ -12,22 +12,22 @@
   />
   <title>Brock | Engineering</title>
 
-  <link rel="icon" type="image/png" href="./Favicon.png?v=20260914-4" />
-  <link rel="manifest" href="./manifest.json?v=20260914-4" />
+  <link rel="icon" type="image/png" href="./Favicon.png?v=20260914-5" />
+  <link rel="manifest" href="./manifest.json?v=20260914-5" />
   <meta name="theme-color" content="#0a0f15" />
 
-  <link rel="stylesheet" href="./assets/css/style.css?v=20260914-4" />
-  <link rel="stylesheet" href="./assets/css/home.css?v=20260914-4" />
-  <link rel="stylesheet" href="./assets/css/tools.css?v=20260914-4" />
-  <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260914-4" />
-  <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260914-4" />
-  <link rel="stylesheet" href="./assets/css/pyro-gates.css?v=20260914-4" />
+  <link rel="stylesheet" href="./assets/css/style.css?v=20260914-5" />
+  <link rel="stylesheet" href="./assets/css/home.css?v=20260914-5" />
+  <link rel="stylesheet" href="./assets/css/tools.css?v=20260914-5" />
+  <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260914-5" />
+  <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260914-5" />
+  <link rel="stylesheet" href="./assets/css/pyro-gates.css?v=20260914-5" />
 </head>
 
 <body>
   <nav class="nav" aria-label="Primary">
     <div class="nav-left">
-      <img src="./Favicon.png?v=20260914-4" alt="Brock Pettay monogram" class="logo" />
+      <img src="./Favicon.png?v=20260914-5" alt="Brock Pettay monogram" class="logo" />
       <span class="site-name">Brock Pettay</span>
     </div>
 
@@ -87,49 +87,79 @@
       <article class="dashboard-card surface home-weather-card">
         <div class="dashboard-card-head">
           <span class="dashboard-label">Weather + Outside</span>
-          <strong id="homeDaylightLeft">--</strong>
+          <strong id="homeWeatherUpdated">Updating…</strong>
         </div>
 
-        <div class="weather-dashboard-layout">
-          <div class="weather-primary-block">
-            <div class="weather-current-row">
-              <div class="condition-pictogram" id="homeWeatherIcon" aria-hidden="true"></div>
+        <div class="weather-current-band">
+          <div class="weather-current-row">
+            <div class="condition-pictogram" id="homeWeatherIcon" role="img" aria-label="Loading weather"></div>
+            <div>
+              <strong id="homeWeatherTemp">--°</strong>
+              <small id="homeWeatherSummary">Loading current conditions</small>
+            </div>
+          </div>
+
+          <div class="weather-today-summary" aria-label="Today's temperature range">
+            <div><span>High</span><strong id="homeWeatherHigh">--°</strong></div>
+            <div><span>Low</span><strong id="homeWeatherLow">--°</strong></div>
+          </div>
+        </div>
+
+        <div class="go-card" id="homeGoCard">
+          <div class="go-card-line">
+            <strong id="homeGoTitle">Loading conditions</strong>
+            <span id="homeGoPill" class="go-pill neutral">Checking</span>
+          </div>
+          <p id="homeGoReason" class="dashboard-note">Checking wind, rain risk, air quality, UV, and temperature.</p>
+        </div>
+
+        <div class="weather-mini-grid" aria-label="Current weather details">
+          <span>Feels like <strong id="homeWeatherFeels">--°</strong></span>
+          <span>Wind <strong id="homeWeatherWind">-- mph</strong></span>
+          <span>Gusts <strong id="homeWeatherGusts">-- mph</strong></span>
+          <span>Humidity <strong id="homeWeatherHumidity">--%</strong></span>
+          <span>Rain chance <strong id="homeWeatherRainChance">--%</strong></span>
+          <span>Today’s precip. <strong id="homeWeatherPrecip">-- in</strong></span>
+          <span>AQI <strong id="homeWeatherAqi">--</strong></span>
+          <span>UV <strong id="homeWeatherUv">--</strong></span>
+          <span>Pressure <strong id="homeWeatherPressure">-- mb</strong></span>
+          <span>Visibility <strong id="homeWeatherVisibility">-- mi</strong></span>
+        </div>
+
+        <div class="weather-detail-grid">
+          <section class="hourly-forecast-card" aria-labelledby="hourlyForecastTitle">
+            <div class="weather-section-head">
               <div>
-                <strong id="homeWeatherTemp">--°</strong>
-                <small id="homeWeatherSummary">Loading</small>
+                <p class="dashboard-label">Near term</p>
+                <h3 id="hourlyForecastTitle">Next 6 hours</h3>
               </div>
             </div>
-
-            <div class="go-card" id="homeGoCard">
-              <div class="go-card-line">
-                <strong id="homeGoTitle">Loading conditions</strong>
-                <span id="homeGoPill" class="go-pill neutral">Checking</span>
-              </div>
-              <p id="homeGoReason" class="dashboard-note">Checking wind, rain risk, AQI, UV, and temperature.</p>
+            <div class="hourly-forecast-strip" id="homeHourlyForecast" aria-live="polite">
+              <span class="forecast-loading">Loading hourly forecast…</span>
             </div>
+          </section>
 
-            <div class="sun-position-card">
-              <div class="sun-path" id="homeSunPath" aria-label="Sun progress from sunrise to sunset">
-                <span class="sun-path-line"></span>
-                <span class="sun-dot" id="homeSunDot"></span>
-                <span class="horizon-line"></span>
+          <div class="sun-position-card">
+            <div class="weather-section-head">
+              <div>
+                <p class="dashboard-label">Daylight</p>
+                <h3>Sun position</h3>
               </div>
-              <div class="sun-times-grid">
-                <div><span>Sunrise</span><strong id="homeSunrise">--:--</strong></div>
-                <div><span>Sunset</span><strong id="homeSunset">--:--</strong></div>
-              </div>
+              <strong id="homeDaylightLeft">--</strong>
             </div>
-          </div>
-
-          <div class="weather-mini-grid">
-            <span>High <strong id="homeWeatherHigh">--°</strong></span>
-            <span>Low <strong id="homeWeatherLow">--°</strong></span>
-            <span>Wind <strong id="homeWeatherWind">-- mph</strong></span>
-            <span>Humidity <strong id="homeWeatherHumidity">--%</strong></span>
-            <span>AQI <strong id="homeWeatherAqi">--</strong></span>
-            <span>UV <strong id="homeWeatherUv">--</strong></span>
+            <div class="sun-path" id="homeSunPath" aria-label="Sun progress from sunrise to sunset">
+              <span class="sun-path-line"></span>
+              <span class="sun-dot" id="homeSunDot"></span>
+              <span class="horizon-line"></span>
+            </div>
+            <div class="sun-times-grid">
+              <div><span>Sunrise</span><strong id="homeSunrise">--:--</strong></div>
+              <div><span>Sunset</span><strong id="homeSunset">--:--</strong></div>
+            </div>
           </div>
         </div>
+
+        <p class="weather-source">New Philadelphia, Ohio · Forecast data by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></p>
       </article>
 
       <article class="dashboard-card surface home-shortcuts-card">
@@ -427,12 +457,12 @@
     </div>
   </dialog>
 
-  <script src="./assets/js/converter-data.js?v=20260914-4"></script>
-  <script src="./assets/js/navigation.js?v=20260914-4"></script>
-  <script src="./assets/js/converter.js?v=20260914-4"></script>
-  <script src="./assets/js/pyro-sim.js?v=20260914-4"></script>
-  <script src="./assets/js/pyro-team.js?v=20260914-4"></script>
-  <script src="./assets/js/pyro-gates.js?v=20260914-4"></script>
-  <script src="./assets/js/app.js?v=20260914-4"></script>
+  <script src="./assets/js/converter-data.js?v=20260914-5"></script>
+  <script src="./assets/js/navigation.js?v=20260914-5"></script>
+  <script src="./assets/js/converter.js?v=20260914-5"></script>
+  <script src="./assets/js/pyro-sim.js?v=20260914-5"></script>
+  <script src="./assets/js/pyro-team.js?v=20260914-5"></script>
+  <script src="./assets/js/pyro-gates.js?v=20260914-5"></script>
+  <script src="./assets/js/app.js?v=20260914-5"></script>
 </body>
 </html>

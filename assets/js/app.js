@@ -126,7 +126,7 @@ function formatAqi(aqi) {
   return `${rounded} high`;
 }
 
-function setGoNoGo({ condition, wind, aqi, uv, temp }) {
+function setGoNoGo({ condition, wind, gusts, rainChance, aqi, uv, temp }) {
   const pill = document.getElementById("homeGoPill");
   const title = document.getElementById("homeGoTitle");
   const reason = document.getElementById("homeGoReason");
@@ -136,6 +136,8 @@ function setGoNoGo({ condition, wind, aqi, uv, temp }) {
   const issues = [];
   if (!condition.go) issues.push(condition.summary);
   if (Number.isFinite(wind) && wind >= 15) issues.push("windy");
+  if (Number.isFinite(gusts) && gusts >= 25) issues.push("strong gusts");
+  if (Number.isFinite(rainChance) && rainChance >= 50) issues.push(`${Math.round(rainChance)}% rain chance`);
   if (Number.isFinite(aqi) && aqi > 100) issues.push("AQI elevated");
   if (Number.isFinite(uv) && uv >= 8) issues.push("high UV");
   if (Number.isFinite(temp) && (temp < 35 || temp > 92)) issues.push("temperature edge");
@@ -148,6 +150,58 @@ function setGoNoGo({ condition, wind, aqi, uv, temp }) {
   reason.textContent = caution
     ? `Watch: ${issues.join(", ")}.`
     : "No obvious weather red flags for casual outdoor activity right now.";
+}
+
+function windDirectionLabel(degrees) {
+  if (!Number.isFinite(degrees)) return "";
+  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  return directions[Math.round(degrees / 45) % directions.length];
+}
+
+function formatForecastHour(value) {
+  const hour = Number(String(value || "").split("T")[1]?.slice(0, 2));
+  if (!Number.isFinite(hour)) return "--";
+  if (hour === 0) return "12 AM";
+  if (hour === 12) return "12 PM";
+  return `${hour % 12} ${hour < 12 ? "AM" : "PM"}`;
+}
+
+function renderHourlyForecast(hourly, currentTime) {
+  const container = document.getElementById("homeHourlyForecast");
+  if (!container) return;
+
+  const times = Array.isArray(hourly?.time) ? hourly.time : [];
+  const nextIndex = times.findIndex((time) => time > currentTime);
+  const startIndex = nextIndex > 0 ? nextIndex - 1 : 0;
+  const items = times.slice(startIndex, startIndex + 6).map((time, offset) => {
+    const index = startIndex + offset;
+    const temperature = hourly.temperature_2m?.[index];
+    const rainChance = hourly.precipitation_probability?.[index];
+    const condition = weatherCodeDetails(hourly.weather_code?.[index]);
+    const item = document.createElement("div");
+    item.className = "hourly-forecast-item";
+
+    const timeEl = document.createElement("time");
+    timeEl.dateTime = time;
+    timeEl.textContent = offset === 0 ? "Now" : formatForecastHour(time);
+    const tempEl = document.createElement("strong");
+    tempEl.textContent = Number.isFinite(temperature) ? `${Math.round(temperature)}°` : "--°";
+    const rainEl = document.createElement("span");
+    rainEl.textContent = Number.isFinite(rainChance) ? `${Math.round(rainChance)}% rain` : "--% rain";
+    const conditionEl = document.createElement("small");
+    conditionEl.textContent = condition.summary;
+
+    item.append(timeEl, tempEl, rainEl, conditionEl);
+    return item;
+  });
+
+  container.replaceChildren(...items);
+  if (!items.length) {
+    const unavailable = document.createElement("span");
+    unavailable.className = "forecast-loading";
+    unavailable.textContent = "Hourly forecast unavailable.";
+    container.appendChild(unavailable);
+  }
 }
 
 function formatDashboardTime(value) {
@@ -208,17 +262,28 @@ async function loadHomeWeather() {
   const aqiEl = document.getElementById("homeWeatherAqi");
   const uvEl = document.getElementById("homeWeatherUv");
   const iconEl = document.getElementById("homeWeatherIcon");
-  if (!tempEl || !summaryEl || !highEl || !lowEl || !windEl || !humidityEl || !aqiEl || !uvEl || !iconEl) return;
+  const feelsEl = document.getElementById("homeWeatherFeels");
+  const gustsEl = document.getElementById("homeWeatherGusts");
+  const rainChanceEl = document.getElementById("homeWeatherRainChance");
+  const precipEl = document.getElementById("homeWeatherPrecip");
+  const pressureEl = document.getElementById("homeWeatherPressure");
+  const visibilityEl = document.getElementById("homeWeatherVisibility");
+  const updatedEl = document.getElementById("homeWeatherUpdated");
+  const required = [tempEl, summaryEl, highEl, lowEl, windEl, humidityEl, aqiEl, uvEl, iconEl,
+    feelsEl, gustsEl, rainChanceEl, precipEl, pressureEl, visibilityEl, updatedEl];
+  if (required.some((element) => !element)) return;
 
   try {
     const forecastParams = new URLSearchParams({
       latitude: DASHBOARD_LOCATION.latitude,
       longitude: DASHBOARD_LOCATION.longitude,
-      current: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,uv_index",
-      daily: "temperature_2m_max,temperature_2m_min,sunrise,sunset",
+      current: "temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,pressure_msl,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index",
+      hourly: "temperature_2m,precipitation_probability,weather_code",
+      daily: "temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset",
       temperature_unit: "fahrenheit",
       wind_speed_unit: "mph",
-      forecast_days: "1",
+      precipitation_unit: "inch",
+      forecast_days: "2",
       timezone: DASHBOARD_LOCATION.timezone,
     });
     const airParams = new URLSearchParams({
@@ -238,6 +303,7 @@ async function loadHomeWeather() {
     const forecastData = await forecastResponse.json();
     const airData = airResponse.ok ? await airResponse.json() : {};
     const current = forecastData.current || {};
+    const hourly = forecastData.hourly || {};
     const daily = forecastData.daily || {};
     const condition = weatherCodeDetails(current.weather_code);
     const aqi = airData.current?.us_aqi;
@@ -248,23 +314,52 @@ async function loadHomeWeather() {
     iconEl.setAttribute("aria-label", condition.summary);
     highEl.textContent = Number.isFinite(daily.temperature_2m_max?.[0]) ? `${Math.round(daily.temperature_2m_max[0])}°` : "--°";
     lowEl.textContent = Number.isFinite(daily.temperature_2m_min?.[0]) ? `${Math.round(daily.temperature_2m_min[0])}°` : "--°";
-    windEl.textContent = Number.isFinite(current.wind_speed_10m) ? `${Math.round(current.wind_speed_10m)} mph` : "-- mph";
+    const windDirection = windDirectionLabel(current.wind_direction_10m);
+    windEl.textContent = Number.isFinite(current.wind_speed_10m)
+      ? `${Math.round(current.wind_speed_10m)} mph${windDirection ? ` ${windDirection}` : ""}`
+      : "-- mph";
     humidityEl.textContent = Number.isFinite(current.relative_humidity_2m) ? `${Math.round(current.relative_humidity_2m)}%` : "--%";
+    feelsEl.textContent = Number.isFinite(current.apparent_temperature) ? `${Math.round(current.apparent_temperature)}°` : "--°";
+    gustsEl.textContent = Number.isFinite(current.wind_gusts_10m) ? `${Math.round(current.wind_gusts_10m)} mph` : "-- mph";
+    rainChanceEl.textContent = Number.isFinite(daily.precipitation_probability_max?.[0])
+      ? `${Math.round(daily.precipitation_probability_max[0])}%`
+      : "--%";
+    precipEl.textContent = Number.isFinite(daily.precipitation_sum?.[0]) ? `${daily.precipitation_sum[0].toFixed(2)} in` : "-- in";
+    pressureEl.textContent = Number.isFinite(current.pressure_msl) ? `${Math.round(current.pressure_msl)} mb` : "-- mb";
+    visibilityEl.textContent = Number.isFinite(current.visibility) ? `${Math.round(current.visibility / 1609.344)} mi` : "-- mi";
     uvEl.textContent = Number.isFinite(current.uv_index) ? `${Math.round(current.uv_index)}` : "--";
     aqiEl.textContent = formatAqi(aqi);
+    updatedEl.textContent = `Updated ${formatForecastHour(current.time)}`;
 
     updateSunPanel(daily.sunrise?.[0], daily.sunset?.[0]);
-    setGoNoGo({ condition, wind: current.wind_speed_10m, aqi, uv: current.uv_index, temp: current.temperature_2m });
+    renderHourlyForecast(hourly, current.time);
+    setGoNoGo({
+      condition,
+      wind: current.wind_speed_10m,
+      gusts: current.wind_gusts_10m,
+      rainChance: daily.precipitation_probability_max?.[0],
+      aqi,
+      uv: current.uv_index,
+      temp: current.temperature_2m,
+    });
   } catch (error) {
     tempEl.textContent = "--°";
     highEl.textContent = "--°";
     lowEl.textContent = "--°";
     windEl.textContent = "-- mph";
     humidityEl.textContent = "--%";
+    feelsEl.textContent = "--°";
+    gustsEl.textContent = "-- mph";
+    rainChanceEl.textContent = "--%";
+    precipEl.textContent = "-- in";
+    pressureEl.textContent = "-- mb";
+    visibilityEl.textContent = "-- mi";
     uvEl.textContent = "--";
     aqiEl.textContent = "--";
     summaryEl.textContent = "Weather unavailable";
+    updatedEl.textContent = "Update unavailable";
     iconEl.dataset.condition = "unknown";
+    renderHourlyForecast({}, "");
   }
 }
 
