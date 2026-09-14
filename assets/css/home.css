@@ -109,7 +109,7 @@
 
 .clock-face {
   position: relative;
-  width: min(128px, 100%);
+  width: min(115px, 100%);
   aspect-ratio: 1;
   border: 1px solid var(--line-strong);
   border-radius: 50%;
@@ -277,7 +277,7 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: min(86px, 100%);
+  width: min(78px, 100%);
   aspect-ratio: 1;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -438,7 +438,7 @@
   --sun-progress: 0.5;
   --sun-y: 1;
   position: relative;
-  height: 118px;
+  height: 106px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 7px;
@@ -448,9 +448,9 @@
 .sun-path-line {
   position: absolute;
   right: 10%;
-  bottom: 22px;
+  bottom: 20px;
   left: 10%;
-  height: 76px;
+  height: 68px;
   border: 2px solid rgba(255, 202, 95, 0.28);
   border-bottom: 0;
   border-radius: 90px 90px 0 0;
@@ -459,7 +459,7 @@
 .horizon-line {
   position: absolute;
   right: 8%;
-  bottom: 22px;
+  bottom: 20px;
   left: 8%;
   height: 1px;
   background: rgba(255, 255, 255, 0.16);
@@ -467,7 +467,7 @@
 
 .sun-dot {
   position: absolute;
-  bottom: calc(22px + (76px * var(--sun-y)));
+  bottom: calc(20px + (68px * var(--sun-y)));
   left: calc(10% + (80% * var(--sun-progress)));
   width: 18px;
   height: 18px;
@@ -490,7 +490,7 @@
 }
 
 .home-weather-card .weather-mini-grid span {
-  min-height: 78px;
+  min-height: 70px;
   align-content: space-between;
   padding: 0.8rem;
 }
@@ -543,7 +543,7 @@
   position: relative;
   display: grid;
   gap: 0.35rem;
-  min-height: 104px;
+  min-height: 94px;
   padding: var(--space-4);
   color: inherit;
   cursor: pointer;
@@ -636,11 +636,11 @@
     grid-template-columns: minmax(82px, 102px) minmax(0, 1fr);
   }
 
-  .condition-pictogram { width: 82px; }
+  .condition-pictogram { width: 74px; }
 
-  .sun-path { height: 100px; }
-  .sun-path-line { height: 62px; }
-  .sun-dot { bottom: calc(22px + (62px * var(--sun-y))); }
+  .sun-path { height: 90px; }
+  .sun-path-line { height: 56px; }
+  .sun-dot { bottom: calc(20px + (56px * var(--sun-y))); }
 }
 
 @media (max-width: 420px) {
@@ -654,7 +654,7 @@
     flex-direction: column;
   }
 
-  .clock-face { width: 96px; }
+  .clock-face { width: 86px; }
 
   .digital-clock > strong,
   .weather-current-row strong {
@@ -667,7 +667,7 @@
   .today-grid div,
   .sun-times-grid div { padding: 0.62rem; }
 
-  .home-weather-card .weather-mini-grid span { min-height: 70px; }
+  .home-weather-card .weather-mini-grid span { min-height: 63px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

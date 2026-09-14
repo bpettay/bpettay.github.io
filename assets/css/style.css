@@ -23,6 +23,7 @@
 * { box-sizing: border-box; }
 
 html {
+  font-size: 90%;
   scroll-behavior: smooth;
   background: var(--bg);
   color-scheme: dark;
@@ -75,7 +76,7 @@ img, svg, video, canvas { display: block; max-width: 100%; }
 input, select, textarea {
   width: 100%;
   min-width: 0;
-  min-height: 48px;
+  min-height: 43px;
   padding: 0.8rem 0.9rem;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -126,14 +127,14 @@ button { color: inherit; touch-action: manipulation; }
 .nav-left, .nav-right { display: flex; align-items: center; min-width: 0; }
 .nav-left { flex: 1 1 auto; gap: .65rem; padding-left: .25rem; }
 .nav-right { flex: 0 0 auto; gap: .3rem; }
-.logo { width: 34px; height: 34px; flex: 0 0 34px; object-fit: contain; border-radius: 6px; }
+.logo { width: 31px; height: 31px; flex: 0 0 31px; object-fit: contain; border-radius: 6px; }
 .site-name { overflow: hidden; color: var(--ink); font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
 
 .nav-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
+  min-height: 38px;
   padding: .55rem .9rem;
   border: 1px solid transparent;
   border-radius: 7px;

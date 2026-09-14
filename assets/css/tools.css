@@ -90,7 +90,7 @@
 .calc-display {
   display: grid;
   gap: 0.28rem;
-  min-height: 88px;
+  min-height: 79px;
   padding: 1rem;
   border-radius: 8px;
   border: 1px solid var(--line);
@@ -124,7 +124,7 @@
 
 .calc-keypad button {
   min-width: 0;
-  min-height: 46px;
+  min-height: 41px;
   padding: 0.65rem 0.4rem;
   border: 1px solid var(--line);
   border-radius: 7px;
@@ -292,7 +292,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
+  min-height: 31px;
   padding: 0.45rem 0.75rem;
   border: 1px solid rgba(255,255,255,0.16);
   border-radius: 999px;
@@ -505,7 +505,7 @@
 
 .hmi-pushbutton,
 .pyro-button {
-  min-height: 54px;
+  min-height: 49px;
   border-radius: 7px;
   border: 1px solid var(--line-strong);
   color: var(--ink);
@@ -578,7 +578,7 @@
 
 .cue-wheel-step,
 .cue-wheel-select {
-  min-height: 54px;
+  min-height: 49px;
   border-radius: 7px;
   border: 1px solid rgba(255,255,255,0.14);
   color: var(--ink);
@@ -629,7 +629,7 @@
   display: grid;
   justify-items: center;
   gap: 0.15rem;
-  min-height: 92px;
+  min-height: 83px;
   margin-top: 0.25rem;
   border-radius: 8px;
   border: 1px solid rgba(255,80,70,0.45);
@@ -680,7 +680,7 @@
 }
 
 .channel-button {
-  min-height: 86px;
+  min-height: 77px;
   display: grid;
   gap: 0.3rem;
   align-content: center;
@@ -746,7 +746,7 @@
   gap: 0.5rem;
   margin: var(--space-3) 0 0;
   padding: 0;
-  min-height: 120px;
+  min-height: 108px;
   list-style: none;
 }
 
@@ -805,7 +805,7 @@
 }
 
 .zone-channel-grid .channel-button {
-  min-height: 64px;
+  min-height: 58px;
   padding: 0.5rem 0.35rem;
   border-radius: 12px;
 }
