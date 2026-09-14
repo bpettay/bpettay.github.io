@@ -273,28 +273,6 @@ function initializePyroSimulator() {
     }
   });
 
-  function injectCueBankStyles() {
-    if (document.getElementById("zoneCueBankStyles")) return;
-    const style = document.createElement("style");
-    style.id = "zoneCueBankStyles";
-    style.textContent = `
-      .channel-grid.zone-cue-bank { display: grid; grid-template-columns: 1fr; gap: 0.85rem; }
-      .cue-zone-group { display: grid; gap: 0.55rem; min-width: 0; }
-      .cue-zone-title { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin: 0; color: var(--ink); font-size: 0.86rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-      .cue-zone-title span { color: var(--ink-soft); font-size: 0.68rem; font-weight: 500; }
-      .zone-channel-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 0.45rem; }
-      .zone-channel-grid .channel-button { min-height: 64px; padding: 0.5rem 0.35rem; border-radius: 12px; }
-      .zone-channel-grid .channel-number { font-size: 0.98rem; }
-      .channel-zone-label { color: var(--ink-soft); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; }
-      @media (max-width: 980px) { .zone-channel-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
-      @media (max-width: 420px) {
-        .zone-channel-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.38rem; }
-        .zone-channel-grid .channel-button { min-height: 58px; padding: 0.42rem 0.25rem; }
-      }
-    `;
-    document.head.appendChild(style);
-  }
-
   function updateCueBankHeader() {
     const channelPanel = channelGrid?.closest(".pyro-panel");
     const title = channelPanel?.querySelector(".channel-header h3");
@@ -517,7 +495,6 @@ function initializePyroSimulator() {
     addLog("Event log cleared.");
   });
 
-  injectCueBankStyles();
   updateCueBankHeader();
   injectCueWheel();
   addLog("Controller interface initialized in SAFE with 3 zones / 30 cues.", { system: true });

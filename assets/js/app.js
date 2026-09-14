@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
   configureConverterPrecision();
-  initializeHomeDashboard();
+  startHomeClock();
+  updateTodayPanel();
+  loadHomeWeather();
   initializeToolsSwitcher();
   initializeMiniCalculator();
 
@@ -16,12 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof initializePyroGateWorkflow === "function") initializePyroGateWorkflow();
 
   initializeScrollHeader();
-  initializeCompactPyroStatusBar();
   initializePanelTilt();
 });
 
 const DASHBOARD_LOCATION = {
-  label: "New Philadelphia, OH",
   latitude: "40.4898",
   longitude: "-81.4457",
   timezone: "America/New_York",
@@ -42,177 +42,6 @@ function configureConverterPrecision() {
   ThreeSigNumberFormat.supportedLocalesOf = NativeNumberFormat.supportedLocalesOf.bind(NativeNumberFormat);
   ThreeSigNumberFormat.__converterThreeSigFigs = true;
   Intl.NumberFormat = ThreeSigNumberFormat;
-}
-
-function initializeHomeDashboard() {
-  const home = document.getElementById("home");
-  if (!home) return;
-
-  injectHomeDashboardStyles();
-
-  home.innerHTML = `
-    <section class="home-dashboard-only utility-dashboard grouped-dashboard" aria-label="Personal dashboard">
-      <article class="dashboard-card surface time-today-card dashboard-span-2">
-        <div class="dashboard-card-head">
-          <span class="dashboard-label">Time + Today</span>
-          <strong>${DASHBOARD_LOCATION.label}</strong>
-        </div>
-
-        <div class="time-today-layout">
-          <div class="clock-layout compact-clock-layout">
-            <div class="analog-clock" aria-hidden="true">
-              <div class="clock-face">
-                <span class="clock-marker twelve"></span>
-                <span class="clock-marker three"></span>
-                <span class="clock-marker six"></span>
-                <span class="clock-marker nine"></span>
-                <span class="clock-hand hour" id="clockHourHand"></span>
-                <span class="clock-hand minute" id="clockMinuteHand"></span>
-                <span class="clock-hand second" id="clockSecondHand"></span>
-                <span class="clock-center"></span>
-              </div>
-            </div>
-            <div class="digital-clock">
-              <strong id="homeClockTime">--:--</strong>
-              <small id="homeClockDate">Loading</small>
-            </div>
-          </div>
-
-          <div class="today-grid compact-today-grid">
-            <div><span>Date</span><strong id="homeFullDate">--</strong></div>
-            <div><span>Day #</span><strong id="homeDayOfYear">--</strong></div>
-            <div><span>Week</span><strong id="homeWeekNumber">--</strong></div>
-            <div><span>Weekend</span><strong id="homeWeekendCountdown">--</strong></div>
-          </div>
-          <span class="sr-only" id="homeWeekday">--</span>
-        </div>
-      </article>
-
-      <article class="dashboard-card surface weather-dashboard-card dashboard-span-2">
-        <div class="dashboard-card-head">
-          <span class="dashboard-label">Weather + Outside</span>
-          <strong id="homeDaylightLeft">--</strong>
-        </div>
-
-        <div class="weather-dashboard-layout">
-          <div class="weather-primary-block">
-            <div class="weather-current-row">
-              <div class="condition-pictogram" id="homeWeatherIcon" aria-hidden="true"></div>
-              <div>
-                <strong id="homeWeatherTemp">--°</strong>
-                <small id="homeWeatherSummary">Loading</small>
-              </div>
-            </div>
-
-            <div class="go-card compact-go-card" id="homeGoCard">
-              <div class="go-card-line">
-                <strong id="homeGoTitle">Loading conditions</strong>
-                <span id="homeGoPill" class="go-pill neutral">Checking</span>
-              </div>
-              <p id="homeGoReason" class="dashboard-note">Checking wind, rain risk, AQI, UV, and temperature.</p>
-            </div>
-
-            <div class="sun-position-card">
-              <div class="sun-path" id="homeSunPath" aria-label="Sun progress from sunrise to sunset">
-                <span class="sun-path-line"></span>
-                <span class="sun-dot" id="homeSunDot"></span>
-                <span class="horizon-line"></span>
-              </div>
-              <div class="sun-times-grid">
-                <div><span>Sunrise</span><strong id="homeSunrise">--:--</strong></div>
-                <div><span>Sunset</span><strong id="homeSunset">--:--</strong></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="weather-side-grid">
-            <div class="weather-mini-grid compact-weather-grid">
-              <span>High <strong id="homeWeatherHigh">--°</strong></span>
-              <span>Low <strong id="homeWeatherLow">--°</strong></span>
-              <span>Wind <strong id="homeWeatherWind">-- mph</strong></span>
-              <span>Humidity <strong id="homeWeatherHumidity">--%</strong></span>
-              <span>AQI <strong id="homeWeatherAqi">--</strong></span>
-              <span>UV <strong id="homeWeatherUv">--</strong></span>
-            </div>
-
-          </div>
-        </div>
-      </article>
-
-      <article class="dashboard-card surface quick-actions-card shortcuts-card dashboard-span-2">
-        <div class="section-heading">
-          <p class="section-label">Shortcuts</p>
-          <h2>Open</h2>
-        </div>
-        <div class="action-grid compact-action-grid">
-          <button class="action-tile" type="button" data-page-target="tools">
-            <span>Tools</span>
-            <strong>Unit converter</strong>
-            <small>3 sig figs, equation preview, grouped units.</small>
-          </button>
-          <button class="action-tile" type="button" data-page-target="pyro">
-            <span>Pyro</span>
-            <strong>Console</strong>
-            <small>Login, cue bank, activity log.</small>
-          </button>
-        </div>
-      </article>
-    </section>
-  `;
-
-  startHomeClock();
-  updateTodayPanel();
-  initializeDashboardShortcuts();
-  loadHomeWeather();
-}
-
-function injectHomeDashboardStyles() {
-  if (document.getElementById("homeDashboardWidgetStyles")) return;
-
-  const style = document.createElement("style");
-  style.id = "homeDashboardWidgetStyles";
-  style.textContent = `
-    .utility-dashboard { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)) !important; align-items: stretch; }
-    .dashboard-span-2, .time-today-card, .weather-dashboard-card { grid-column: span 2; }
-    .utility-dashboard .dashboard-card { min-height: 0; }
-    .time-today-layout, .weather-primary-block, .weather-side-grid { display: grid; gap: 0.85rem; min-width: 0; }
-    .compact-clock-layout { grid-template-columns: minmax(106px, 128px) minmax(0, 1fr); }
-    .compact-today-grid { grid-template-columns: repeat(auto-fit, minmax(112px, 1fr)); }
-    .weather-dashboard-layout { display: grid; grid-template-columns: minmax(230px, 0.85fr) minmax(0, 1.15fr); gap: 1rem; align-items: start; min-width: 0; }
-    .compact-weather-grid { grid-template-columns: repeat(auto-fit, minmax(94px, 1fr)); }
-    .go-card, .sun-position-card { min-width: 0; padding: 0.8rem; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.07); background: rgba(255, 255, 255, 0.035); }
-    .go-card[data-status="go"] { border-color: rgba(120, 255, 190, 0.22); }
-    .go-card[data-status="caution"] { border-color: rgba(255, 202, 95, 0.28); }
-    .go-card-line { display: flex; align-items: center; justify-content: space-between; gap: 0.65rem; min-width: 0; }
-    .go-card-line strong { color: var(--ink); font-size: 1rem; line-height: 1.2; }
-    .go-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 68px; padding: 0.28rem 0.58rem; border-radius: 999px; font-size: 0.72rem; line-height: 1; text-transform: uppercase; letter-spacing: 0.08em; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.04); }
-    .go-pill.go { color: #c8ffd8; border-color: rgba(120, 255, 190, 0.28); background: rgba(120, 255, 190, 0.08); }
-    .go-pill.caution { color: #ffe6a8; border-color: rgba(255, 202, 95, 0.28); background: rgba(255, 202, 95, 0.08); }
-    .go-pill.neutral { color: var(--ink-soft); }
-    .dashboard-note { margin: 0; color: var(--ink-soft); line-height: 1.55; }
-    .sun-times-grid, .today-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.65rem; }
-    .sun-times-grid div, .today-grid div { display: grid; gap: 0.25rem; min-width: 0; padding: 0.72rem; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.065); background: rgba(255, 255, 255, 0.035); }
-    .sun-times-grid span, .today-grid span { color: var(--ink-soft); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
-    .sun-times-grid strong, .today-grid strong { color: var(--ink); font-size: 1rem; line-height: 1.2; overflow-wrap: anywhere; }
-    .sun-position-card { display: grid; gap: 0.7rem; }
-    .sun-path { --sun-progress: 0.5; --sun-y: 1; position: relative; height: 88px; border-radius: 16px; overflow: hidden; background: linear-gradient(180deg, rgba(255, 202, 95, 0.08), rgba(255, 255, 255, 0.025)); border: 1px solid rgba(255, 255, 255, 0.06); }
-    .sun-path-line { position: absolute; left: 10%; right: 10%; bottom: 18px; height: 58px; border: 2px solid rgba(255, 202, 95, 0.28); border-bottom: 0; border-radius: 90px 90px 0 0; }
-    .horizon-line { position: absolute; left: 8%; right: 8%; bottom: 18px; height: 1px; background: rgba(255, 255, 255, 0.16); }
-    .sun-dot { position: absolute; left: calc(10% + (80% * var(--sun-progress))); bottom: calc(18px + (58px * var(--sun-y))); width: 18px; height: 18px; border-radius: 999px; background: #ffca5f; box-shadow: 0 0 26px rgba(255, 202, 95, 0.55); transform: translate(-50%, 50%); }
-    @media (max-width: 980px) { .dashboard-span-2, .time-today-card, .weather-dashboard-card { grid-column: 1 / -1; } .weather-dashboard-layout { grid-template-columns: 1fr; } }
-    @media (max-width: 720px) { .compact-clock-layout { grid-template-columns: 1fr; } }
-    @media (max-width: 420px) { .sun-times-grid, .today-grid { grid-template-columns: 1fr; } }
-  `;
-  document.head.appendChild(style);
-}
-
-function initializeDashboardShortcuts() {
-  document.querySelectorAll("[data-page-target]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const navButton = document.querySelector(`.nav-link[data-page="${button.dataset.pageTarget}"]`);
-      navButton?.click();
-    });
-  });
 }
 
 function startHomeClock() {
@@ -669,95 +498,6 @@ function initializeScrollHeader() {
   }, { passive: true });
 
   updateHeader();
-}
-
-function initializeCompactPyroStatusBar() {
-  if (document.getElementById("compactPyroStatusOverrides")) return;
-
-  const style = document.createElement("style");
-  style.id = "compactPyroStatusOverrides";
-  style.textContent = `
-    .pyro-sticky-status {
-      top: 0.35rem !important;
-      z-index: 26 !important;
-      display: flex !important;
-      align-items: center !important;
-      gap: 0 !important;
-      width: fit-content !important;
-      max-width: min(calc(100% - 1rem), 980px) !important;
-      margin-inline: auto !important;
-      padding: 0.16rem 0.42rem !important;
-      min-height: 24px !important;
-      border-radius: 999px !important;
-      border: 1px solid rgba(120, 255, 190, 0.12) !important;
-      background: rgba(4, 7, 7, 0.78) !important;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28) !important;
-      backdrop-filter: blur(12px) !important;
-      overflow-x: auto !important;
-      scrollbar-width: none !important;
-    }
-
-    .pyro-sticky-status::-webkit-scrollbar { display: none !important; }
-
-    .sticky-status-tile {
-      display: inline-flex !important;
-      align-items: baseline !important;
-      gap: 0.22rem !important;
-      min-width: 0 !important;
-      min-height: 0 !important;
-      padding: 0 0.46rem !important;
-      border: 0 !important;
-      border-radius: 0 !important;
-      background: transparent !important;
-      box-shadow: none !important;
-      white-space: nowrap !important;
-    }
-
-    .sticky-status-tile + .sticky-status-tile { border-left: 1px solid rgba(255, 255, 255, 0.12) !important; }
-
-    .sticky-status-tile span {
-      flex: 0 0 auto !important;
-      color: rgba(169, 176, 183, 0.74) !important;
-      font-size: 0.48rem !important;
-      letter-spacing: 0.07em !important;
-      line-height: 1 !important;
-      text-transform: uppercase !important;
-    }
-
-    .sticky-status-tile strong {
-      min-width: 0 !important;
-      max-width: 12ch !important;
-      color: rgba(243, 245, 247, 0.92) !important;
-      font-size: 0.64rem !important;
-      font-weight: 600 !important;
-      line-height: 1 !important;
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
-    }
-
-    .sticky-status-tile.primary strong {
-      color: #c8ffd8 !important;
-      max-width: 16ch !important;
-    }
-
-    .sticky-status-tile.hold strong { color: #ffd2cf !important; }
-
-    @media (max-width: 720px) {
-      .pyro-sticky-status {
-        top: 0.2rem !important;
-        max-width: calc(100% - 0.5rem) !important;
-        margin-inline: 0.25rem !important;
-        padding: 0.14rem 0.34rem !important;
-      }
-
-      .sticky-status-tile { padding: 0 0.38rem !important; }
-      .sticky-status-tile span { font-size: 0.44rem !important; }
-      .sticky-status-tile strong { font-size: 0.58rem !important; max-width: 10ch !important; }
-      .sticky-status-tile.primary strong { max-width: 14ch !important; }
-    }
-  `;
-  document.head.appendChild(style);
 }
 
 function initializePanelTilt() {

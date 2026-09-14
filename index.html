@@ -12,54 +12,22 @@
   />
   <title>Brock | Engineering</title>
 
-  <script>
-    window.siteAssetVersion = Date.now().toString(36);
-    window.versionedAsset = function versionedAsset(path) {
-      return `${path}${path.includes("?") ? "&" : "?"}v=${window.siteAssetVersion}`;
-    };
-    document.write(`<link rel="icon" type="image/png" href="${window.versionedAsset("./Favicon.png")}" />`);
-    document.write(`<link rel="manifest" href="${window.versionedAsset("manifest.json")}" />`);
-  </script>
+  <link rel="icon" type="image/png" href="./Favicon.png?v=20260914-1" />
+  <link rel="manifest" href="./manifest.json?v=20260914-1" />
   <meta name="theme-color" content="#0066cc" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
-    rel="stylesheet"
-  />
-
-  <style>
-    .logo {
-      width: 34px !important;
-      height: 34px !important;
-      max-width: 34px !important;
-      max-height: 34px !important;
-      flex: 0 0 34px !important;
-      object-fit: contain !important;
-    }
-  </style>
-
-  <script>
-    [
-      "./assets/css/style.css",
-      "./assets/css/home.css",
-      "./assets/css/tools.css",
-      "./assets/css/pyro-auth.css",
-      "./assets/css/pyro-team.css",
-      "./assets/css/pyro-gates.css",
-    ].forEach((href) => {
-      document.write(`<link rel="stylesheet" href="${window.versionedAsset(href)}" />`);
-    });
-  </script>
+  <link rel="stylesheet" href="./assets/css/style.css?v=20260914-1" />
+  <link rel="stylesheet" href="./assets/css/home.css?v=20260914-1" />
+  <link rel="stylesheet" href="./assets/css/tools.css?v=20260914-1" />
+  <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260914-1" />
+  <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260914-1" />
+  <link rel="stylesheet" href="./assets/css/pyro-gates.css?v=20260914-1" />
 </head>
 
 <body>
   <nav class="nav" aria-label="Primary">
     <div class="nav-left">
-      <script>
-        document.write(`<img src="${window.versionedAsset("./assets/img/bp-monogram.png")}" alt="Brock Pettay monogram" class="logo" />`);
-      </script>
+      <img src="./Favicon.png?v=20260914-1" alt="Brock Pettay monogram" class="logo" />
       <span class="site-name">Brock Pettay</span>
     </div>
 
@@ -70,87 +38,113 @@
     </div>
   </nav>
 
-  <main id="home" class="page active" data-page-label="Home">
-    <section class="hero surface">
-      <div class="hero-main">
-        <p class="eyebrow">Mechanical Engineering</p>
-        <h1>Brock Pettay</h1>
-        <p class="hero-text">
-          Mechanical engineering work, practical tools, and project documentation organized to be easy to scan and easy to use.
-        </p>
-      </div>
+  <main id="home" class="page active">
+    <section class="home-dashboard-only" aria-label="Personal dashboard">
+      <article class="dashboard-card surface">
+        <div class="dashboard-card-head">
+          <span class="dashboard-label">Time + Today</span>
+          <strong>New Philadelphia, OH</strong>
+        </div>
 
-      <div class="hero-links">
-        <button class="cta-button" type="button" data-page-target="tools">Open Tools</button>
-      </div>
-    </section>
+        <div class="time-today-layout">
+          <div class="clock-layout">
+            <div class="analog-clock" aria-hidden="true">
+              <div class="clock-face">
+                <span class="clock-marker twelve"></span>
+                <span class="clock-marker three"></span>
+                <span class="clock-marker six"></span>
+                <span class="clock-marker nine"></span>
+                <span class="clock-hand hour" id="clockHourHand"></span>
+                <span class="clock-hand minute" id="clockMinuteHand"></span>
+                <span class="clock-hand second" id="clockSecondHand"></span>
+                <span class="clock-center"></span>
+              </div>
+            </div>
+            <div class="digital-clock">
+              <strong id="homeClockTime">--:--</strong>
+              <small id="homeClockDate">Loading</small>
+            </div>
+          </div>
 
-    <section class="home-grid">
-      <section class="home-section surface intro-section">
+          <div class="today-grid">
+            <div><span>Date</span><strong id="homeFullDate">--</strong></div>
+            <div><span>Day #</span><strong id="homeDayOfYear">--</strong></div>
+            <div><span>Week</span><strong id="homeWeekNumber">--</strong></div>
+            <div><span>Weekend</span><strong id="homeWeekendCountdown">--</strong></div>
+          </div>
+          <span class="sr-only" id="homeWeekday">--</span>
+        </div>
+      </article>
+
+      <article class="dashboard-card surface">
+        <div class="dashboard-card-head">
+          <span class="dashboard-label">Weather + Outside</span>
+          <strong id="homeDaylightLeft">--</strong>
+        </div>
+
+        <div class="weather-dashboard-layout">
+          <div class="weather-primary-block">
+            <div class="weather-current-row">
+              <div class="condition-pictogram" id="homeWeatherIcon" aria-hidden="true"></div>
+              <div>
+                <strong id="homeWeatherTemp">--°</strong>
+                <small id="homeWeatherSummary">Loading</small>
+              </div>
+            </div>
+
+            <div class="go-card" id="homeGoCard">
+              <div class="go-card-line">
+                <strong id="homeGoTitle">Loading conditions</strong>
+                <span id="homeGoPill" class="go-pill neutral">Checking</span>
+              </div>
+              <p id="homeGoReason" class="dashboard-note">Checking wind, rain risk, AQI, UV, and temperature.</p>
+            </div>
+
+            <div class="sun-position-card">
+              <div class="sun-path" id="homeSunPath" aria-label="Sun progress from sunrise to sunset">
+                <span class="sun-path-line"></span>
+                <span class="sun-dot" id="homeSunDot"></span>
+                <span class="horizon-line"></span>
+              </div>
+              <div class="sun-times-grid">
+                <div><span>Sunrise</span><strong id="homeSunrise">--:--</strong></div>
+                <div><span>Sunset</span><strong id="homeSunset">--:--</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="weather-mini-grid">
+            <span>High <strong id="homeWeatherHigh">--°</strong></span>
+            <span>Low <strong id="homeWeatherLow">--°</strong></span>
+            <span>Wind <strong id="homeWeatherWind">-- mph</strong></span>
+            <span>Humidity <strong id="homeWeatherHumidity">--%</strong></span>
+            <span>AQI <strong id="homeWeatherAqi">--</strong></span>
+            <span>UV <strong id="homeWeatherUv">--</strong></span>
+          </div>
+        </div>
+      </article>
+
+      <article class="dashboard-card surface">
         <div class="section-heading">
-          <p class="section-label">About</p>
-          <h2>Simple and useful.</h2>
+          <p class="section-label">Shortcuts</p>
+          <h2>Open</h2>
         </div>
-        <p>
-          I’m Brock Pettay, a mechanical engineer focused on practical engineering work, testing, design, and problem solving.
-          This site is a straightforward place for tools, project material, and technical ideas.
-        </p>
-      </section>
-
-      <section class="home-section surface quick-section">
-        <div class="section-heading">
-          <p class="section-label">Quick Access</p>
-          <h2>Find things quickly.</h2>
+        <div class="action-grid">
+          <button class="action-tile" type="button" data-page-target="tools">
+            <span>Tools</span>
+            <strong>Engineering toolbox</strong>
+            <small>Converter, calculator, and future utilities.</small>
+          </button>
+          <button class="action-tile" type="button" data-page-target="pyro">
+            <span>Pyro</span>
+            <strong>Console</strong>
+            <small>Login, cue bank, and activity log.</small>
+          </button>
         </div>
-
-        <div class="quick-list">
-          <article class="quick-item">
-            <h3>Tools</h3>
-            <p>Engineering utilities for fast day-to-day reference and conversion.</p>
-          </article>
-          <article class="quick-item">
-            <h3>Projects</h3>
-            <p>Selected technical work and documentation as the site expands.</p>
-          </article>
-        </div>
-      </section>
-    </section>
-
-    <section class="home-section surface roadmap-section">
-      <div class="section-heading">
-        <p class="section-label">Roadmap</p>
-        <h2>What belongs here next.</h2>
-      </div>
-
-      <div class="roadmap-list">
-        <article class="roadmap-item">
-          <span class="roadmap-status">Now</span>
-          <div>
-            <h3>Core Site Structure</h3>
-            <p>Keep the site readable, minimal, and easy to extend without adding clutter.</p>
-          </div>
-        </article>
-
-        <article class="roadmap-item">
-          <span class="roadmap-status">Next</span>
-          <div>
-            <h3>Practical Tools</h3>
-            <p>Add references and calculators that are actually useful in projects and shop work.</p>
-          </div>
-        </article>
-
-        <article class="roadmap-item">
-          <span class="roadmap-status">Later</span>
-          <div>
-            <h3>Project Documentation</h3>
-            <p>Add selected engineering projects in a format that stays clean and easy to navigate.</p>
-          </div>
-        </article>
-      </div>
+      </article>
     </section>
   </main>
-
-  <main id="tools" class="page" data-page-label="Tools" hidden>
+  <main id="tools" class="page" hidden>
     <section class="tool-switcher surface" aria-labelledby="toolSwitcherTitle">
       <div>
         <p class="tool-label">Toolbox</p>
@@ -268,7 +262,7 @@
     </section>
   </main>
 
-  <main id="pyro" class="page" data-page-label="Pyro" hidden>
+  <main id="pyro" class="page" hidden>
     <section class="tool-card surface pyro-card">
       <div class="tool-header pyro-header">
         <div>
@@ -373,7 +367,7 @@
               <p class="tool-label">Cue Bank</p>
               <h3>3 zones / 30-channel matrix</h3>
             </div>
-            <button id="simScrambleBtn" class="pyro-button compact" type="button">Randomize Continuity</button>
+            <button id="simScrambleBtn" class="pyro-button" type="button">Randomize Continuity</button>
           </div>
           <div id="simChannelGrid" class="channel-grid" aria-live="polite"></div>
         </section>
@@ -384,7 +378,7 @@
               <p class="tool-label">Message Console</p>
               <h3>Operator log</h3>
             </div>
-            <button id="simClearLogBtn" class="pyro-button compact" type="button">Clear Log</button>
+            <button id="simClearLogBtn" class="pyro-button" type="button">Clear Log</button>
           </div>
           <ol id="simEventLog" class="event-log" aria-live="polite"></ol>
         </section>
@@ -418,25 +412,19 @@
         <button type="button" data-auth-key="7">7</button>
         <button type="button" data-auth-key="8">8</button>
         <button type="button" data-auth-key="9">9</button>
-        <button type="button" id="authClearBtn" class="auth-clear">CLR</button>
+        <button type="button" id="authClearBtn">CLR</button>
         <button type="button" data-auth-key="0">0</button>
-        <button type="button" id="authSubmitBtn" class="auth-submit">ENT</button>
+        <button type="button" id="authSubmitBtn">ENT</button>
       </div>
     </div>
   </dialog>
 
-  <script>
-    [
-      "./assets/js/converter-data.js",
-      "./assets/js/navigation.js",
-      "./assets/js/converter.js",
-      "./assets/js/pyro-sim.js",
-      "./assets/js/pyro-team.js",
-      "./assets/js/pyro-gates.js",
-      "./assets/js/app.js",
-    ].forEach((src) => {
-      document.write(`<script src="${window.versionedAsset(src)}"><\/script>`);
-    });
-  </script>
+  <script src="./assets/js/converter-data.js?v=20260914-1"></script>
+  <script src="./assets/js/navigation.js?v=20260914-1"></script>
+  <script src="./assets/js/converter.js?v=20260914-1"></script>
+  <script src="./assets/js/pyro-sim.js?v=20260914-1"></script>
+  <script src="./assets/js/pyro-team.js?v=20260914-1"></script>
+  <script src="./assets/js/pyro-gates.js?v=20260914-1"></script>
+  <script src="./assets/js/app.js?v=20260914-1"></script>
 </body>
 </html>

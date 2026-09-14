@@ -95,7 +95,6 @@
 }
 
 .auth-keypad button,
-.auth-actions button,
 .auth-close-button {
   min-height: 48px;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -112,24 +111,8 @@
 }
 
 .auth-keypad button:active,
-.auth-actions button:active,
 .auth-close-button:active {
   transform: translateY(2px);
-}
-
-.auth-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
-}
-
-.auth-actions .auth-submit {
-  border-color: rgba(255, 177, 45, 0.36);
-  background: linear-gradient(180deg, rgba(255, 193, 77, 0.44), rgba(132, 79, 0, 0.28));
-}
-
-.auth-actions .auth-clear {
-  color: var(--ink-soft);
 }
 
 .auth-close-button {
@@ -141,10 +124,6 @@
   color: var(--ink-soft);
 }
 
-.selector-widget.authorized {
-  border-color: rgba(120, 255, 190, 0.18);
-}
-
 #operatorStatusText {
   color: #92cda9;
 }
@@ -154,8 +133,7 @@
     padding: 0.85rem;
   }
 
-  .auth-keypad button,
-  .auth-actions button {
+  .auth-keypad button {
     min-height: 52px;
   }
 }
