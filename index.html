@@ -12,22 +12,22 @@
   />
   <title>Brock | Engineering</title>
 
-  <link rel="icon" type="image/png" href="./Favicon.png?v=20260914-1" />
-  <link rel="manifest" href="./manifest.json?v=20260914-1" />
+  <link rel="icon" type="image/png" href="./Favicon.png?v=20260914-2" />
+  <link rel="manifest" href="./manifest.json?v=20260914-2" />
   <meta name="theme-color" content="#0066cc" />
 
-  <link rel="stylesheet" href="./assets/css/style.css?v=20260914-1" />
-  <link rel="stylesheet" href="./assets/css/home.css?v=20260914-1" />
-  <link rel="stylesheet" href="./assets/css/tools.css?v=20260914-1" />
-  <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260914-1" />
-  <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260914-1" />
-  <link rel="stylesheet" href="./assets/css/pyro-gates.css?v=20260914-1" />
+  <link rel="stylesheet" href="./assets/css/style.css?v=20260914-2" />
+  <link rel="stylesheet" href="./assets/css/home.css?v=20260914-2" />
+  <link rel="stylesheet" href="./assets/css/tools.css?v=20260914-2" />
+  <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260914-2" />
+  <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260914-2" />
+  <link rel="stylesheet" href="./assets/css/pyro-gates.css?v=20260914-2" />
 </head>
 
 <body>
   <nav class="nav" aria-label="Primary">
     <div class="nav-left">
-      <img src="./Favicon.png?v=20260914-1" alt="Brock Pettay monogram" class="logo" />
+      <img src="./Favicon.png?v=20260914-2" alt="Brock Pettay monogram" class="logo" />
       <span class="site-name">Brock Pettay</span>
     </div>
 
@@ -39,8 +39,16 @@
   </nav>
 
   <main id="home" class="page active">
-    <section class="home-dashboard-only" aria-label="Personal dashboard">
-      <article class="dashboard-card surface">
+    <header class="home-overview">
+      <div>
+        <p class="dashboard-label">Dashboard</p>
+        <h1>Daily overview</h1>
+      </div>
+      <p>Local time, current conditions, and quick access in one glance.</p>
+    </header>
+
+    <section class="home-dashboard-only" aria-label="Daily overview dashboard">
+      <article class="dashboard-card surface home-time-card">
         <div class="dashboard-card-head">
           <span class="dashboard-label">Time + Today</span>
           <strong>New Philadelphia, OH</strong>
@@ -76,7 +84,7 @@
         </div>
       </article>
 
-      <article class="dashboard-card surface">
+      <article class="dashboard-card surface home-weather-card">
         <div class="dashboard-card-head">
           <span class="dashboard-label">Weather + Outside</span>
           <strong id="homeDaylightLeft">--</strong>
@@ -124,7 +132,7 @@
         </div>
       </article>
 
-      <article class="dashboard-card surface">
+      <article class="dashboard-card surface home-shortcuts-card">
         <div class="section-heading">
           <p class="section-label">Shortcuts</p>
           <h2>Open</h2>
@@ -419,12 +427,12 @@
     </div>
   </dialog>
 
-  <script src="./assets/js/converter-data.js?v=20260914-1"></script>
-  <script src="./assets/js/navigation.js?v=20260914-1"></script>
-  <script src="./assets/js/converter.js?v=20260914-1"></script>
-  <script src="./assets/js/pyro-sim.js?v=20260914-1"></script>
-  <script src="./assets/js/pyro-team.js?v=20260914-1"></script>
-  <script src="./assets/js/pyro-gates.js?v=20260914-1"></script>
-  <script src="./assets/js/app.js?v=20260914-1"></script>
+  <script src="./assets/js/converter-data.js?v=20260914-2"></script>
+  <script src="./assets/js/navigation.js?v=20260914-2"></script>
+  <script src="./assets/js/converter.js?v=20260914-2"></script>
+  <script src="./assets/js/pyro-sim.js?v=20260914-2"></script>
+  <script src="./assets/js/pyro-team.js?v=20260914-2"></script>
+  <script src="./assets/js/pyro-gates.js?v=20260914-2"></script>
+  <script src="./assets/js/app.js?v=20260914-2"></script>
 </body>
 </html>

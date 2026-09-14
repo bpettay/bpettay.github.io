@@ -1,8 +1,43 @@
+.home-overview {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: clamp(1.2rem, 3vw, 2.2rem) clamp(0.2rem, 0.8vw, 0.55rem) clamp(0.85rem, 2vw, 1.25rem);
+}
+
+.home-overview h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(2rem, 4vw, 3.35rem);
+  font-weight: 520;
+  letter-spacing: -0.055em;
+  line-height: 0.98;
+}
+
+.home-overview > p {
+  max-width: 32rem;
+  margin: 0 0 0.12rem;
+  color: var(--ink-soft);
+  font-size: clamp(0.88rem, 1.2vw, 1rem);
+  line-height: 1.55;
+  text-align: right;
+}
+
 .home-dashboard-only {
   display: grid;
+  grid-template-columns: minmax(300px, 0.72fr) minmax(0, 1.48fr);
+  grid-template-areas:
+    "time weather"
+    "shortcuts weather";
   gap: clamp(0.9rem, 2vw, 1.25rem);
+  align-items: start;
   min-width: 0;
 }
+
+.home-time-card { grid-area: time; }
+.home-weather-card { grid-area: weather; align-self: stretch; }
+.home-shortcuts-card { grid-area: shortcuts; }
 
 .dashboard-card,
 .action-tile {
@@ -23,6 +58,16 @@
   gap: clamp(0.85rem, 1.8vw, 1.15rem);
   padding: clamp(1rem, 2.4vw, 1.35rem);
   overflow: hidden;
+}
+
+.dashboard-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 1.25rem;
+  left: 1.25rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(115, 183, 255, 0.36), transparent);
 }
 
 .dashboard-card-head {
@@ -52,10 +97,14 @@
 
 .time-today-layout {
   display: grid;
-  grid-template-columns: minmax(250px, 0.7fr) minmax(0, 1.3fr);
-  gap: 1rem;
+  grid-template-columns: 1fr;
+  gap: 1.1rem;
   align-items: center;
   min-width: 0;
+}
+
+.home-time-card .clock-layout {
+  grid-template-columns: minmax(110px, 124px) minmax(0, 1fr);
 }
 
 .clock-layout {
@@ -191,6 +240,10 @@
   min-width: 0;
 }
 
+.home-time-card .today-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .today-grid div,
 .sun-times-grid div {
   display: grid;
@@ -220,8 +273,8 @@
 
 .weather-dashboard-layout {
   display: grid;
-  grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.1fr);
-  gap: 1rem;
+  grid-template-columns: minmax(310px, 1.2fr) minmax(220px, 0.8fr);
+  gap: clamp(1rem, 2.2vw, 1.45rem);
   align-items: start;
   min-width: 0;
 }
@@ -406,7 +459,7 @@
   --sun-progress: 0.5;
   --sun-y: 1;
   position: relative;
-  height: 88px;
+  height: 118px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 16px;
@@ -416,9 +469,9 @@
 .sun-path-line {
   position: absolute;
   right: 10%;
-  bottom: 18px;
+  bottom: 22px;
   left: 10%;
-  height: 58px;
+  height: 76px;
   border: 2px solid rgba(255, 202, 95, 0.28);
   border-bottom: 0;
   border-radius: 90px 90px 0 0;
@@ -427,7 +480,7 @@
 .horizon-line {
   position: absolute;
   right: 8%;
-  bottom: 18px;
+  bottom: 22px;
   left: 8%;
   height: 1px;
   background: rgba(255, 255, 255, 0.16);
@@ -435,7 +488,7 @@
 
 .sun-dot {
   position: absolute;
-  bottom: calc(18px + (58px * var(--sun-y)));
+  bottom: calc(22px + (76px * var(--sun-y)));
   left: calc(10% + (80% * var(--sun-progress)));
   width: 18px;
   height: 18px;
@@ -450,6 +503,21 @@
   grid-template-columns: repeat(2, minmax(112px, 1fr));
   gap: 0.62rem;
   min-width: 0;
+}
+
+.home-weather-card .weather-mini-grid {
+  align-content: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.home-weather-card .weather-mini-grid span {
+  min-height: 78px;
+  align-content: space-between;
+  padding: 0.8rem;
+}
+
+.home-weather-card .weather-mini-grid strong {
+  font-size: 1rem;
 }
 
 .weather-mini-grid span {
@@ -487,20 +555,36 @@
 
 .action-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-3);
   min-width: 0;
 }
 
 .action-tile {
+  position: relative;
   display: grid;
   gap: 0.35rem;
-  min-height: 112px;
+  min-height: 104px;
   padding: var(--space-4);
   color: inherit;
   cursor: pointer;
   text-align: left;
   transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.action-tile::after {
+  content: "\2192";
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  color: rgba(244, 247, 251, 0.48);
+  font-size: 1.2rem;
+  transform: translateY(-50%);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.action-tile > * {
+  padding-right: 1.6rem;
 }
 
 .action-tile span {
@@ -525,31 +609,60 @@
   transform: translateY(-1px);
 }
 
-@media (max-width: 980px) {
+.action-tile:hover::after,
+.action-tile:focus-visible::after {
+  color: var(--ink);
+  transform: translate(3px, -50%);
+}
+
+@media (max-width: 1080px) {
+  .home-dashboard-only {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "time"
+      "weather"
+      "shortcuts";
+  }
+
+  .time-today-layout {
+    grid-template-columns: minmax(250px, 0.72fr) minmax(0, 1.28fr);
+  }
+
+  .action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .home-overview {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1rem 0.25rem 0.8rem;
+  }
+
+  .home-overview > p {
+    max-width: 36rem;
+    text-align: left;
+  }
+
   .time-today-layout,
-  .weather-dashboard-layout {
+  .weather-dashboard-layout,
+  .action-grid {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 720px) {
-  .clock-layout,
+@media (max-width: 560px) {
+  .home-time-card .clock-layout,
   .weather-current-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(82px, 102px) minmax(0, 1fr);
   }
 
-  .analog-clock {
-    justify-content: start;
-  }
+  .condition-pictogram { width: 82px; }
 
-  .condition-pictogram {
-    width: 78px;
-  }
-
-  .weather-mini-grid,
-  .action-grid {
-    grid-template-columns: 1fr;
-  }
+  .sun-path { height: 100px; }
+  .sun-path-line { height: 62px; }
+  .sun-dot { bottom: calc(22px + (62px * var(--sun-y))); }
 }
 
 @media (max-width: 420px) {
@@ -563,19 +676,20 @@
     flex-direction: column;
   }
 
-  .clock-face {
-    width: 112px;
-  }
+  .clock-face { width: 96px; }
 
   .digital-clock > strong,
   .weather-current-row strong {
     font-size: clamp(1.8rem, 12vw, 2.35rem);
   }
 
-  .today-grid,
-  .sun-times-grid {
-    grid-template-columns: 1fr;
-  }
+  .home-time-card .today-grid,
+  .sun-times-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .today-grid div,
+  .sun-times-grid div { padding: 0.62rem; }
+
+  .home-weather-card .weather-mini-grid span { min-height: 70px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -586,5 +700,10 @@
   .action-tile:hover,
   .action-tile:focus-visible {
     transform: none;
+  }
+
+  .action-tile:hover::after,
+  .action-tile:focus-visible::after {
+    transform: translateY(-50%);
   }
 }
