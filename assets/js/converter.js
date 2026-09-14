@@ -17,6 +17,8 @@ function initializeConverter() {
   const previewFactorEl = document.getElementById("previewFactor");
   const previewPanel = previewSummaryEl?.closest(".preview-panel");
   const controlGrid = categoryEl?.closest(".tool-grid");
+  const queryGroup = queryInputEl?.closest(".field-group");
+  const resultsGrid = resultValueEl?.closest(".compact-results-grid");
 
   const required = [
     categoryEl,
@@ -27,11 +29,26 @@ function initializeConverter() {
     resultFormulaEl,
     resultFactorEl,
     relatedResultsEl,
+    controlGrid,
+    resultsGrid,
   ];
 
   if (required.some((el) => !el) || typeof unitData !== "object") return;
   if (categoryEl.dataset.converterReady === "true") return;
   categoryEl.dataset.converterReady = "true";
+
+  const categoryGroup = categoryEl.closest(".field-group");
+  const valueGroup = inputValueEl.closest(".field-group");
+  const fromGroup = fromUnitEl.closest(".field-group");
+  const toGroup = toUnitEl.closest(".field-group");
+
+  queryGroup?.classList.add("converter-query-group");
+  controlGrid.classList.add("converter-control-grid");
+  resultsGrid.classList.add("converter-results-grid");
+  categoryGroup?.classList.add("converter-category-group");
+  valueGroup?.classList.add("converter-value-group");
+  fromGroup?.classList.add("converter-from-group");
+  toGroup?.classList.add("converter-to-group");
 
   installConverterLayout();
 
@@ -40,38 +57,43 @@ function initializeConverter() {
     return Array.isArray(info?.units) ? info.units : Object.keys(info?.units || {});
   };
 
-  const normalize = (value) => String(value || "")
-    .trim()
-    .replace(/μ/g, "µ")
-    .replace(/²/g, "^2")
-    .replace(/³/g, "^3")
-    .replace(/[⋅×]/g, "·")
-    .replace(/degrees?\s*/gi, "°")
-    .replace(/\s+/g, " ")
-    .toLowerCase();
+  function canonicalText(value) {
+    return String(value || "")
+      .trim()
+      .replace(/μ/g, "µ")
+      .replace(/²/g, "^2")
+      .replace(/³/g, "^3")
+      .replace(/[⋅×]/g, "·")
+      .replace(/degrees?\s*/gi, "°")
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+  }
 
-  const comparable = (value) => normalize(value)
-    .replace(/\^2/g, "²")
-    .replace(/\^3/g, "³")
-    .replace(/\s*·\s*/g, "·")
-    .replace(/\s*\/\s*/g, "/")
-    .replace(/\s*\(\s*/g, "(")
-    .replace(/\s*\)\s*/g, ")");
+  function comparableUnit(value) {
+    return canonicalText(value)
+      .replace(/\^2/g, "²")
+      .replace(/\^3/g, "³")
+      .replace(/\s*·\s*/g, "·")
+      .replace(/\s*\/\s*/g, "/")
+      .replace(/\s*\(\s*/g, "(")
+      .replace(/\s*\)\s*/g, ")");
+  }
 
   function findUnitMatches(rawUnit) {
-    const normalized = comparable(rawUnit);
+    const normalized = comparableUnit(rawUnit);
     const matches = [];
 
     Object.keys(unitData).forEach((category) => {
       getUnits(category).forEach((unit) => {
-        if (comparable(unit) === normalized) matches.push({ category, unit });
+        if (comparableUnit(unit) === normalized) matches.push({ category, unit });
       });
     });
 
     const aliases = typeof unitAliases === "object" ? unitAliases : {};
-    const key = normalize(rawUnit);
-    const keys = key.endsWith("s") ? [key, key.slice(0, -1)] : [key];
-    const alias = keys.map((candidate) => aliases[candidate]).find(Boolean);
+    const key = canonicalText(rawUnit);
+    const candidates = [key];
+    if (key.endsWith("s")) candidates.push(key.slice(0, -1));
+    const alias = candidates.map((candidate) => aliases[candidate]).find(Boolean);
 
     if (alias && !matches.some((match) => match.category === alias.category && match.unit === alias.unit)) {
       matches.unshift(alias);
@@ -88,6 +110,7 @@ function initializeConverter() {
       const toMatch = toMatches.find((candidate) => candidate.category === fromMatch.category);
       if (toMatch) return { category: fromMatch.category, from: fromMatch.unit, to: toMatch.unit };
     }
+
     return null;
   }
 
@@ -172,7 +195,7 @@ function initializeConverter() {
   }
 
   function validateInput(value, category, from) {
-    if (!Number.isFinite(value)) return "Enter a value.";
+    if (!Number.isFinite(value)) return "Enter a valid numeric value.";
     if (category === "Fuel Economy" && value < 0) return "Fuel economy cannot be negative.";
     if (category === "Temperature" && toCelsius(value, from) < -273.15 - 1e-10) {
       return "Temperature cannot be below absolute zero.";
@@ -196,26 +219,29 @@ function initializeConverter() {
     return (value * fromFactor) / toFactor;
   }
 
-  function formulaText(value, category, from, to, converted) {
+  function getFormulaText(value, category, from, to, converted) {
     const info = unitData[category];
     if (info.type === "temperature" || info.type === "fuelEconomy") {
       return `${formatNumber(value)} ${from} = ${formatNumber(converted)} ${to}`;
     }
+
     const factor = info.units[from] / info.units[to];
     return `${formatNumber(value)} ${from} × ${formatNumber(factor)} = ${formatNumber(converted)} ${to}`;
   }
 
-  function factorText(category, from, to) {
+  function getFactorText(category, from, to) {
     const info = unitData[category];
-    if (info.type === "temperature") return "Offset scale";
-    if (info.type === "fuelEconomy" && (from === "L/100 km" || to === "L/100 km")) return "Inverse scale";
+    if (info.type === "temperature") return "Offset scale — no single constant multiplier.";
+    if (info.type === "fuelEconomy" && (from === "L/100 km" || to === "L/100 km")) {
+      return "Inverse scale — result depends on the entered value.";
+    }
     return `1 ${from} = ${formatNumber(convertUnits(1, category, from, to))} ${to}`;
   }
 
   function renderEquation(value, category, from, to, converted) {
     if (!previewPanel) return;
-    let equation = document.getElementById("equationPreview");
 
+    let equation = document.getElementById("equationPreview");
     if (!equation) {
       equation = document.createElement("div");
       equation.id = "equationPreview";
@@ -223,7 +249,7 @@ function initializeConverter() {
       previewPanel.appendChild(equation);
     }
 
-    equation.textContent = formulaText(value, category, from, to, converted);
+    equation.textContent = getFormulaText(value, category, from, to, converted);
   }
 
   function renderRelatedConversions(value, category, from, to) {
@@ -234,6 +260,7 @@ function initializeConverter() {
       .filter((unit) => unit !== from && unit !== to)
       .slice(0, 4)
       .forEach((unit) => {
+        const converted = convertUnits(value, category, from, unit);
         const row = document.createElement("div");
         row.className = "related-item";
 
@@ -243,7 +270,7 @@ function initializeConverter() {
 
         const result = document.createElement("span");
         result.className = "related-item-value";
-        result.textContent = `${formatNumber(convertUnits(value, category, from, unit))} ${unit}`;
+        result.textContent = `${formatNumber(converted)} ${unit}`;
 
         row.append(label, result);
         relatedResultsEl.appendChild(row);
@@ -259,6 +286,7 @@ function initializeConverter() {
 
   function renderConversion(value, category, from, to, updatePreview = false) {
     const problem = validateInput(value, category, from);
+
     if (problem) {
       clearResult(problem);
       if (updatePreview) document.getElementById("equationPreview")?.remove();
@@ -273,8 +301,8 @@ function initializeConverter() {
     }
 
     resultValueEl.textContent = `${formatNumber(converted)} ${to}`;
-    resultFormulaEl.textContent = formulaText(value, category, from, to, converted);
-    resultFactorEl.textContent = factorText(category, from, to);
+    resultFormulaEl.textContent = getFormulaText(value, category, from, to, converted);
+    resultFactorEl.textContent = getFactorText(category, from, to);
     renderRelatedConversions(value, category, from, to);
 
     if (updatePreview) renderEquation(value, category, from, to, converted);
@@ -286,12 +314,15 @@ function initializeConverter() {
     return raw === "" ? NaN : Number(raw);
   }
 
-  function convertValue(updatePreview = false) {
-    return renderConversion(readManualValue(), categoryEl.value, fromUnitEl.value, toUnitEl.value, updatePreview);
+  function convertManual() {
+    renderConversion(readManualValue(), categoryEl.value, fromUnitEl.value, toUnitEl.value, false);
   }
 
   function parseQuickQuery(query) {
-    const match = query.trim().match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*(.+?)\s+(?:to|in|as|into)\s+(.+)$/i);
+    const match = query
+      .trim()
+      .match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*(.+?)\s+(?:to|in|as|into)\s+(.+)$/i);
+
     if (!match) return null;
 
     const value = Number(match[1]);
@@ -299,22 +330,34 @@ function initializeConverter() {
     return Number.isFinite(value) && resolved ? { value, ...resolved } : null;
   }
 
-  function updateLivePreview() {
+  function setPreviewVisible(visible) {
+    if (!previewPanel) return;
+    previewPanel.hidden = !visible;
+  }
+
+  function resetQuickQuery() {
+    if (!queryInputEl) return;
+    queryInputEl.value = "";
+    if (queryStatusEl) queryStatusEl.textContent = "";
+    document.getElementById("equationPreview")?.remove();
+    setPreviewVisible(false);
+  }
+
+  function updateQuickQuery() {
     if (!queryInputEl || !previewSummaryEl || !previewFactorEl || !queryStatusEl) return;
     const query = queryInputEl.value.trim();
 
     if (!query) {
-      previewSummaryEl.textContent = "10 in to mm";
-      previewFactorEl.textContent = "Quick query or use the controls below";
-      queryStatusEl.textContent = "";
-      document.getElementById("equationPreview")?.remove();
+      resetQuickQuery();
       return;
     }
 
+    setPreviewVisible(true);
     const parsed = parseQuickQuery(query);
+
     if (!parsed) {
-      previewSummaryEl.textContent = "Enter: value unit to unit";
-      previewFactorEl.textContent = "Example: 10 in to mm";
+      previewSummaryEl.textContent = "Waiting for a complete conversion…";
+      previewFactorEl.textContent = "Use: value unit to unit";
       queryStatusEl.textContent = "";
       document.getElementById("equationPreview")?.remove();
       return;
@@ -324,30 +367,26 @@ function initializeConverter() {
     inputValueEl.value = parsed.value;
     const converted = renderConversion(parsed.value, parsed.category, parsed.from, parsed.to, true);
 
-    if (Number.isNaN(converted)) return;
+    if (Number.isNaN(converted)) {
+      queryStatusEl.textContent = resultFormulaEl.textContent;
+      return;
+    }
 
-    previewSummaryEl.textContent = `${formatNumber(parsed.value)} ${parsed.from} → ${formatNumber(converted)} ${parsed.to}`;
-    previewFactorEl.textContent = factorText(parsed.category, parsed.from, parsed.to);
+    previewSummaryEl.textContent = `${formatNumber(parsed.value)} ${parsed.from} = ${formatNumber(converted)} ${parsed.to}`;
+    previewFactorEl.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
     queryStatusEl.textContent = parsed.category;
   }
 
   function installSwapButton() {
-    if (!controlGrid || document.getElementById("swapUnits")) return;
-
-    const fromGroup = fromUnitEl.closest(".field-group");
-    const toGroup = toUnitEl.closest(".field-group");
-    if (!fromGroup || !toGroup) return;
-
-    fromGroup.classList.add("converter-from-group");
-    toGroup.classList.add("converter-to-group");
+    if (document.getElementById("swapUnits") || !toGroup) return;
 
     const wrapper = document.createElement("div");
     wrapper.className = "field-group converter-swap-group";
 
-    const spacer = document.createElement("span");
-    spacer.className = "converter-swap-label";
-    spacer.textContent = "Swap";
-    spacer.setAttribute("aria-hidden", "true");
+    const label = document.createElement("span");
+    label.className = "converter-swap-label";
+    label.textContent = "Swap";
+    label.setAttribute("aria-hidden", "true");
 
     const button = document.createElement("button");
     button.id = "swapUnits";
@@ -364,108 +403,124 @@ function initializeConverter() {
 
       if (queryInputEl?.value.trim()) {
         queryInputEl.value = `${inputValueEl.value} ${fromUnitEl.value} to ${toUnitEl.value}`;
-        updateLivePreview();
+        updateQuickQuery();
       } else {
-        convertValue();
+        convertManual();
       }
     });
 
-    wrapper.append(spacer, button);
+    wrapper.append(label, button);
     controlGrid.insertBefore(wrapper, toGroup);
   }
 
-  categoryEl.addEventListener("change", () => {
-    setDefaultUnits(categoryEl.value);
-    convertValue();
-  });
+  function switchToManualMode() {
+    resetQuickQuery();
+    convertManual();
+  }
 
-  fromUnitEl.addEventListener("change", () => convertValue(Boolean(queryInputEl?.value.trim())));
-  toUnitEl.addEventListener("change", () => convertValue(Boolean(queryInputEl?.value.trim())));
-  inputValueEl.addEventListener("input", () => convertValue(Boolean(queryInputEl?.value.trim())));
-  queryInputEl?.addEventListener("input", updateLivePreview);
+  categoryEl.addEventListener("change", () => {
+    resetQuickQuery();
+    setDefaultUnits(categoryEl.value);
+    convertManual();
+  });
+  inputValueEl.addEventListener("input", switchToManualMode);
+  fromUnitEl.addEventListener("change", switchToManualMode);
+  toUnitEl.addEventListener("change", switchToManualMode);
+  queryInputEl?.addEventListener("input", updateQuickQuery);
 
   populateCategories();
   categoryEl.value = Object.prototype.hasOwnProperty.call(unitData, "Length") ? "Length" : Object.keys(unitData)[0];
   setDefaultUnits(categoryEl.value);
   installSwapButton();
-  convertValue();
-  updateLivePreview();
+  setPreviewVisible(false);
+  convertManual();
 }
 
 function installConverterLayout() {
-  if (document.getElementById("converter-workflow-layout")) return;
+  if (document.getElementById("converter-workflow-layout-v4")) return;
 
   const style = document.createElement("style");
-  style.id = "converter-workflow-layout";
+  style.id = "converter-workflow-layout-v4";
   style.textContent = `
     #tools .compact-tool-card {
       display: block !important;
       min-height: 0 !important;
-      padding: .72rem .82rem !important;
+      padding: .8rem .9rem !important;
     }
 
     #tools .compact-tool-card .tool-header {
-      margin-bottom: .34rem !important;
-    }
-
-    #tools .compact-tool-card .tool-header h2 {
-      font-size: clamp(1.32rem, 2.4vw, 1.82rem) !important;
+      margin-bottom: .45rem !important;
     }
 
     #tools .compact-tool-card .tool-intro {
-      margin-top: .16rem !important;
-      line-height: 1.28 !important;
-      font-size: .78rem !important;
+      margin-top: .2rem !important;
+      font-size: .8rem !important;
+      line-height: 1.3 !important;
     }
 
     #tools .compact-converter-layout {
       display: grid !important;
-      grid-template-columns: 1fr !important;
+      grid-template-columns: minmax(0, 1fr) !important;
       grid-template-areas: none !important;
-      gap: .28rem !important;
+      gap: .42rem !important;
       min-height: 0 !important;
       align-items: stretch !important;
+      flex: none !important;
     }
 
-    #tools .compact-converter-layout > .field-group:first-child {
+    #tools .compact-converter-layout > *,
+    #tools .converter-query-group,
+    #tools .converter-control-grid,
+    #tools .converter-results-grid {
+      grid-area: auto !important;
+    }
+
+    #tools .converter-query-group {
       display: grid !important;
-      grid-template-columns: minmax(220px, 1.15fr) minmax(250px, .85fr) !important;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, .8fr) !important;
       grid-template-areas:
         "label preview"
-        "query preview" !important;
-      gap: .16rem .34rem !important;
+        "input preview" !important;
+      gap: .22rem .42rem !important;
       padding: 0 !important;
-      margin: 0 !important;
       border: 0 !important;
+      border-radius: 0 !important;
       background: transparent !important;
     }
 
-    #tools .compact-converter-layout > .field-group:first-child > label {
+    #tools .converter-query-group > label {
       grid-area: label !important;
       align-self: end;
       margin: 0 !important;
-      font-size: .66rem !important;
+      font-size: .68rem !important;
       line-height: 1 !important;
-      text-transform: uppercase;
-      letter-spacing: .05em;
     }
 
     #tools #queryInput {
-      grid-area: query !important;
-      min-height: 34px !important;
-      padding: .4rem .55rem !important;
-      font-size: .82rem !important;
+      grid-area: input !important;
+      min-width: 0 !important;
+      min-height: 36px !important;
+      padding: .45rem .58rem !important;
+      font-size: .84rem !important;
     }
 
-    #tools .preview-panel {
+    #tools .converter-query-group > .preview-panel {
       grid-area: preview !important;
-      display: grid !important;
-      align-content: center !important;
-      gap: .05rem !important;
+      min-width: 0 !important;
       min-height: 0 !important;
       margin: 0 !important;
-      padding: .34rem .48rem !important;
-      border-radius: 7px !important;
+      padding: .42rem .55rem !important;
+    }
+
+    #tools .converter-query-group > .preview-panel[hidden] {
+      display: none !important;
+    }
+
+    #tools .converter-query-group:has(.preview-panel[hidden]) {
+      grid-template-columns: minmax(0, 1fr) !important;
+      grid-template-areas:
+        "label"
+        "input" !important;
     }
 
     #tools .preview-summary,
@@ -474,172 +529,170 @@ function installConverterLayout() {
     #tools .result-formula,
     #tools .result-factor {
       margin: 0 !important;
-      line-height: 1.2 !important;
-      font-size: .7rem !important;
-    }
-
-    #tools .query-status {
-      font-size: .62rem !important;
-      text-transform: uppercase;
-      letter-spacing: .05em;
+      font-size: .73rem !important;
+      line-height: 1.24 !important;
     }
 
     #tools #equationPreview {
-      margin-top: .12rem !important;
-      padding-top: .12rem !important;
+      margin-top: .18rem !important;
+      padding-top: .18rem !important;
       border-top: 1px solid var(--line) !important;
-      font-size: .76rem !important;
+      color: var(--ink) !important;
+      font-family: "Cambria Math", "STIX Two Math", serif !important;
+      font-size: .8rem !important;
       white-space: nowrap;
       overflow-x: auto;
     }
 
-    #tools .compact-tool-grid {
+    #tools .converter-control-grid {
       display: grid !important;
-      grid-template-columns: minmax(120px, .9fr) minmax(100px, .7fr) minmax(120px, 1fr) 34px minmax(120px, 1fr) !important;
-      gap: .26rem !important;
+      grid-template-columns: minmax(140px, 1.05fr) minmax(100px, .72fr) minmax(130px, 1fr) 38px minmax(130px, 1fr) !important;
+      grid-template-areas: "category value from swap to" !important;
+      gap: .38rem !important;
       align-items: end !important;
       padding: 0 !important;
-      margin: 0 !important;
       border: 0 !important;
+      border-radius: 0 !important;
       background: transparent !important;
     }
 
-    #tools .compact-tool-grid .field-group {
-      gap: .12rem !important;
+    #tools .converter-category-group { grid-area: category !important; }
+    #tools .converter-value-group { grid-area: value !important; }
+    #tools .converter-from-group { grid-area: from !important; }
+    #tools .converter-swap-group { grid-area: swap !important; }
+    #tools .converter-to-group { grid-area: to !important; }
+
+    #tools .converter-control-grid .field-group {
       min-width: 0 !important;
-      margin: 0 !important;
+      gap: .18rem !important;
     }
 
-    #tools .compact-tool-grid .field-group label,
+    #tools .converter-control-grid .field-group label,
     #tools .converter-swap-label {
-      min-height: auto !important;
-      color: var(--ink-soft);
-      font-size: .64rem !important;
+      min-height: 1em !important;
+      color: var(--ink-soft) !important;
+      font-size: .66rem !important;
       line-height: 1 !important;
       text-transform: uppercase;
       letter-spacing: .05em;
     }
 
-    #tools .compact-tool-grid input,
-    #tools .compact-tool-grid select,
+    #tools .converter-control-grid input,
+    #tools .converter-control-grid select,
     #tools .converter-swap-button {
-      width: 100%;
-      min-width: 0;
-      min-height: 34px !important;
-      padding: .4rem .48rem !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 36px !important;
+      padding: .44rem .52rem !important;
       border-radius: 7px !important;
-      font-size: .78rem !important;
-    }
-
-    #tools .converter-swap-group {
-      min-width: 34px !important;
-    }
-
-    #tools .converter-swap-label {
-      visibility: hidden;
+      font-size: .8rem !important;
     }
 
     #tools .converter-swap-button {
       padding: 0 !important;
-      border: 1px solid var(--line);
-      color: var(--ink);
-      background: #141b24;
+      border: 1px solid var(--line) !important;
+      color: var(--ink) !important;
+      background: #141b24 !important;
       cursor: pointer;
-      font-size: .95rem !important;
+      font-size: .98rem !important;
     }
 
-    #tools .compact-results-grid {
+    #tools .converter-results-grid {
       display: grid !important;
-      grid-template-columns: minmax(230px, .9fr) minmax(0, 1.1fr) !important;
+      grid-template-columns: minmax(230px, .85fr) minmax(0, 1.15fr) !important;
       grid-template-rows: none !important;
-      gap: .26rem !important;
+      gap: .38rem !important;
       min-height: 0 !important;
-      margin: 0 !important;
     }
 
     #tools .result-panel,
     #tools .related-panel {
       min-height: 0 !important;
-      padding: .44rem .54rem !important;
-      border-radius: 7px !important;
-    }
-
-    #tools .result-panel .tool-label,
-    #tools .related-panel .tool-label {
-      margin-bottom: .12rem !important;
+      padding: .52rem .62rem !important;
+      box-shadow: none !important;
     }
 
     #tools .result-value {
-      margin: 0 0 .08rem !important;
-      font-size: clamp(1.28rem, 2.7vw, 1.82rem) !important;
-      line-height: 1 !important;
+      margin: 0 0 .12rem !important;
+      font-size: clamp(1.35rem, 2.7vw, 1.9rem) !important;
+    }
+
+    #tools .related-panel {
+      display: block !important;
     }
 
     #tools .related-results {
+      display: grid !important;
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-      gap: .2rem !important;
+      gap: .26rem !important;
     }
 
     #tools .related-item {
-      padding: .28rem .36rem !important;
-      gap: .26rem !important;
-      font-size: .7rem !important;
-      line-height: 1.15 !important;
+      display: grid !important;
+      gap: .1rem !important;
+      min-width: 0 !important;
+      padding: .32rem .4rem !important;
+      font-size: .72rem !important;
+    }
+
+    #tools .related-item-value {
+      text-align: left !important;
+      font-weight: 600;
     }
 
     @media (max-width: 900px) {
-      #tools .compact-converter-layout > .field-group:first-child {
+      #tools .converter-query-group {
         grid-template-columns: 1fr !important;
         grid-template-areas:
           "label"
-          "query"
+          "input"
           "preview" !important;
-        gap: .16rem !important;
       }
 
-      #tools .compact-tool-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: .28rem !important;
+      #tools .converter-control-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+        grid-template-areas:
+          "category value"
+          "from to"
+          "swap swap" !important;
       }
 
       #tools .converter-swap-group {
-        grid-column: 1 / -1 !important;
+        width: 38px;
         justify-self: center;
-        width: 34px;
       }
 
       #tools .converter-swap-label {
         display: none;
       }
+
+      #tools .converter-results-grid {
+        grid-template-columns: 1fr !important;
+      }
     }
 
     @media (max-width: 620px) {
       #tools .compact-tool-card {
-        padding: .6rem !important;
+        padding: .65rem !important;
       }
 
       #tools .compact-tool-card .tool-intro {
-        display: none;
+        display: none !important;
       }
 
-      #tools .compact-tool-grid {
-        grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr) !important;
+      #tools .converter-control-grid {
+        grid-template-columns: minmax(0, 1fr) 38px minmax(0, 1fr) !important;
+        grid-template-areas:
+          "category category category"
+          "value value value"
+          "from swap to" !important;
       }
 
-      #tools .compact-tool-grid > .field-group:nth-child(1),
-      #tools .compact-tool-grid > .field-group:nth-child(2) {
-        grid-column: 1 / -1 !important;
-      }
-
-      #tools .converter-from-group { grid-column: 1 !important; }
       #tools .converter-swap-group {
-        grid-column: 2 !important;
-        width: 34px;
+        width: 38px;
         align-self: end;
       }
-      #tools .converter-to-group { grid-column: 3 !important; }
 
-      #tools .compact-results-grid,
       #tools .related-results {
         grid-template-columns: 1fr !important;
       }
