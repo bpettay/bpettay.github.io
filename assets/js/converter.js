@@ -40,43 +40,38 @@ function initializeConverter() {
     return Array.isArray(info?.units) ? info.units : Object.keys(info?.units || {});
   };
 
-  function canonicalText(value) {
-    return String(value || "")
-      .trim()
-      .replace(/μ/g, "µ")
-      .replace(/²/g, "^2")
-      .replace(/³/g, "^3")
-      .replace(/[⋅×]/g, "·")
-      .replace(/degrees?\s*/gi, "°")
-      .replace(/\s+/g, " ")
-      .toLowerCase();
-  }
+  const normalize = (value) => String(value || "")
+    .trim()
+    .replace(/μ/g, "µ")
+    .replace(/²/g, "^2")
+    .replace(/³/g, "^3")
+    .replace(/[⋅×]/g, "·")
+    .replace(/degrees?\s*/gi, "°")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 
-  function comparableUnit(value) {
-    return canonicalText(value)
-      .replace(/\^2/g, "²")
-      .replace(/\^3/g, "³")
-      .replace(/\s*·\s*/g, "·")
-      .replace(/\s*\/\s*/g, "/")
-      .replace(/\s*\(\s*/g, "(")
-      .replace(/\s*\)\s*/g, ")");
-  }
+  const comparable = (value) => normalize(value)
+    .replace(/\^2/g, "²")
+    .replace(/\^3/g, "³")
+    .replace(/\s*·\s*/g, "·")
+    .replace(/\s*\/\s*/g, "/")
+    .replace(/\s*\(\s*/g, "(")
+    .replace(/\s*\)\s*/g, ")");
 
   function findUnitMatches(rawUnit) {
-    const normalized = comparableUnit(rawUnit);
+    const normalized = comparable(rawUnit);
     const matches = [];
 
     Object.keys(unitData).forEach((category) => {
       getUnits(category).forEach((unit) => {
-        if (comparableUnit(unit) === normalized) matches.push({ category, unit });
+        if (comparable(unit) === normalized) matches.push({ category, unit });
       });
     });
 
     const aliases = typeof unitAliases === "object" ? unitAliases : {};
-    const key = canonicalText(rawUnit);
-    const candidates = [key];
-    if (key.endsWith("s")) candidates.push(key.slice(0, -1));
-    const alias = candidates.map((candidate) => aliases[candidate]).find(Boolean);
+    const key = normalize(rawUnit);
+    const keys = key.endsWith("s") ? [key, key.slice(0, -1)] : [key];
+    const alias = keys.map((candidate) => aliases[candidate]).find(Boolean);
 
     if (alias && !matches.some((match) => match.category === alias.category && match.unit === alias.unit)) {
       matches.unshift(alias);
@@ -93,7 +88,6 @@ function initializeConverter() {
       const toMatch = toMatches.find((candidate) => candidate.category === fromMatch.category);
       if (toMatch) return { category: fromMatch.category, from: fromMatch.unit, to: toMatch.unit };
     }
-
     return null;
   }
 
@@ -178,7 +172,7 @@ function initializeConverter() {
   }
 
   function validateInput(value, category, from) {
-    if (!Number.isFinite(value)) return "Enter a valid numeric value.";
+    if (!Number.isFinite(value)) return "Enter a value.";
     if (category === "Fuel Economy" && value < 0) return "Fuel economy cannot be negative.";
     if (category === "Temperature" && toCelsius(value, from) < -273.15 - 1e-10) {
       return "Temperature cannot be below absolute zero.";
@@ -202,29 +196,26 @@ function initializeConverter() {
     return (value * fromFactor) / toFactor;
   }
 
-  function getFormulaText(value, category, from, to, converted) {
+  function formulaText(value, category, from, to, converted) {
     const info = unitData[category];
     if (info.type === "temperature" || info.type === "fuelEconomy") {
       return `${formatNumber(value)} ${from} = ${formatNumber(converted)} ${to}`;
     }
-
     const factor = info.units[from] / info.units[to];
     return `${formatNumber(value)} ${from} × ${formatNumber(factor)} = ${formatNumber(converted)} ${to}`;
   }
 
-  function getFactorText(category, from, to) {
+  function factorText(category, from, to) {
     const info = unitData[category];
-    if (info.type === "temperature") return "Offset scale — no single constant multiplier.";
-    if (info.type === "fuelEconomy" && (from === "L/100 km" || to === "L/100 km")) {
-      return "Inverse scale — result depends on the entered value.";
-    }
+    if (info.type === "temperature") return "Offset scale";
+    if (info.type === "fuelEconomy" && (from === "L/100 km" || to === "L/100 km")) return "Inverse scale";
     return `1 ${from} = ${formatNumber(convertUnits(1, category, from, to))} ${to}`;
   }
 
   function renderEquation(value, category, from, to, converted) {
     if (!previewPanel) return;
-
     let equation = document.getElementById("equationPreview");
+
     if (!equation) {
       equation = document.createElement("div");
       equation.id = "equationPreview";
@@ -232,7 +223,7 @@ function initializeConverter() {
       previewPanel.appendChild(equation);
     }
 
-    equation.textContent = getFormulaText(value, category, from, to, converted);
+    equation.textContent = formulaText(value, category, from, to, converted);
   }
 
   function renderRelatedConversions(value, category, from, to) {
@@ -243,7 +234,6 @@ function initializeConverter() {
       .filter((unit) => unit !== from && unit !== to)
       .slice(0, 4)
       .forEach((unit) => {
-        const converted = convertUnits(value, category, from, unit);
         const row = document.createElement("div");
         row.className = "related-item";
 
@@ -253,7 +243,7 @@ function initializeConverter() {
 
         const result = document.createElement("span");
         result.className = "related-item-value";
-        result.textContent = `${formatNumber(converted)} ${unit}`;
+        result.textContent = `${formatNumber(convertUnits(value, category, from, unit))} ${unit}`;
 
         row.append(label, result);
         relatedResultsEl.appendChild(row);
@@ -269,7 +259,6 @@ function initializeConverter() {
 
   function renderConversion(value, category, from, to, updatePreview = false) {
     const problem = validateInput(value, category, from);
-
     if (problem) {
       clearResult(problem);
       if (updatePreview) document.getElementById("equationPreview")?.remove();
@@ -284,8 +273,8 @@ function initializeConverter() {
     }
 
     resultValueEl.textContent = `${formatNumber(converted)} ${to}`;
-    resultFormulaEl.textContent = getFormulaText(value, category, from, to, converted);
-    resultFactorEl.textContent = getFactorText(category, from, to);
+    resultFormulaEl.textContent = formulaText(value, category, from, to, converted);
+    resultFactorEl.textContent = factorText(category, from, to);
     renderRelatedConversions(value, category, from, to);
 
     if (updatePreview) renderEquation(value, category, from, to, converted);
@@ -298,14 +287,11 @@ function initializeConverter() {
   }
 
   function convertValue(updatePreview = false) {
-    renderConversion(readManualValue(), categoryEl.value, fromUnitEl.value, toUnitEl.value, updatePreview);
+    return renderConversion(readManualValue(), categoryEl.value, fromUnitEl.value, toUnitEl.value, updatePreview);
   }
 
   function parseQuickQuery(query) {
-    const match = query
-      .trim()
-      .match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*(.+?)\s+(?:to|in|as|into)\s+(.+)$/i);
-
+    const match = query.trim().match(/^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)\s*(.+?)\s+(?:to|in|as|into)\s+(.+)$/i);
     if (!match) return null;
 
     const value = Number(match[1]);
@@ -318,8 +304,8 @@ function initializeConverter() {
     const query = queryInputEl.value.trim();
 
     if (!query) {
-      previewSummaryEl.textContent = "Example: 10 in to mm";
-      previewFactorEl.textContent = "Or use the controls below.";
+      previewSummaryEl.textContent = "10 in to mm";
+      previewFactorEl.textContent = "Quick query or use the controls below";
       queryStatusEl.textContent = "";
       document.getElementById("equationPreview")?.remove();
       return;
@@ -327,9 +313,9 @@ function initializeConverter() {
 
     const parsed = parseQuickQuery(query);
     if (!parsed) {
-      previewSummaryEl.textContent = "Waiting for a complete conversion…";
-      previewFactorEl.textContent = "Format: value unit to unit";
-      queryStatusEl.textContent = "Check the unit spelling if this does not resolve.";
+      previewSummaryEl.textContent = "Enter: value unit to unit";
+      previewFactorEl.textContent = "Example: 10 in to mm";
+      queryStatusEl.textContent = "";
       document.getElementById("equationPreview")?.remove();
       return;
     }
@@ -338,13 +324,10 @@ function initializeConverter() {
     inputValueEl.value = parsed.value;
     const converted = renderConversion(parsed.value, parsed.category, parsed.from, parsed.to, true);
 
-    if (Number.isNaN(converted)) {
-      queryStatusEl.textContent = resultFormulaEl.textContent;
-      return;
-    }
+    if (Number.isNaN(converted)) return;
 
-    previewSummaryEl.textContent = `${formatNumber(parsed.value)} ${parsed.from} = ${formatNumber(converted)} ${parsed.to}`;
-    previewFactorEl.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
+    previewSummaryEl.textContent = `${formatNumber(parsed.value)} ${parsed.from} → ${formatNumber(converted)} ${parsed.to}`;
+    previewFactorEl.textContent = factorText(parsed.category, parsed.from, parsed.to);
     queryStatusEl.textContent = parsed.category;
   }
 
@@ -363,8 +346,8 @@ function initializeConverter() {
 
     const spacer = document.createElement("span");
     spacer.className = "converter-swap-label";
-    spacer.setAttribute("aria-hidden", "true");
     spacer.textContent = "Swap";
+    spacer.setAttribute("aria-hidden", "true");
 
     const button = document.createElement("button");
     button.id = "swapUnits";
@@ -418,36 +401,41 @@ function installConverterLayout() {
     #tools .compact-tool-card {
       display: block !important;
       min-height: 0 !important;
-      padding: .85rem 1rem !important;
+      padding: .72rem .82rem !important;
     }
 
     #tools .compact-tool-card .tool-header {
-      margin-bottom: .5rem !important;
+      margin-bottom: .34rem !important;
+    }
+
+    #tools .compact-tool-card .tool-header h2 {
+      font-size: clamp(1.32rem, 2.4vw, 1.82rem) !important;
     }
 
     #tools .compact-tool-card .tool-intro {
-      margin-top: .25rem !important;
-      line-height: 1.35 !important;
-      font-size: .82rem !important;
+      margin-top: .16rem !important;
+      line-height: 1.28 !important;
+      font-size: .78rem !important;
     }
 
     #tools .compact-converter-layout {
       display: grid !important;
       grid-template-columns: 1fr !important;
       grid-template-areas: none !important;
-      gap: .48rem !important;
+      gap: .28rem !important;
       min-height: 0 !important;
       align-items: stretch !important;
     }
 
     #tools .compact-converter-layout > .field-group:first-child {
       display: grid !important;
-      grid-template-columns: minmax(220px, 1fr) minmax(280px, .9fr) !important;
+      grid-template-columns: minmax(220px, 1.15fr) minmax(250px, .85fr) !important;
       grid-template-areas:
         "label preview"
         "query preview" !important;
-      gap: .28rem .5rem !important;
+      gap: .16rem .34rem !important;
       padding: 0 !important;
+      margin: 0 !important;
       border: 0 !important;
       background: transparent !important;
     }
@@ -456,23 +444,28 @@ function installConverterLayout() {
       grid-area: label !important;
       align-self: end;
       margin: 0 !important;
-      font-size: .72rem !important;
+      font-size: .66rem !important;
+      line-height: 1 !important;
+      text-transform: uppercase;
+      letter-spacing: .05em;
     }
 
     #tools #queryInput {
       grid-area: query !important;
-      min-height: 38px !important;
-      padding: .5rem .65rem !important;
-      font-size: .86rem !important;
+      min-height: 34px !important;
+      padding: .4rem .55rem !important;
+      font-size: .82rem !important;
     }
 
     #tools .preview-panel {
       grid-area: preview !important;
       display: grid !important;
       align-content: center !important;
+      gap: .05rem !important;
       min-height: 0 !important;
       margin: 0 !important;
-      padding: .48rem .6rem !important;
+      padding: .34rem .48rem !important;
+      border-radius: 7px !important;
     }
 
     #tools .preview-summary,
@@ -481,39 +474,47 @@ function installConverterLayout() {
     #tools .result-formula,
     #tools .result-factor {
       margin: 0 !important;
-      line-height: 1.28 !important;
-      font-size: .75rem !important;
+      line-height: 1.2 !important;
+      font-size: .7rem !important;
+    }
+
+    #tools .query-status {
+      font-size: .62rem !important;
+      text-transform: uppercase;
+      letter-spacing: .05em;
     }
 
     #tools #equationPreview {
-      margin-top: .22rem !important;
-      padding-top: .22rem !important;
+      margin-top: .12rem !important;
+      padding-top: .12rem !important;
       border-top: 1px solid var(--line) !important;
-      font-size: .82rem !important;
+      font-size: .76rem !important;
       white-space: nowrap;
       overflow-x: auto;
     }
 
     #tools .compact-tool-grid {
       display: grid !important;
-      grid-template-columns: minmax(130px, .9fr) minmax(110px, .7fr) minmax(130px, 1fr) 40px minmax(130px, 1fr) !important;
-      gap: .42rem !important;
+      grid-template-columns: minmax(120px, .9fr) minmax(100px, .7fr) minmax(120px, 1fr) 34px minmax(120px, 1fr) !important;
+      gap: .26rem !important;
       align-items: end !important;
       padding: 0 !important;
+      margin: 0 !important;
       border: 0 !important;
       background: transparent !important;
     }
 
     #tools .compact-tool-grid .field-group {
-      gap: .2rem !important;
+      gap: .12rem !important;
       min-width: 0 !important;
+      margin: 0 !important;
     }
 
     #tools .compact-tool-grid .field-group label,
     #tools .converter-swap-label {
-      min-height: 1em;
+      min-height: auto !important;
       color: var(--ink-soft);
-      font-size: .68rem !important;
+      font-size: .64rem !important;
       line-height: 1 !important;
       text-transform: uppercase;
       letter-spacing: .05em;
@@ -524,14 +525,18 @@ function installConverterLayout() {
     #tools .converter-swap-button {
       width: 100%;
       min-width: 0;
-      min-height: 38px !important;
-      padding: .48rem .55rem !important;
+      min-height: 34px !important;
+      padding: .4rem .48rem !important;
       border-radius: 7px !important;
-      font-size: .82rem !important;
+      font-size: .78rem !important;
     }
 
     #tools .converter-swap-group {
-      min-width: 40px !important;
+      min-width: 34px !important;
+    }
+
+    #tools .converter-swap-label {
+      visibility: hidden;
     }
 
     #tools .converter-swap-button {
@@ -540,37 +545,46 @@ function installConverterLayout() {
       color: var(--ink);
       background: #141b24;
       cursor: pointer;
-      font-size: 1rem !important;
+      font-size: .95rem !important;
     }
 
     #tools .compact-results-grid {
       display: grid !important;
-      grid-template-columns: minmax(250px, .9fr) minmax(0, 1.1fr) !important;
+      grid-template-columns: minmax(230px, .9fr) minmax(0, 1.1fr) !important;
       grid-template-rows: none !important;
-      gap: .42rem !important;
+      gap: .26rem !important;
       min-height: 0 !important;
+      margin: 0 !important;
     }
 
     #tools .result-panel,
     #tools .related-panel {
       min-height: 0 !important;
-      padding: .58rem .68rem !important;
+      padding: .44rem .54rem !important;
+      border-radius: 7px !important;
+    }
+
+    #tools .result-panel .tool-label,
+    #tools .related-panel .tool-label {
+      margin-bottom: .12rem !important;
     }
 
     #tools .result-value {
-      margin: 0 0 .16rem !important;
-      font-size: clamp(1.4rem, 3vw, 2rem) !important;
+      margin: 0 0 .08rem !important;
+      font-size: clamp(1.28rem, 2.7vw, 1.82rem) !important;
+      line-height: 1 !important;
     }
 
     #tools .related-results {
       grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-      gap: .3rem !important;
+      gap: .2rem !important;
     }
 
     #tools .related-item {
-      padding: .36rem .45rem !important;
-      gap: .35rem !important;
-      font-size: .76rem !important;
+      padding: .28rem .36rem !important;
+      gap: .26rem !important;
+      font-size: .7rem !important;
+      line-height: 1.15 !important;
     }
 
     @media (max-width: 900px) {
@@ -580,16 +594,18 @@ function installConverterLayout() {
           "label"
           "query"
           "preview" !important;
+        gap: .16rem !important;
       }
 
       #tools .compact-tool-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: .28rem !important;
       }
 
       #tools .converter-swap-group {
         grid-column: 1 / -1 !important;
         justify-self: center;
-        width: 40px;
+        width: 34px;
       }
 
       #tools .converter-swap-label {
@@ -599,11 +615,15 @@ function installConverterLayout() {
 
     @media (max-width: 620px) {
       #tools .compact-tool-card {
-        padding: .7rem !important;
+        padding: .6rem !important;
+      }
+
+      #tools .compact-tool-card .tool-intro {
+        display: none;
       }
 
       #tools .compact-tool-grid {
-        grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr) !important;
+        grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr) !important;
       }
 
       #tools .compact-tool-grid > .field-group:nth-child(1),
@@ -611,19 +631,13 @@ function installConverterLayout() {
         grid-column: 1 / -1 !important;
       }
 
-      #tools .converter-from-group {
-        grid-column: 1 !important;
-      }
-
+      #tools .converter-from-group { grid-column: 1 !important; }
       #tools .converter-swap-group {
         grid-column: 2 !important;
-        width: 40px;
+        width: 34px;
         align-self: end;
       }
-
-      #tools .converter-to-group {
-        grid-column: 3 !important;
-      }
+      #tools .converter-to-group { grid-column: 3 !important; }
 
       #tools .compact-results-grid,
       #tools .related-results {
