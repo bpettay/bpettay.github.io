@@ -1,17 +1,17 @@
 :root {
-  --bg: #02060a;
-  --bg-soft: #071019;
-  --surface: rgba(10, 23, 35, 0.84);
-  --surface-strong: rgba(16, 34, 49, 0.92);
-  --surface-hover: rgba(24, 45, 62, 0.95);
-  --ink: #f4f7fb;
-  --ink-soft: #aebaca;
-  --line: rgba(150, 190, 225, 0.14);
-  --line-strong: rgba(150, 190, 225, 0.28);
-  --accent: #73b7ff;
-  --shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+  --bg: #070a0f;
+  --bg-soft: #0b1017;
+  --surface: #10161e;
+  --surface-strong: #151d27;
+  --surface-hover: #19232e;
+  --ink: #edf2f7;
+  --ink-soft: #96a2b1;
+  --line: #25313e;
+  --line-strong: #3b4a5b;
+  --accent: #5ca7e5;
+  --shadow: 0 10px 28px rgba(0, 0, 0, 0.24);
   --max-width: 1380px;
-  --radius: 18px;
+  --radius: 12px;
   --space-1: 0.5rem;
   --space-2: 0.75rem;
   --space-3: 1rem;
@@ -37,10 +37,7 @@ body {
   min-height: 100dvh;
   overflow-x: hidden;
   color: var(--ink);
-  background:
-    radial-gradient(circle at 15% -10%, rgba(44, 126, 195, 0.13), transparent 34%),
-    radial-gradient(circle at 92% 5%, rgba(66, 104, 146, 0.09), transparent 28%),
-    linear-gradient(180deg, #06101a 0%, #02070d 45%, #010407 100%);
+  background: linear-gradient(180deg, #0a0f15 0%, var(--bg) 42%, #05070a 100%);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.5;
   padding-top: env(safe-area-inset-top);
@@ -71,8 +68,8 @@ img, svg, video, canvas { display: block; max-width: 100%; }
   overflow: visible;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: linear-gradient(145deg, rgba(11, 26, 39, 0.94), rgba(5, 14, 23, 0.96));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.035), var(--shadow);
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 input, select, textarea {
@@ -81,29 +78,29 @@ input, select, textarea {
   min-height: 48px;
   padding: 0.8rem 0.9rem;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 8px;
   color: var(--ink);
-  background: rgba(255,255,255,.055);
+  background: #0c1219;
   transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
 }
-input:hover, select:hover, textarea:hover { background: rgba(255,255,255,.075); }
+input:hover, select:hover, textarea:hover { background: #111923; }
 input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: rgba(115,183,255,.58);
-  background: rgba(255,255,255,.08);
-  box-shadow: 0 0 0 3px rgba(115,183,255,.12);
+  background: #111923;
+  box-shadow: 0 0 0 2px rgba(92,167,229,.18);
 }
 
 select {
   color-scheme: dark;
   color: var(--ink);
-  background-color: #171717;
+  background-color: #0c1219;
 }
 
 select option,
 select optgroup {
   color: #f3f5f7;
-  background-color: #171717;
+  background-color: #0c1219;
 }
 button { color: inherit; touch-action: manipulation; }
 
@@ -119,17 +116,17 @@ button { color: inherit; touch-action: manipulation; }
   margin: 0.75rem auto 0;
   padding: 0.55rem 0.65rem;
   border: 1px solid var(--line);
-  border-radius: 18px;
-  background: rgba(5, 12, 19, 0.78);
-  box-shadow: 0 12px 34px rgba(0,0,0,.24);
-  backdrop-filter: blur(20px) saturate(130%);
-  -webkit-backdrop-filter: blur(20px) saturate(130%);
+  border-radius: 12px;
+  background: rgba(10, 15, 21, 0.94);
+  box-shadow: 0 8px 24px rgba(0,0,0,.22);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   transition: transform .2s ease, opacity .2s ease, background .2s ease;
 }
 .nav-left, .nav-right { display: flex; align-items: center; min-width: 0; }
 .nav-left { flex: 1 1 auto; gap: .65rem; padding-left: .25rem; }
 .nav-right { flex: 0 0 auto; gap: .3rem; }
-.logo { width: 34px; height: 34px; flex: 0 0 34px; object-fit: contain; border-radius: 9px; }
+.logo { width: 34px; height: 34px; flex: 0 0 34px; object-fit: contain; border-radius: 6px; }
 .site-name { overflow: hidden; color: var(--ink); font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
 
 .nav-link {
@@ -139,7 +136,7 @@ button { color: inherit; touch-action: manipulation; }
   min-height: 42px;
   padding: .55rem .9rem;
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: 7px;
   color: var(--ink-soft);
   background: transparent;
   text-decoration: none;
@@ -149,16 +146,15 @@ button { color: inherit; touch-action: manipulation; }
 }
 .nav-link:hover {
   color: var(--ink);
-  background: rgba(255,255,255,.07);
+  background: #151d26;
 }
 .nav-link:active { transform: scale(.97); }
 .nav-link.active {
   color: var(--ink);
   border-color: rgba(255,255,255,.09);
-  background: rgba(255,255,255,.11);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  background: #1a2530;
 }
-.nav.nav-compact { background: rgba(5,12,19,.9); }
+.nav.nav-compact { background: rgba(10,15,21,.97); }
 .nav.nav-hidden { transform: translateY(-130%); opacity: 0; pointer-events: none; }
 
 button:focus-visible, a:focus-visible {
@@ -182,7 +178,7 @@ button:focus-visible, a:focus-visible {
 
 @media (max-width: 720px) {
   :root {
-    --radius: 16px;
+    --radius: 10px;
     --shadow: 0 10px 28px rgba(0,0,0,.22);
   }
 
@@ -193,7 +189,7 @@ button:focus-visible, a:focus-visible {
     padding-right: 0;
     padding-bottom: calc(88px + env(safe-area-inset-bottom));
     padding-left: 0;
-    background: #02070d;
+    background: var(--bg);
   }
 
   .page {
@@ -211,12 +207,12 @@ button:focus-visible, a:focus-visible {
     width: auto;
     margin: 0;
     padding: .38rem;
-    border-radius: 20px;
+    border-radius: 12px;
     border-color: rgba(150,190,225,.18);
-    background: rgba(5, 12, 19, .88);
-    box-shadow: 0 12px 36px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.04);
-    backdrop-filter: blur(24px) saturate(145%);
-    -webkit-backdrop-filter: blur(24px) saturate(145%);
+    background: rgba(10, 15, 21, .96);
+    box-shadow: 0 10px 28px rgba(0,0,0,.36);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     transform: translateZ(0);
   }
 
@@ -234,26 +230,26 @@ button:focus-visible, a:focus-visible {
     width: 100%;
     min-height: 50px;
     padding: .6rem .35rem;
-    border-radius: 15px;
+    border-radius: 8px;
     font-size: .9rem;
     font-weight: 500;
   }
 
   .nav-link.active {
-    background: rgba(255,255,255,.13);
+    background: #1a2530;
     border-color: rgba(255,255,255,.1);
   }
 
   .surface {
-    border-radius: 16px;
+    border-radius: 10px;
     border-color: rgba(150,190,225,.12);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.025), 0 8px 22px rgba(0,0,0,.18);
+    box-shadow: 0 6px 18px rgba(0,0,0,.2);
   }
 
   input, select, textarea {
     min-height: 52px;
     font-size: 16px;
-    border-radius: 13px;
+    border-radius: 8px;
   }
 
   button, [role="button"] { min-height: 44px; }

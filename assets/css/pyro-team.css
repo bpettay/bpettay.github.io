@@ -61,9 +61,9 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.65rem;
   padding: 0.75rem;
-  border-radius: 16px;
+  border-radius: 8px;
   border: 1px solid rgba(120, 255, 190, 0.12);
-  background: rgba(20, 45, 32, 0.22);
+  background: #0a1411;
 }
 
 .trace-tile {
@@ -71,7 +71,7 @@
   display: grid;
   gap: 0.25rem;
   padding: 0.7rem;
-  border-radius: 12px;
+  border-radius: 7px;
   border: 1px solid rgba(255, 255, 255, 0.07);
   background: rgba(0, 0, 0, 0.14);
 }
@@ -104,8 +104,8 @@
   min-width: 0;
   padding: var(--space-3);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  background: #0b1118;
 }
 
 .team-form-grid {
@@ -142,7 +142,7 @@
   gap: 0.75rem;
   padding: 0.85rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  border-radius: 7px;
   background: rgba(0, 0, 0, 0.16);
 }
 
@@ -151,7 +151,7 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: 6px;
   color: var(--ink);
   background: rgba(255, 255, 255, 0.08);
   font-weight: 700;
@@ -212,10 +212,10 @@
 
 .sync-button {
   min-height: 58px;
-  border-radius: 15px;
+  border-radius: 7px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   color: var(--ink);
-  background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04));
+  background: #18212b;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -232,13 +232,13 @@
   grid-column: 1 / -1;
   min-height: 64px;
   border-color: rgba(255, 76, 65, 0.42);
-  background: linear-gradient(180deg, rgba(255, 76, 65, 0.32), rgba(125, 18, 12, 0.32));
+  background: #50201e;
 }
 
 .sync-button.clear {
   grid-column: 1 / -1;
   border-color: rgba(120, 255, 190, 0.24);
-  background: linear-gradient(180deg, rgba(120, 255, 190, 0.18), rgba(20, 45, 32, 0.34));
+  background: #123020;
 }
 
 .sync-mini-log {
@@ -253,7 +253,7 @@
   display: grid;
   gap: 0.18rem;
   padding: 0.65rem 0.7rem;
-  border-radius: 11px;
+  border-radius: 7px;
   border: 1px solid rgba(255, 255, 255, 0.07);
   background: rgba(255, 255, 255, 0.035);
   color: var(--ink);
@@ -278,9 +278,9 @@
   display: grid;
   gap: 0.25rem;
   padding: 0.72rem 0.8rem;
-  border-radius: 13px;
+  border-radius: 7px;
   border: 1px solid rgba(120, 255, 190, 0.12);
-  background: rgba(20, 45, 32, 0.2);
+  background: #0a1411;
 }
 
 .ergonomic-action-banner span,
