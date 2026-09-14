@@ -16,6 +16,9 @@ function initializeConverter() {
   const previewSummaryEl = document.getElementById("previewSummary");
   const previewFactorEl = document.getElementById("previewFactor");
   const controlGrid = categoryEl?.closest(".tool-grid");
+  const converterLayout = categoryEl?.closest(".compact-converter-layout");
+  const queryGroup = queryInputEl?.closest(".field-group");
+  const resultsGrid = resultValueEl?.closest(".compact-results-grid");
   const previewPanel = previewSummaryEl?.closest(".preview-panel");
 
   const required = [
@@ -32,6 +35,58 @@ function initializeConverter() {
   if (required.some((el) => !el) || typeof unitData !== "object") return;
   if (categoryEl.dataset.converterReady === "true") return;
   categoryEl.dataset.converterReady = "true";
+
+  function applyStableLayout() {
+    const width = window.innerWidth;
+
+    if (converterLayout) {
+      converterLayout.style.display = "grid";
+      converterLayout.style.gridTemplateAreas = "none";
+      converterLayout.style.gridTemplateColumns = "1fr";
+      converterLayout.style.gap = width > 720 ? "0.8rem" : "0.65rem";
+      converterLayout.style.alignItems = "stretch";
+      converterLayout.style.minHeight = "0";
+    }
+
+    if (queryGroup) {
+      queryGroup.style.gridArea = "auto";
+      queryGroup.style.padding = "0";
+      queryGroup.style.border = "0";
+      queryGroup.style.background = "transparent";
+    }
+
+    if (controlGrid) {
+      controlGrid.style.gridArea = "auto";
+      controlGrid.style.display = "grid";
+      controlGrid.style.alignItems = "end";
+      controlGrid.style.padding = "0";
+      controlGrid.style.border = "0";
+      controlGrid.style.background = "transparent";
+      controlGrid.style.gap = width > 720 ? "0.7rem" : "0.55rem";
+
+      if (width > 980) {
+        controlGrid.style.gridTemplateColumns = "repeat(4, minmax(0, 1fr))";
+      } else if (width > 720) {
+        controlGrid.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+      } else {
+        controlGrid.style.gridTemplateColumns = "1fr";
+      }
+    }
+
+    if (resultsGrid) {
+      resultsGrid.style.gridArea = "auto";
+      resultsGrid.style.display = "grid";
+      resultsGrid.style.gridTemplateRows = "none";
+      resultsGrid.style.gridTemplateColumns = width > 820
+        ? "minmax(0, 1fr) minmax(280px, 0.9fr)"
+        : "1fr";
+      resultsGrid.style.gap = width > 720 ? "0.7rem" : "0.55rem";
+      resultsGrid.style.minHeight = "0";
+    }
+  }
+
+  applyStableLayout();
+  window.addEventListener("resize", applyStableLayout, { passive: true });
 
   const getUnits = (category) => {
     const info = unitData[category];
@@ -97,7 +152,6 @@ function initializeConverter() {
 
   function populateCategories() {
     categoryEl.replaceChildren();
-
     Object.keys(unitData).forEach((category) => {
       const option = document.createElement("option");
       option.value = category;
@@ -179,11 +233,9 @@ function initializeConverter() {
   function validateInput(value, category, from) {
     if (!Number.isFinite(value)) return "Enter a valid numeric value.";
     if (category === "Fuel Economy" && value < 0) return "Fuel economy cannot be negative.";
-
     if (category === "Temperature" && toCelsius(value, from) < -273.15 - 1e-10) {
       return "Temperature cannot be below absolute zero.";
     }
-
     return "";
   }
 
@@ -205,7 +257,6 @@ function initializeConverter() {
 
   function getFormulaText(value, category, from, to, converted) {
     const info = unitData[category];
-
     if (info.type === "temperature" || info.type === "fuelEconomy") {
       return `${formatNumber(value)} ${from} = ${formatNumber(converted)} ${to}`;
     }
@@ -216,7 +267,6 @@ function initializeConverter() {
 
   function getFactorText(category, from, to) {
     const info = unitData[category];
-
     if (info.type === "temperature") return "Offset scale — no single constant multiplier.";
 
     if (info.type === "fuelEconomy" && (from === "L/100 km" || to === "L/100 km")) {
@@ -288,7 +338,6 @@ function initializeConverter() {
     }
 
     const converted = convertUnits(value, category, from, to);
-
     if (Number.isNaN(converted)) {
       clearResult("Those units are not compatible.");
       if (updatePreview) document.getElementById("equationPreview")?.remove();
@@ -327,7 +376,6 @@ function initializeConverter() {
 
   function updateLivePreview() {
     if (!queryInputEl || !previewSummaryEl || !previewFactorEl || !queryStatusEl) return;
-
     const query = queryInputEl.value.trim();
 
     if (!query) {
@@ -350,7 +398,6 @@ function initializeConverter() {
 
     setUnitSelections(parsed.category, parsed.from, parsed.to);
     inputValueEl.value = parsed.value;
-
     const converted = renderConversion(parsed.value, parsed.category, parsed.from, parsed.to, true);
 
     if (Number.isNaN(converted)) {
