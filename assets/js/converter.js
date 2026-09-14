@@ -1,5 +1,5 @@
 function initializeGroupedUnitSelectors() {
-  // Compatibility shim: initializeConverter owns selector setup.
+  // Compatibility shim for app.js. initializeConverter owns selector setup.
 }
 
 function initializeConverter() {
@@ -15,11 +15,8 @@ function initializeConverter() {
   const queryStatusEl = document.getElementById("queryStatus");
   const previewSummaryEl = document.getElementById("previewSummary");
   const previewFactorEl = document.getElementById("previewFactor");
-  const controlGrid = categoryEl?.closest(".tool-grid");
-  const converterLayout = categoryEl?.closest(".compact-converter-layout");
-  const queryGroup = queryInputEl?.closest(".field-group");
-  const resultsGrid = resultValueEl?.closest(".compact-results-grid");
   const previewPanel = previewSummaryEl?.closest(".preview-panel");
+  const controlGrid = categoryEl?.closest(".tool-grid");
 
   const required = [
     categoryEl,
@@ -36,57 +33,7 @@ function initializeConverter() {
   if (categoryEl.dataset.converterReady === "true") return;
   categoryEl.dataset.converterReady = "true";
 
-  function applyStableLayout() {
-    const width = window.innerWidth;
-
-    if (converterLayout) {
-      converterLayout.style.display = "grid";
-      converterLayout.style.gridTemplateAreas = "none";
-      converterLayout.style.gridTemplateColumns = "1fr";
-      converterLayout.style.gap = width > 720 ? "0.8rem" : "0.65rem";
-      converterLayout.style.alignItems = "stretch";
-      converterLayout.style.minHeight = "0";
-    }
-
-    if (queryGroup) {
-      queryGroup.style.gridArea = "auto";
-      queryGroup.style.padding = "0";
-      queryGroup.style.border = "0";
-      queryGroup.style.background = "transparent";
-    }
-
-    if (controlGrid) {
-      controlGrid.style.gridArea = "auto";
-      controlGrid.style.display = "grid";
-      controlGrid.style.alignItems = "end";
-      controlGrid.style.padding = "0";
-      controlGrid.style.border = "0";
-      controlGrid.style.background = "transparent";
-      controlGrid.style.gap = width > 720 ? "0.7rem" : "0.55rem";
-
-      if (width > 980) {
-        controlGrid.style.gridTemplateColumns = "repeat(4, minmax(0, 1fr))";
-      } else if (width > 720) {
-        controlGrid.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
-      } else {
-        controlGrid.style.gridTemplateColumns = "1fr";
-      }
-    }
-
-    if (resultsGrid) {
-      resultsGrid.style.gridArea = "auto";
-      resultsGrid.style.display = "grid";
-      resultsGrid.style.gridTemplateRows = "none";
-      resultsGrid.style.gridTemplateColumns = width > 820
-        ? "minmax(0, 1fr) minmax(280px, 0.9fr)"
-        : "1fr";
-      resultsGrid.style.gap = width > 720 ? "0.7rem" : "0.55rem";
-      resultsGrid.style.minHeight = "0";
-    }
-  }
-
-  applyStableLayout();
-  window.addEventListener("resize", applyStableLayout, { passive: true });
+  installConverterLayout();
 
   const getUnits = (category) => {
     const info = unitData[category];
@@ -126,10 +73,10 @@ function initializeConverter() {
     });
 
     const aliases = typeof unitAliases === "object" ? unitAliases : {};
-    const rawKey = canonicalText(rawUnit);
-    const candidates = [rawKey];
-    if (rawKey.endsWith("s")) candidates.push(rawKey.slice(0, -1));
-    const alias = candidates.map((key) => aliases[key]).find(Boolean);
+    const key = canonicalText(rawUnit);
+    const candidates = [key];
+    if (key.endsWith("s")) candidates.push(key.slice(0, -1));
+    const alias = candidates.map((candidate) => aliases[candidate]).find(Boolean);
 
     if (alias && !matches.some((match) => match.category === alias.category && match.unit === alias.unit)) {
       matches.unshift(alias);
@@ -268,11 +215,9 @@ function initializeConverter() {
   function getFactorText(category, from, to) {
     const info = unitData[category];
     if (info.type === "temperature") return "Offset scale — no single constant multiplier.";
-
     if (info.type === "fuelEconomy" && (from === "L/100 km" || to === "L/100 km")) {
       return "Inverse scale — result depends on the entered value.";
     }
-
     return `1 ${from} = ${formatNumber(convertUnits(1, category, from, to))} ${to}`;
   }
 
@@ -284,12 +229,6 @@ function initializeConverter() {
       equation = document.createElement("div");
       equation.id = "equationPreview";
       equation.setAttribute("aria-live", "polite");
-      equation.style.marginTop = "0.55rem";
-      equation.style.paddingTop = "0.55rem";
-      equation.style.borderTop = "1px solid var(--line)";
-      equation.style.color = "var(--ink)";
-      equation.style.fontFamily = '"Cambria Math", "STIX Two Math", serif';
-      equation.style.overflowX = "auto";
       previewPanel.appendChild(equation);
     }
 
@@ -308,15 +247,15 @@ function initializeConverter() {
         const row = document.createElement("div");
         row.className = "related-item";
 
-        const unitEl = document.createElement("span");
-        unitEl.className = "related-item-label";
-        unitEl.textContent = unit;
+        const label = document.createElement("span");
+        label.className = "related-item-label";
+        label.textContent = unit;
 
-        const valueEl = document.createElement("span");
-        valueEl.className = "related-item-value";
-        valueEl.textContent = `${formatNumber(converted)} ${unit}`;
+        const result = document.createElement("span");
+        result.className = "related-item-value";
+        result.textContent = `${formatNumber(converted)} ${unit}`;
 
-        row.append(unitEl, valueEl);
+        row.append(label, result);
         relatedResultsEl.appendChild(row);
       });
   }
@@ -380,14 +319,13 @@ function initializeConverter() {
 
     if (!query) {
       previewSummaryEl.textContent = "Example: 10 in to mm";
-      previewFactorEl.textContent = "Type a conversion or use the controls below.";
+      previewFactorEl.textContent = "Or use the controls below.";
       queryStatusEl.textContent = "";
       document.getElementById("equationPreview")?.remove();
       return;
     }
 
     const parsed = parseQuickQuery(query);
-
     if (!parsed) {
       previewSummaryEl.textContent = "Waiting for a complete conversion…";
       previewFactorEl.textContent = "Format: value unit to unit";
@@ -413,24 +351,28 @@ function initializeConverter() {
   function installSwapButton() {
     if (!controlGrid || document.getElementById("swapUnits")) return;
 
-    const row = document.createElement("div");
-    row.className = "converter-swap-row";
-    row.style.display = "flex";
-    row.style.justifyContent = "flex-end";
-    row.style.marginTop = "0.15rem";
+    const fromGroup = fromUnitEl.closest(".field-group");
+    const toGroup = toUnitEl.closest(".field-group");
+    if (!fromGroup || !toGroup) return;
+
+    fromGroup.classList.add("converter-from-group");
+    toGroup.classList.add("converter-to-group");
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "field-group converter-swap-group";
+
+    const spacer = document.createElement("span");
+    spacer.className = "converter-swap-label";
+    spacer.setAttribute("aria-hidden", "true");
+    spacer.textContent = "Swap";
 
     const button = document.createElement("button");
     button.id = "swapUnits";
     button.type = "button";
-    button.textContent = "⇄ Swap units";
+    button.className = "converter-swap-button";
+    button.textContent = "⇄";
+    button.title = "Swap units";
     button.setAttribute("aria-label", "Swap source and destination units");
-    button.style.minHeight = "36px";
-    button.style.padding = "0.45rem 0.75rem";
-    button.style.border = "1px solid var(--line)";
-    button.style.borderRadius = "7px";
-    button.style.color = "var(--ink)";
-    button.style.background = "#141b24";
-    button.style.cursor = "pointer";
 
     button.addEventListener("click", () => {
       const previous = fromUnitEl.value;
@@ -445,8 +387,8 @@ function initializeConverter() {
       }
     });
 
-    row.appendChild(button);
-    controlGrid.insertAdjacentElement("afterend", row);
+    wrapper.append(spacer, button);
+    controlGrid.insertBefore(wrapper, toGroup);
   }
 
   categoryEl.addEventListener("change", () => {
@@ -465,4 +407,230 @@ function initializeConverter() {
   installSwapButton();
   convertValue();
   updateLivePreview();
+}
+
+function installConverterLayout() {
+  if (document.getElementById("converter-workflow-layout")) return;
+
+  const style = document.createElement("style");
+  style.id = "converter-workflow-layout";
+  style.textContent = `
+    #tools .compact-tool-card {
+      display: block !important;
+      min-height: 0 !important;
+      padding: .85rem 1rem !important;
+    }
+
+    #tools .compact-tool-card .tool-header {
+      margin-bottom: .5rem !important;
+    }
+
+    #tools .compact-tool-card .tool-intro {
+      margin-top: .25rem !important;
+      line-height: 1.35 !important;
+      font-size: .82rem !important;
+    }
+
+    #tools .compact-converter-layout {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      grid-template-areas: none !important;
+      gap: .48rem !important;
+      min-height: 0 !important;
+      align-items: stretch !important;
+    }
+
+    #tools .compact-converter-layout > .field-group:first-child {
+      display: grid !important;
+      grid-template-columns: minmax(220px, 1fr) minmax(280px, .9fr) !important;
+      grid-template-areas:
+        "label preview"
+        "query preview" !important;
+      gap: .28rem .5rem !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+    }
+
+    #tools .compact-converter-layout > .field-group:first-child > label {
+      grid-area: label !important;
+      align-self: end;
+      margin: 0 !important;
+      font-size: .72rem !important;
+    }
+
+    #tools #queryInput {
+      grid-area: query !important;
+      min-height: 38px !important;
+      padding: .5rem .65rem !important;
+      font-size: .86rem !important;
+    }
+
+    #tools .preview-panel {
+      grid-area: preview !important;
+      display: grid !important;
+      align-content: center !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding: .48rem .6rem !important;
+    }
+
+    #tools .preview-summary,
+    #tools .preview-factor,
+    #tools .query-status,
+    #tools .result-formula,
+    #tools .result-factor {
+      margin: 0 !important;
+      line-height: 1.28 !important;
+      font-size: .75rem !important;
+    }
+
+    #tools #equationPreview {
+      margin-top: .22rem !important;
+      padding-top: .22rem !important;
+      border-top: 1px solid var(--line) !important;
+      font-size: .82rem !important;
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+
+    #tools .compact-tool-grid {
+      display: grid !important;
+      grid-template-columns: minmax(130px, .9fr) minmax(110px, .7fr) minmax(130px, 1fr) 40px minmax(130px, 1fr) !important;
+      gap: .42rem !important;
+      align-items: end !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: transparent !important;
+    }
+
+    #tools .compact-tool-grid .field-group {
+      gap: .2rem !important;
+      min-width: 0 !important;
+    }
+
+    #tools .compact-tool-grid .field-group label,
+    #tools .converter-swap-label {
+      min-height: 1em;
+      color: var(--ink-soft);
+      font-size: .68rem !important;
+      line-height: 1 !important;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    #tools .compact-tool-grid input,
+    #tools .compact-tool-grid select,
+    #tools .converter-swap-button {
+      width: 100%;
+      min-width: 0;
+      min-height: 38px !important;
+      padding: .48rem .55rem !important;
+      border-radius: 7px !important;
+      font-size: .82rem !important;
+    }
+
+    #tools .converter-swap-group {
+      min-width: 40px !important;
+    }
+
+    #tools .converter-swap-button {
+      padding: 0 !important;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: #141b24;
+      cursor: pointer;
+      font-size: 1rem !important;
+    }
+
+    #tools .compact-results-grid {
+      display: grid !important;
+      grid-template-columns: minmax(250px, .9fr) minmax(0, 1.1fr) !important;
+      grid-template-rows: none !important;
+      gap: .42rem !important;
+      min-height: 0 !important;
+    }
+
+    #tools .result-panel,
+    #tools .related-panel {
+      min-height: 0 !important;
+      padding: .58rem .68rem !important;
+    }
+
+    #tools .result-value {
+      margin: 0 0 .16rem !important;
+      font-size: clamp(1.4rem, 3vw, 2rem) !important;
+    }
+
+    #tools .related-results {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: .3rem !important;
+    }
+
+    #tools .related-item {
+      padding: .36rem .45rem !important;
+      gap: .35rem !important;
+      font-size: .76rem !important;
+    }
+
+    @media (max-width: 900px) {
+      #tools .compact-converter-layout > .field-group:first-child {
+        grid-template-columns: 1fr !important;
+        grid-template-areas:
+          "label"
+          "query"
+          "preview" !important;
+      }
+
+      #tools .compact-tool-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      }
+
+      #tools .converter-swap-group {
+        grid-column: 1 / -1 !important;
+        justify-self: center;
+        width: 40px;
+      }
+
+      #tools .converter-swap-label {
+        display: none;
+      }
+    }
+
+    @media (max-width: 620px) {
+      #tools .compact-tool-card {
+        padding: .7rem !important;
+      }
+
+      #tools .compact-tool-grid {
+        grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr) !important;
+      }
+
+      #tools .compact-tool-grid > .field-group:nth-child(1),
+      #tools .compact-tool-grid > .field-group:nth-child(2) {
+        grid-column: 1 / -1 !important;
+      }
+
+      #tools .converter-from-group {
+        grid-column: 1 !important;
+      }
+
+      #tools .converter-swap-group {
+        grid-column: 2 !important;
+        width: 40px;
+        align-self: end;
+      }
+
+      #tools .converter-to-group {
+        grid-column: 3 !important;
+      }
+
+      #tools .compact-results-grid,
+      #tools .related-results {
+        grid-template-columns: 1fr !important;
+      }
+    }
+  `;
+
+  document.head.appendChild(style);
 }
