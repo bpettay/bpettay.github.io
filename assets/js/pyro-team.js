@@ -102,11 +102,13 @@ function initializePyroTeamSync() {
 
     const stamp = actionStamp(action);
     const item = document.createElement("li");
-    item.innerHTML = `
-      <span>${stamp.id} · ${stamp.time} · Zone ${stamp.zone}</span>
-      <strong>${message}</strong>
-      <em>${stamp.device} / ${stamp.role}</em>
-    `;
+    const detail = document.createElement("span");
+    detail.textContent = `${stamp.id} · ${stamp.time} · Zone ${stamp.zone}`;
+    const content = document.createElement("strong");
+    content.textContent = message;
+    const source = document.createElement("em");
+    source.textContent = `${stamp.device} / ${stamp.role}`;
+    item.append(detail, content, source);
     syncLog.prepend(item);
 
     while (syncLog.children.length > 8) {

@@ -123,7 +123,7 @@ function initializePyroGateWorkflow() {
   let activeGateIndex = 0;
 
   function currentOperatorLabel() {
-    return document.getElementById("operatorStatusText")?.textContent?.replace("Authorized: ", "") || "Operator";
+    return document.getElementById("operatorStatusText")?.textContent?.replace(/^(Authorized|Logged in):\s*/, "") || "Operator";
   }
 
   function currentZoneLabel() {
@@ -146,10 +146,11 @@ function initializePyroGateWorkflow() {
       second: "2-digit",
     });
 
-    item.innerHTML = `
-      <span>${time} · ${meta || currentZoneLabel()}</span>
-      <strong>${message}</strong>
-    `;
+    const detail = document.createElement("span");
+    detail.textContent = `${time} · ${meta || currentZoneLabel()}`;
+    const content = document.createElement("strong");
+    content.textContent = message;
+    item.append(detail, content);
 
     persistentActivityLog.prepend(item);
 
@@ -218,7 +219,7 @@ function initializePyroGateWorkflow() {
     const state = document.getElementById("pyroStateText")?.textContent || "SAFE / LOCKED OUT";
     const cue = document.getElementById("pyroSelectedCue")?.textContent || "CUE 01";
     const zone = document.getElementById("teamAssignedZone")?.value || "A";
-    const operator = document.getElementById("operatorStatusText")?.textContent?.replace("Authorized: ", "") || "Auth required";
+    const operator = document.getElementById("operatorStatusText")?.textContent?.replace(/^(Authorized|Logged in):\s*/, "") || "Auth required";
     const trace = document.getElementById("traceLastAction")?.textContent || "TR-1000";
 
     const stickySystemState = document.getElementById("stickySystemState");
@@ -292,6 +293,6 @@ function initializePyroGateWorkflow() {
   });
 
   initializeActivityDock();
-  window.setInterval(refreshStickyStatus, 1000);
+  window.addEventListener("pyro-operator-session", refreshStickyStatus);
   showGate(0);
 }

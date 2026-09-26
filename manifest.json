@@ -1,18 +1,14 @@
 {
   "name": "Brock Pettay - Engineering Tools",
   "short_name": "Brock Tools",
-  "description": "Engineering tools and remote pyro control",
-  "start_url": "/index.html",
+  "description": "Personal engineering dashboard, tools, and interface simulations",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#0066cc",
+  "background_color": "#070a0f",
+  "theme_color": "#0a0f15",
   "orientation": "portrait-primary",
   "icons": [
-    {
-      "src": "Favicon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
     {
       "src": "Favicon.png",
       "sizes": "512x512",

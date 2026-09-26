@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  configureConverterPrecision();
   startHomeClock();
   updateTodayPanel();
   loadHomeWeather();
@@ -13,12 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeGroupedUnitSelectors();
   }
 
-  if (typeof initializePyroSimulator === "function") initializePyroSimulator();
-  if (typeof initializePyroTeamSync === "function") initializePyroTeamSync();
-  if (typeof initializePyroGateWorkflow === "function") initializePyroGateWorkflow();
-
   initializeScrollHeader();
-  initializePanelTilt();
+  registerServiceWorker();
 });
 
 const DASHBOARD_LOCATION = {
@@ -27,29 +22,9 @@ const DASHBOARD_LOCATION = {
   timezone: "America/New_York",
 };
 
-function configureConverterPrecision() {
-  const NativeNumberFormat = Intl.NumberFormat;
-  if (NativeNumberFormat.__converterThreeSigFigs) return;
-
-  function ThreeSigNumberFormat(locales, options = {}) {
-    const adjustedOptions = options.maximumSignificantDigits === 10
-      ? { ...options, maximumSignificantDigits: 3 }
-      : options;
-    return new NativeNumberFormat(locales, adjustedOptions);
-  }
-
-  ThreeSigNumberFormat.prototype = NativeNumberFormat.prototype;
-  ThreeSigNumberFormat.supportedLocalesOf = NativeNumberFormat.supportedLocalesOf.bind(NativeNumberFormat);
-  ThreeSigNumberFormat.__converterThreeSigFigs = true;
-  Intl.NumberFormat = ThreeSigNumberFormat;
-}
-
 function startHomeClock() {
   const timeEl = document.getElementById("homeClockTime");
   const dateEl = document.getElementById("homeClockDate");
-  const hourHand = document.getElementById("clockHourHand");
-  const minuteHand = document.getElementById("clockMinuteHand");
-  const secondHand = document.getElementById("clockSecondHand");
   if (!timeEl || !dateEl) return;
 
   const updateClock = () => {
@@ -69,22 +44,6 @@ function startHomeClock() {
       timeZone: DASHBOARD_LOCATION.timezone,
     }).format(now);
 
-    const parts = new Intl.DateTimeFormat("en-US", {
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      hour12: false,
-      timeZone: DASHBOARD_LOCATION.timezone,
-    }).formatToParts(now);
-
-    const partValue = (type) => Number(parts.find((part) => part.type === type)?.value || 0);
-    const hours = partValue("hour");
-    const minutes = partValue("minute");
-    const seconds = partValue("second");
-
-    if (hourHand) hourHand.style.transform = `translateX(-50%) rotate(${(hours % 12) * 30 + minutes * 0.5}deg)`;
-    if (minuteHand) minuteHand.style.transform = `translateX(-50%) rotate(${minutes * 6 + seconds * 0.1}deg)`;
-    if (secondHand) secondHand.style.transform = `translateX(-50%) rotate(${seconds * 6}deg)`;
   };
 
   updateClock();
@@ -228,7 +187,7 @@ function updateSunPanel(sunrise, sunset) {
   const sunriseDate = sunrise ? new Date(sunrise) : null;
   const sunsetDate = sunset ? new Date(sunset) : null;
 
-  if (!sunriseDate || !sunsetDate || Number.isNaN(sunriseDate) || Number.isNaN(sunsetDate)) {
+  if (!sunriseDate || !sunsetDate || Number.isNaN(sunriseDate.getTime()) || Number.isNaN(sunsetDate.getTime())) {
     leftEl.textContent = "--";
     return;
   }
@@ -293,15 +252,22 @@ async function loadHomeWeather() {
       timezone: DASHBOARD_LOCATION.timezone,
     });
 
-    const [forecastResponse, airResponse] = await Promise.all([
-      fetch(`https://api.open-meteo.com/v1/forecast?${forecastParams.toString()}`, { cache: "no-store" }),
-      fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?${airParams.toString()}`, { cache: "no-store" }),
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 8000);
+    const [forecastResult, airResult] = await Promise.allSettled([
+      fetch(`https://api.open-meteo.com/v1/forecast?${forecastParams.toString()}`, { signal: controller.signal }),
+      fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?${airParams.toString()}`, { signal: controller.signal }),
     ]);
+    window.clearTimeout(timeoutId);
 
-    if (!forecastResponse.ok) throw new Error("Weather request failed");
+    if (forecastResult.status !== "fulfilled" || !forecastResult.value.ok) {
+      throw new Error("Weather request failed");
+    }
 
-    const forecastData = await forecastResponse.json();
-    const airData = airResponse.ok ? await airResponse.json() : {};
+    const forecastData = await forecastResult.value.json();
+    const airData = airResult.status === "fulfilled" && airResult.value.ok
+      ? await airResult.value.json()
+      : {};
     const current = forecastData.current || {};
     const hourly = forecastData.hourly || {};
     const daily = forecastData.daily || {};
@@ -382,10 +348,14 @@ function updateTodayPanel() {
   const weekEl = document.getElementById("homeWeekNumber");
   const weekendEl = document.getElementById("homeWeekendCountdown");
 
-  const start = new Date(localDate.getFullYear(), 0, 0);
-  const dayOfYear = Math.floor((localDate - start) / 86400000);
-  const weekNumber = Math.ceil((((localDate - new Date(localDate.getFullYear(), 0, 1)) / 86400000) + new Date(localDate.getFullYear(), 0, 1).getDay() + 1) / 7);
-  const daysUntilSaturday = (6 - localDate.getDay() + 7) % 7;
+  const calendarMetrics = window.SiteDateUtils?.getCalendarMetrics(
+    localDate.getFullYear(),
+    localDate.getMonth(),
+    localDate.getDate()
+  );
+  const dayOfYear = calendarMetrics?.dayOfYear ?? "--";
+  const weekNumber = calendarMetrics?.weekNumber ?? "--";
+  const daysUntilSaturday = calendarMetrics?.daysUntilSaturday ?? 0;
 
   if (weekdayEl) {
     weekdayEl.textContent = new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone: DASHBOARD_LOCATION.timezone }).format(now);
@@ -595,69 +565,22 @@ function initializeScrollHeader() {
   updateHeader();
 }
 
-function initializePanelTilt() {
-  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const finePointer = window.matchMedia("(pointer: fine)");
+let pyroFeaturesInitialized = false;
 
-  if (prefersReducedMotion.matches || !finePointer.matches) return;
+function initializePyroFeatures() {
+  if (pyroFeaturesInitialized) return;
+  pyroFeaturesInitialized = true;
 
-  const panels = document.querySelectorAll("main .surface");
-  panels.forEach((panel) => {
-    let frameId = 0;
-    let targetTiltX = 0;
-    let targetTiltY = 0;
-    let targetLiftZ = 0;
-    let currentTiltX = 0;
-    let currentTiltY = 0;
-    let currentLiftZ = 0;
+  if (typeof initializePyroSimulator === "function") initializePyroSimulator();
+  if (typeof initializePyroTeamSync === "function") initializePyroTeamSync();
+  if (typeof initializePyroGateWorkflow === "function") initializePyroGateWorkflow();
+}
 
-    const render = () => {
-      const easing = panel.classList.contains("is-pointer-active") ? 0.12 : 0.08;
-      currentTiltX += (targetTiltX - currentTiltX) * easing;
-      currentTiltY += (targetTiltY - currentTiltY) * easing;
-      currentLiftZ += (targetLiftZ - currentLiftZ) * easing;
+window.initializePyroFeatures = initializePyroFeatures;
 
-      panel.style.setProperty("--tilt-x", `${currentTiltX.toFixed(2)}deg`);
-      panel.style.setProperty("--tilt-y", `${currentTiltY.toFixed(2)}deg`);
-      panel.style.setProperty("--lift-z", `${currentLiftZ.toFixed(2)}px`);
-
-      if (Math.abs(targetTiltX - currentTiltX) < 0.01 &&
-          Math.abs(targetTiltY - currentTiltY) < 0.01 &&
-          Math.abs(targetLiftZ - currentLiftZ) < 0.01) {
-        frameId = 0;
-        return;
-      }
-
-      frameId = requestAnimationFrame(render);
-    };
-
-    const updateTargets = (event) => {
-      const rect = panel.getBoundingClientRect();
-      const px = (event.clientX - rect.left) / rect.width;
-      const py = (event.clientY - rect.top) / rect.height;
-      const centeredX = (Math.min(1, Math.max(0, px)) - 0.5) * 2;
-      const centeredY = (Math.min(1, Math.max(0, py)) - 0.5) * 2;
-
-      targetTiltY = centeredX * 1.05;
-      targetTiltX = centeredY * -1.05;
-      targetLiftZ = 1.6 - Math.min(1, Math.hypot(centeredX, centeredY)) * 0.55;
-
-      if (!frameId) frameId = requestAnimationFrame(render);
-    };
-
-    panel.addEventListener("pointerenter", (event) => {
-      panel.classList.add("is-pointer-active");
-      updateTargets(event);
-    });
-
-    panel.addEventListener("pointermove", updateTargets);
-
-    panel.addEventListener("pointerleave", () => {
-      panel.classList.remove("is-pointer-active");
-      targetTiltX = 0;
-      targetTiltY = 0;
-      targetLiftZ = 0;
-      if (!frameId) frameId = requestAnimationFrame(render);
-    });
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker.register("./service-worker.js").catch(() => {
+    // The dashboard remains fully functional when offline support is unavailable.
   });
 }

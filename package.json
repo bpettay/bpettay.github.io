@@ -1,0 +1,7 @@
+{
+  "name": "bpettay-engineering-dashboard",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  }
+}

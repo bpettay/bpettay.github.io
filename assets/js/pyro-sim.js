@@ -57,6 +57,7 @@ function initializePyroSimulator() {
       };
     })
   );
+  const channelButtons = new Map();
 
   let armed = false;
   let authorizedOperator = window.pyroOperatorSession || null;
@@ -80,8 +81,8 @@ function initializePyroSimulator() {
       loginAt: operator.loginAt || new Date().toISOString(),
     };
     window.pyroOperatorSession = authorizedOperator;
-    window.dispatchEvent(new CustomEvent("pyro-operator-session", { detail: authorizedOperator }));
     updateAuthDisplay();
+    window.dispatchEvent(new CustomEvent("pyro-operator-session", { detail: authorizedOperator }));
   }
 
   function cueLabel(channel, compact = false) {
@@ -100,7 +101,9 @@ function initializePyroSimulator() {
     });
     const operator = options.system ? null : activeOperator();
     const actor = operator ? `${operator.name} · ` : "";
-    item.innerHTML = `<span>${time}</span>${actor}${message}`;
+    const timestamp = document.createElement("span");
+    timestamp.textContent = time;
+    item.append(timestamp, document.createTextNode(`${actor}${message}`));
     eventLog.prepend(item);
     while (eventLog.children.length > 8) {
       eventLog.removeChild(eventLog.lastElementChild);
@@ -169,8 +172,8 @@ function initializePyroSimulator() {
     if (title) title.textContent = purpose === "access" ? "Operator Login" : "Operator Keypad";
     if (authStatus) {
       authStatus.textContent = purpose === "access"
-        ? "Operator login required before opening Pyro. Use keypad or keyboard."
-        : "Select operator and enter PIN. Use keypad or keyboard.";
+        ? "Local simulation only. Enter the selected operator's demo PIN."
+        : "Local simulation only. Select an operator and enter a demo PIN.";
     }
     updateAuthDisplay();
     if (typeof authDialog?.showModal === "function") {
@@ -202,13 +205,13 @@ function initializePyroSimulator() {
   function appendPinDigit(digit) {
     if (!/^\d$/.test(digit) || pendingPin.length >= 6) return;
     pendingPin += digit;
-    if (authStatus) authStatus.textContent = "Enter operator PIN.";
+    if (authStatus) authStatus.textContent = "Enter demo PIN.";
     updateAuthDisplay();
   }
 
   function backspacePin() {
     pendingPin = pendingPin.slice(0, -1);
-    if (authStatus) authStatus.textContent = pendingPin ? "Enter operator PIN." : "PIN cleared.";
+    if (authStatus) authStatus.textContent = pendingPin ? "Enter demo PIN." : "PIN cleared.";
     updateAuthDisplay();
   }
 
@@ -332,27 +335,59 @@ function initializePyroSimulator() {
   function renderChannels() {
     if (!channelGrid) return;
     channelGrid.classList.add("zone-cue-bank");
-    channelGrid.innerHTML = "";
-    zoneLabels.forEach((zone) => {
-      const zoneChannels = channels.filter((channel) => channel.zone === zone);
-      const zoneGroup = document.createElement("section");
-      zoneGroup.className = "cue-zone-group";
-      zoneGroup.innerHTML = `<h4 class="cue-zone-title">Zone ${zone}<span>10 cues</span></h4><div class="zone-channel-grid"></div>`;
-      const zoneGrid = zoneGroup.querySelector(".zone-channel-grid");
-      zoneChannels.forEach((channel) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = ["channel-button", channel.selected ? "selected" : "", channel.continuity ? "continuity-good" : "continuity-open", channel.used ? "channel-used" : ""].filter(Boolean).join(" ");
-        button.innerHTML = `
-          <span class="channel-lamp" aria-hidden="true"></span>
-          <span class="channel-number">${String(channel.cue).padStart(2, "0")}</span>
-          <span class="channel-zone-label">Zone ${channel.zone}</span>
-          <span class="channel-status">${channel.used ? "Used" : channel.continuity ? "Good" : "Open"}</span>
-        `;
-        button.addEventListener("click", () => selectChannelById(channel.id));
-        zoneGrid.appendChild(button);
+
+    if (!channelButtons.size) {
+      zoneLabels.forEach((zone) => {
+        const zoneGroup = document.createElement("section");
+        zoneGroup.className = "cue-zone-group";
+
+        const title = document.createElement("h4");
+        title.className = "cue-zone-title";
+        title.append(`Zone ${zone}`);
+        const count = document.createElement("span");
+        count.textContent = `${cuesPerZone} cues`;
+        title.appendChild(count);
+
+        const zoneGrid = document.createElement("div");
+        zoneGrid.className = "zone-channel-grid";
+        channels.filter((channel) => channel.zone === zone).forEach((channel) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.dataset.channelId = String(channel.id);
+
+          const lamp = document.createElement("span");
+          lamp.className = "channel-lamp";
+          lamp.setAttribute("aria-hidden", "true");
+          const number = document.createElement("span");
+          number.className = "channel-number";
+          number.textContent = String(channel.cue).padStart(2, "0");
+          const zoneLabel = document.createElement("span");
+          zoneLabel.className = "channel-zone-label";
+          zoneLabel.textContent = `Zone ${channel.zone}`;
+          const status = document.createElement("span");
+          status.className = "channel-status";
+          button.append(lamp, number, zoneLabel, status);
+          button.addEventListener("click", () => selectChannelById(channel.id));
+          zoneGrid.appendChild(button);
+          channelButtons.set(channel.id, button);
+        });
+
+        zoneGroup.append(title, zoneGrid);
+        channelGrid.appendChild(zoneGroup);
       });
-      channelGrid.appendChild(zoneGroup);
+    }
+
+    channels.forEach((channel) => {
+      const button = channelButtons.get(channel.id);
+      if (!button) return;
+      button.className = [
+        "channel-button",
+        channel.selected ? "selected" : "",
+        channel.continuity ? "continuity-good" : "continuity-open",
+        channel.used ? "channel-used" : "",
+      ].filter(Boolean).join(" ");
+      const status = button.querySelector(".channel-status");
+      if (status) status.textContent = channel.used ? "Used" : channel.continuity ? "Good" : "Open";
     });
   }
 
