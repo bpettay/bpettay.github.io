@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="./assets/css/pyro-auth.css" />
   <link rel="stylesheet" href="./assets/css/pyro-team.css" />
   <link rel="stylesheet" href="./assets/css/pyro-gates.css" />
+  <link rel="stylesheet" href="./assets/css/command-bar.css" />
 
   <link rel="icon" type="image/png" href="./Favicon.png" />
   <link rel="manifest" href="./manifest.json" />
@@ -27,7 +28,9 @@
   <script src="./assets/js/pyro-sim.js" defer></script>
   <script src="./assets/js/pyro-team.js" defer></script>
   <script src="./assets/js/pyro-gates.js" defer></script>
+  <script src="./assets/js/weather-window.js" defer></script>
   <script src="./assets/js/app.js" defer></script>
+  <script src="./assets/js/command-bar.js" defer></script>
 </head>
 
 <body>
@@ -35,6 +38,11 @@
     <div class="nav-left">
       <img src="./Favicon.png" alt="Brock Pettay monogram" class="logo" />
       <span class="site-name">Brock Pettay</span>
+      <button class="command-trigger" type="button" data-command-open aria-label="Open engineering command bar">
+        <span class="command-trigger-mark" aria-hidden="true"></span>
+        <span class="command-trigger-label">Command</span>
+        <kbd>Ctrl K</kbd>
+      </button>
     </div>
 
     <div class="nav-right">
@@ -164,6 +172,37 @@
             </div>
           </div>
         </div>
+
+        <section class="work-window-card" id="weatherWorkWindow" aria-labelledby="workWindowTitle">
+          <div class="work-window-head">
+            <div>
+              <p class="dashboard-label">Plan ahead</p>
+              <h3 id="workWindowTitle">Weather work-window finder</h3>
+            </div>
+            <div class="work-window-controls">
+              <label>Job profile
+                <select id="workWindowProfile">
+                  <option value="general">General outdoor</option>
+                  <option value="painting">Painting / coating</option>
+                  <option value="roof">Roof / ladder</option>
+                  <option value="precision">Precision setup</option>
+                </select>
+              </label>
+              <label>Minimum
+                <select id="workWindowDuration">
+                  <option value="2">2 hours</option>
+                  <option value="3">3 hours</option>
+                  <option value="4">4 hours</option>
+                  <option value="6">6 hours</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <p class="work-window-criteria" id="workWindowCriteria">Checking daylight, rain, wind, gusts, and temperature.</p>
+          <div class="work-window-results" id="workWindowResults" aria-live="polite">
+            <span class="forecast-loading">Finding workable forecast windows…</span>
+          </div>
+        </section>
 
         <p class="weather-source">New Philadelphia, Ohio · Forecast data by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></p>
       </article>
@@ -460,6 +499,22 @@
         <button type="button" data-auth-key="0">0</button>
         <button type="button" id="authSubmitBtn">ENT</button>
       </div>
+    </div>
+  </dialog>
+
+  <dialog class="command-dialog" id="engineeringCommandBar" aria-labelledby="commandBarTitle">
+    <div class="command-shell">
+      <div class="command-input-row">
+        <span class="command-search-mark" aria-hidden="true"></span>
+        <label class="sr-only" for="commandInput" id="commandBarTitle">Engineering command bar</label>
+        <input id="commandInput" type="search" autocomplete="off" spellcheck="false" placeholder="Navigate, run a tool, or type 10 in to mm" />
+        <kbd>Esc</kbd>
+      </div>
+      <div class="command-results" id="commandResults" role="listbox" aria-label="Available commands"></div>
+      <footer class="command-footer">
+        <span><kbd>↑</kbd><kbd>↓</kbd> move</span>
+        <span><kbd>Enter</kbd> run</span>
+      </footer>
     </div>
   </dialog>
 

@@ -655,6 +655,98 @@
 .weather-source a { color: inherit; }
 .weather-source a:hover { color: var(--ink); }
 
+.work-window-card {
+  display: grid;
+  gap: 0.8rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.work-window-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.work-window-head h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.06rem;
+  font-weight: 600;
+}
+
+.work-window-head .dashboard-label { margin-bottom: 0.18rem; }
+
+.work-window-controls {
+  display: grid;
+  grid-template-columns: minmax(155px, 1fr) minmax(110px, 0.62fr);
+  gap: 0.55rem;
+  min-width: min(100%, 330px);
+}
+
+.work-window-controls label {
+  display: grid;
+  gap: 0.22rem;
+  color: var(--ink-soft);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.work-window-controls select {
+  min-height: 38px;
+  padding: 0.48rem 0.62rem;
+  font-size: 0.78rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.work-window-criteria {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+}
+
+.work-window-results {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.62rem;
+  min-width: 0;
+}
+
+.work-window-result {
+  display: grid;
+  gap: 0.32rem;
+  min-width: 0;
+  padding: 0.72rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0c1219;
+}
+
+.work-window-result[data-best="true"] {
+  border-color: rgba(83, 190, 141, 0.38);
+  background: rgba(37, 103, 72, 0.12);
+}
+
+.work-window-result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--ink-soft);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.work-window-result-head strong { color: #84d3ad; font-size: 0.72rem; }
+.work-window-result h4 { margin: 0; color: var(--ink); font-size: 0.9rem; font-weight: 600; }
+.work-window-result p { margin: 0; color: var(--ink-soft); font-size: 0.7rem; line-height: 1.45; }
+.work-window-empty { grid-column: 1 / -1; margin: 0; padding: 0.8rem; border: 1px dashed var(--line); border-radius: 8px; color: var(--ink-soft); text-align: center; }
+
 .section-heading h2 {
   margin: 0;
   color: var(--ink);
@@ -763,6 +855,10 @@
   .weather-detail-grid {
     grid-template-columns: 1fr;
   }
+
+  .work-window-head { align-items: stretch; flex-direction: column; }
+  .work-window-controls { width: 100%; min-width: 0; }
+  .work-window-results { grid-template-columns: 1fr; }
 
   .home-weather-card .weather-mini-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

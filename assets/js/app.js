@@ -237,7 +237,7 @@ async function loadHomeWeather() {
       latitude: DASHBOARD_LOCATION.latitude,
       longitude: DASHBOARD_LOCATION.longitude,
       current: "temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,pressure_msl,visibility,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index",
-      hourly: "temperature_2m,precipitation_probability,weather_code",
+      hourly: "temperature_2m,apparent_temperature,precipitation_probability,weather_code,wind_speed_10m,wind_gusts_10m,is_day",
       daily: "temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset",
       temperature_unit: "fahrenheit",
       wind_speed_unit: "mph",
@@ -299,6 +299,9 @@ async function loadHomeWeather() {
 
     updateSunPanel(daily.sunrise?.[0], daily.sunset?.[0]);
     renderHourlyForecast(hourly, current.time);
+    if (typeof window.renderWeatherWorkWindows === "function") {
+      window.renderWeatherWorkWindows(hourly, current.time);
+    }
     setGoNoGo({
       condition,
       wind: current.wind_speed_10m,
@@ -326,6 +329,9 @@ async function loadHomeWeather() {
     updatedEl.textContent = "Update unavailable";
     iconEl.dataset.condition = "unknown";
     renderHourlyForecast({}, "");
+    if (typeof window.renderWeatherWorkWindows === "function") {
+      window.renderWeatherWorkWindows({}, "");
+    }
   }
 }
 
@@ -398,6 +404,7 @@ function initializeToolsSwitcher() {
 
   select.addEventListener("change", () => showTool(select.value));
   showTool(select.value);
+  window.siteTools = { showTool };
 }
 
 function initializeMiniCalculator() {
