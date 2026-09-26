@@ -411,6 +411,7 @@
       if (graphWindow.ymin >= graphWindow.ymax) graphWindow.ymax = graphWindow.ymin + 1;
       if (graphWindow.xscl <= 0) graphWindow.xscl = 1;
       if (graphWindow.yscl <= 0) graphWindow.yscl = 1;
+      graphWindow.xres = Math.max(1, Math.min(8, Math.round(Number(graphWindow.xres) || 1)));
     }
 
     function activeFunctions() {
@@ -475,7 +476,8 @@
         context.beginPath();
         let drawing = false;
         let previousY = null;
-        for (let pixelX = 0; pixelX <= canvas.width; pixelX += 1) {
+        const pixelStep = Math.max(1, Number(graphWindow.xres) || 1);
+        for (let pixelX = 0; pixelX <= canvas.width; pixelX += pixelStep) {
           const x = graphWindow.xmin + pixelX / canvas.width * (graphWindow.xmax - graphWindow.xmin);
           let y;
           try { y = Number(fn.compiled.evaluate(scopeFor(x))); } catch (error) { y = NaN; }
@@ -628,8 +630,9 @@
       else if (action === "graph") showView("graph");
       else if (action === "trace") { traceX = 0; showView("trace"); }
       else if (action === "table") showView("table");
-      else if (action === "zoom") zoomGraph();
-      else if (action === "mode") { state.angle = state.angle === "RADIAN" ? "DEGREE" : "RADIAN"; updateModeLabel(); saveState(); }
+      else if (action === "zoom") openZoomMenu();
+      else if (action === "mode") openModeMenu();
+      else if (action === "math") openMathMenu();
       else if (action === "second") { secondMode = !secondMode; calculator.classList.toggle("gc-second-active", secondMode); }
       else if (action === "delete") deleteAtCursor();
       else if (action === "clear") {
@@ -654,6 +657,24 @@
     calculator.addEventListener("click", (event) => {
       const button = event.target.closest("button");
       if (!button) return;
+
+      if (button.dataset.gcMenuInsert !== undefined) {
+        showView("home");
+        insertAtCursor(button.dataset.gcMenuInsert);
+        return;
+      }
+      if (button.dataset.gcMenuAction) {
+        handleMenuAction(button.dataset.gcMenuAction);
+        return;
+      }
+
+      if (secondMode && button.dataset.gcSecondInsert !== undefined) {
+        insertAtCursor(button.dataset.gcSecondInsert);
+        secondMode = false;
+        calculator.classList.remove("gc-second-active");
+        return;
+      }
+
       if (button.dataset.gcInsert !== undefined) insertAtCursor(button.dataset.gcInsert);
       else if (button.dataset.gcAction) handleAction(button.dataset.gcAction);
     });
