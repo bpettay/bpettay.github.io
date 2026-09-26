@@ -4,6 +4,10 @@ function initializeNavigation() {
   const pageButtons = document.querySelectorAll("[data-page-target]");
   const nav = document.querySelector(".nav");
   const navRight = document.querySelector(".nav-right");
+  const toolsMenu = document.querySelector(".nav-tools-menu");
+  const toolsTrigger = document.querySelector(".nav-tools-trigger");
+  const toolButtons = document.querySelectorAll("[data-tool-target]");
+  let closeNavFlyout = () => {};
 
   if (!tabs.length || !pages.length) return;
 
@@ -27,7 +31,8 @@ function initializeNavigation() {
     flyout.id = "primaryNavFlyout";
     flyout.setAttribute("aria-label", "Site navigation");
 
-    tabs.forEach((tab) => flyout.appendChild(tab));
+    const primaryItems = Array.from(navRight.children);
+    primaryItems.forEach((item) => flyout.appendChild(item));
     navRight.append(toggle, flyout);
 
     const setOpen = (open) => {
@@ -35,6 +40,7 @@ function initializeNavigation() {
       toggle.setAttribute("aria-expanded", String(open));
       toggle.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
     };
+    closeNavFlyout = () => setOpen(false);
 
     toggle.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -107,6 +113,11 @@ function initializeNavigation() {
       tab.classList.toggle("active", isActive);
       tab.setAttribute("aria-current", isActive ? "page" : "false");
     });
+    if (toolsTrigger) {
+      const isToolsPage = pageId === "tools";
+      toolsTrigger.classList.toggle("active", isToolsPage);
+      toolsTrigger.setAttribute("aria-current", isToolsPage ? "page" : "false");
+    }
 
     pages.forEach((page) => {
       const isActive = page.id === pageId;
@@ -117,6 +128,36 @@ function initializeNavigation() {
     if (updateUrl) syncUrl(pageId, replaceState);
     return pageId;
   }
+
+  const setToolsMenuOpen = (open) => {
+    if (!toolsMenu || !toolsTrigger) return;
+    toolsMenu.classList.toggle("open", open);
+    toolsTrigger.setAttribute("aria-expanded", String(open));
+  };
+
+  toolsTrigger?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setToolsMenuOpen(!toolsMenu.classList.contains("open"));
+  });
+
+  toolButtons.forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      await openPage("tools");
+      if (window.siteTools?.showTool) window.siteTools.showTool(button.dataset.toolTarget);
+      setToolsMenuOpen(false);
+      closeNavFlyout();
+    });
+  });
+
+  toolsMenu?.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      setToolsMenuOpen(false);
+      toolsTrigger?.focus();
+    }
+  });
+
+  document.addEventListener("click", () => setToolsMenuOpen(false));
 
   tabs.forEach((tab) => tab.addEventListener("click", () => openPage(tab.dataset.page)));
   pageButtons.forEach((button) => button.addEventListener("click", () => openPage(button.dataset.pageTarget)));
