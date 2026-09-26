@@ -65,7 +65,21 @@
       </button>
       <div class="nav-right">
         <button class="nav-link active" data-page="home" type="button">Home</button>
-        <button class="nav-link" data-page="tools" type="button">Tools</button>
+        <div class="nav-tools-menu">
+          <button class="nav-link nav-tools-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+            Tools
+          </button>
+          <div class="tools-nav-dropdown" role="menu" aria-label="Engineering tools">
+            <button class="tools-nav-item" type="button" role="menuitem" data-tool-target="converter">
+              <strong>Unit Converter</strong>
+              <span>Engineering unit conversions</span>
+            </button>
+            <button class="tools-nav-item" type="button" role="menuitem" data-tool-target="calculator">
+              <strong>Calculator</strong>
+              <span>Scientific graphing workspace</span>
+            </button>
+          </div>
+        </div>
         <button class="nav-link" data-page="pyro" type="button">Pyro</button>
       </div>
     </div>
@@ -247,21 +261,6 @@
     </section>
   </main>
   <main id="tools" class="page" hidden>
-    <section class="tool-switcher surface" aria-labelledby="toolSwitcherTitle">
-      <div>
-        <p class="tool-label">Toolbox</p>
-        <h2 id="toolSwitcherTitle">Choose a tool</h2>
-        <p id="toolSwitcherDescription">Convert between common engineering units.</p>
-      </div>
-      <div class="field-group tool-picker">
-        <label for="toolSelect">Active tool</label>
-        <select id="toolSelect">
-          <option value="converter">Unit Converter</option>
-          <option value="calculator">Calculator</option>
-        </select>
-      </div>
-    </section>
-
     <section class="tool-card compact-tool-card surface tool-panel" data-tool-panel="converter">
       <div class="tool-header">
         <div>
