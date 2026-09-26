@@ -543,3 +543,21 @@ textarea:focus { background: #090c0e; }
   }
   .surface { border-radius: 5px; }
 }
+
+/* Intentionally quiet AI-assistance disclosure at the end of each page. */
+.page::after {
+  content: "AI-assisted · Verify critical outputs independently.";
+  display: block;
+  width: 100%;
+  padding-top: 1.75rem;
+  color: var(--ink-soft);
+  font-size: 0.56rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0.12;
+  pointer-events: none;
+  user-select: none;
+}
