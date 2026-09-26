@@ -384,7 +384,7 @@ function initializeToolsSwitcher() {
   const select = document.getElementById("toolSelect");
   const panels = document.querySelectorAll("[data-tool-panel]");
   const description = document.getElementById("toolSwitcherDescription");
-  if (!select || !panels.length) return;
+  if (!panels.length) return;
 
   const descriptions = {
     converter: "Convert between common engineering units.",
@@ -395,15 +395,15 @@ function initializeToolsSwitcher() {
     const available = Array.from(panels).some((panel) => panel.dataset.toolPanel === tool);
     const activeTool = available ? tool : "converter";
 
-    select.value = activeTool;
+    if (select) select.value = activeTool;
     panels.forEach((panel) => {
       panel.hidden = panel.dataset.toolPanel !== activeTool;
     });
     if (description) description.textContent = descriptions[activeTool];
   };
 
-  select.addEventListener("change", () => showTool(select.value));
-  showTool(select.value);
+  if (select) select.addEventListener("change", () => showTool(select.value));
+  showTool(select?.value || "converter");
   window.siteTools = { showTool };
 }
 
