@@ -33,6 +33,8 @@
     const historyEl = document.getElementById("gcHistory");
     const functionList = document.getElementById("gcFunctionList");
     const windowGrid = document.getElementById("gcWindowGrid");
+    const menuHeading = document.getElementById("gcMenuHeading");
+    const menuList = document.getElementById("gcMenuList");
     const tableHead = document.getElementById("gcTableHead");
     const tableBody = document.getElementById("gcTableBody");
     const titleEl = document.getElementById("gcScreenTitle");
@@ -165,7 +167,7 @@
       canvas.hidden = view !== "graph" && view !== "trace";
       traceReadout.hidden = !traceActive;
       views.forEach((element) => { element.hidden = element.dataset.gcView !== view; });
-      const titles = { home: "HOME", functions: "Y=", window: "WINDOW", graph: "GRAPH", trace: "TRACE", table: "TABLE" };
+      const titles = { home: "HOME", functions: "Y=", window: "WINDOW", menu: "MENU", graph: "GRAPH", trace: "TRACE", table: "TABLE" };
       titleEl.textContent = titles[view] || "HOME";
       if (view === "graph" || view === "trace") drawGraph();
       if (view === "table") renderTable();
@@ -177,6 +179,128 @@
       } else if (view === "window") {
         activeInput = windowGrid.querySelector('input[type="number"]') || expressionInput;
       }
+    }
+
+    function renderMenu(title, items) {
+      if (!menuHeading || !menuList) return;
+      menuHeading.textContent = title;
+      menuList.replaceChildren();
+      items.forEach((item, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "gc-menu-item";
+        button.innerHTML = `<span>${index < 9 ? index + 1 : 0}:</span><strong>${item.label}</strong>`;
+        if (item.insert !== undefined) button.dataset.gcMenuInsert = item.insert;
+        if (item.action) button.dataset.gcMenuAction = item.action;
+        menuList.appendChild(button);
+      });
+      showView("menu");
+      titleEl.textContent = title;
+    }
+
+    function openMathMenu() {
+      renderMenu("MATH", [
+        { label: "abs(", insert: "abs(" },
+        { label: "round(", insert: "round(" },
+        { label: "min(", insert: "min(" },
+        { label: "max(", insert: "max(" },
+        { label: "gcd(", insert: "gcd(" },
+        { label: "lcm(", insert: "lcm(" },
+        { label: "nCr", insert: "combinations(" },
+        { label: "nPr", insert: "permutations(" },
+        { label: "factorial", insert: "!" },
+        { label: "π", insert: "pi" },
+      ]);
+    }
+
+    function openModeMenu() {
+      renderMenu("MODE", [
+        { label: `Radian${state.angle === "RADIAN" ? "  ✓" : ""}`, action: "mode-radian" },
+        { label: `Degree${state.angle === "DEGREE" ? "  ✓" : ""}`, action: "mode-degree" },
+      ]);
+    }
+
+    function zoomAroundCenter(factor) {
+      const graphWindow = state.graphWindow;
+      const centerX = (graphWindow.xmin + graphWindow.xmax) / 2;
+      const centerY = (graphWindow.ymin + graphWindow.ymax) / 2;
+      const halfX = (graphWindow.xmax - graphWindow.xmin) * factor / 2;
+      const halfY = (graphWindow.ymax - graphWindow.ymin) * factor / 2;
+      Object.assign(graphWindow, {
+        xmin: centerX - halfX,
+        xmax: centerX + halfX,
+        ymin: centerY - halfY,
+        ymax: centerY + halfY,
+      });
+    }
+
+    function zoomFit() {
+      const functions = activeFunctions();
+      if (!functions.length) return;
+      const graphWindow = state.graphWindow;
+      let minY = Infinity;
+      let maxY = -Infinity;
+      const samples = 320;
+      for (let index = 0; index <= samples; index += 1) {
+        const x = graphWindow.xmin + index / samples * (graphWindow.xmax - graphWindow.xmin);
+        functions.forEach((fn) => {
+          try {
+            const y = Number(fn.compiled.evaluate(scopeFor(x)));
+            if (Number.isFinite(y)) {
+              minY = Math.min(minY, y);
+              maxY = Math.max(maxY, y);
+            }
+          } catch (error) {
+            // Undefined graph points are ignored.
+          }
+        });
+      }
+      if (!Number.isFinite(minY) || !Number.isFinite(maxY)) return;
+      const span = Math.max(1e-6, maxY - minY);
+      const padding = span * 0.1;
+      graphWindow.ymin = minY - padding;
+      graphWindow.ymax = maxY + padding;
+    }
+
+    function applyZoom(action) {
+      const graphWindow = state.graphWindow;
+      if (action === "zoom-standard") Object.assign(graphWindow, DEFAULT_WINDOW);
+      else if (action === "zoom-in") zoomAroundCenter(0.5);
+      else if (action === "zoom-out") zoomAroundCenter(2);
+      else if (action === "zoom-decimal") Object.assign(graphWindow, { xmin: -4.7, xmax: 4.7, xscl: 1, ymin: -3.1, ymax: 3.1, yscl: 1, xres: 1 });
+      else if (action === "zoom-square") {
+        const centerY = (graphWindow.ymin + graphWindow.ymax) / 2;
+        const xSpan = graphWindow.xmax - graphWindow.xmin;
+        const ySpan = xSpan * canvas.height / canvas.width;
+        graphWindow.ymin = centerY - ySpan / 2;
+        graphWindow.ymax = centerY + ySpan / 2;
+      } else if (action === "zoom-fit") zoomFit();
+      renderWindowEditor();
+      saveState();
+      showView("graph");
+    }
+
+    function openZoomMenu() {
+      renderMenu("ZOOM", [
+        { label: "ZBox", action: "zoom-in" },
+        { label: "Zoom In", action: "zoom-in" },
+        { label: "Zoom Out", action: "zoom-out" },
+        { label: "ZDecimal", action: "zoom-decimal" },
+        { label: "ZSquare", action: "zoom-square" },
+        { label: "ZStandard", action: "zoom-standard" },
+        { label: "ZoomFit", action: "zoom-fit" },
+      ]);
+    }
+
+    function handleMenuAction(action) {
+      if (action === "mode-radian" || action === "mode-degree") {
+        state.angle = action === "mode-degree" ? "DEGREE" : "RADIAN";
+        updateModeLabel();
+        saveState();
+        openModeMenu();
+        return;
+      }
+      if (action.startsWith("zoom-")) applyZoom(action);
     }
 
     function renderHistory() {
