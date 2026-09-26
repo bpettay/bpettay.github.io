@@ -1,4 +1,4 @@
-const CACHE_NAME = "brock-tools-shell-v2";
+const CACHE_NAME = "brock-tools-shell-v3";
 const SHELL_ASSETS = [
   "./",
   "./index.html",
@@ -11,6 +11,7 @@ const SHELL_ASSETS = [
   "./assets/css/pyro-team.css",
   "./assets/css/pyro-gates.css",
   "./assets/css/command-bar.css",
+  "./assets/css/refinement.css",
   "./assets/js/date-utils.js",
   "./assets/js/converter-data.js",
   "./assets/js/navigation.js",
