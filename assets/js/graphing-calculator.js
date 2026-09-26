@@ -111,7 +111,7 @@
         .replace(/π/g, "pi")
         .replace(/×/g, "*")
         .replace(/÷/g, "/")
-        .replace(/√\\\(/g, "sqrt(")
+        .replace(/√\(/g, "sqrt(")
         .replace(/−/g, "-");
     }
 
@@ -445,6 +445,10 @@
       if (currentView === "graph" || currentView === "trace" || currentView === "table") showView("home");
       if (!(activeInput instanceof HTMLInputElement) || activeInput.closest("[hidden]")) activeInput = expressionInput;
 
+      if (activeInput === expressionInput && !activeInput.value && /^[+*/^]$/.test(value)) {
+        activeInput.value = "Ans";
+      }
+
       if (activeInput.type === "number") {
         if (!/^[0-9.\-]$/.test(value)) return;
         activeInput.value += value;
@@ -458,6 +462,7 @@
       activeInput.setRangeText(value, start, end, "end");
       activeInput.dispatchEvent(new Event("input", { bubbles: true }));
       activeInput.focus();
+      if (activeInput === expressionInput) renderCurrentEntry();
     }
 
     function deleteAtCursor() {
@@ -475,12 +480,14 @@
       else if (start > 0) activeInput.setRangeText("", start - 1, start, "end");
       activeInput.dispatchEvent(new Event("input", { bubbles: true }));
       activeInput.focus();
+      if (activeInput === expressionInput) renderCurrentEntry();
     }
 
     function recallHistory(direction) {
       if (currentView !== "home" || !state.history.length) return;
       historyCursor = Math.max(-1, Math.min(state.history.length - 1, historyCursor + direction));
       expressionInput.value = historyCursor < 0 ? "" : state.history[state.history.length - 1 - historyCursor].expression;
+      renderCurrentEntry();
     }
 
     function handleAction(action) {
@@ -495,7 +502,7 @@
       else if (action === "delete") deleteAtCursor();
       else if (action === "clear") {
         if (currentView !== "home") showView("home");
-        else if (expressionInput.value) expressionInput.value = "";
+        else if (expressionInput.value) { expressionInput.value = ""; renderCurrentEntry(); }
         else { state.history = []; renderHistory(); saveState(); }
       }
       else if (action === "enter") {
@@ -518,15 +525,21 @@
       if (button.dataset.gcInsert !== undefined) insertAtCursor(button.dataset.gcInsert);
       else if (button.dataset.gcAction) handleAction(button.dataset.gcAction);
     });
+    expressionInput.addEventListener("input", renderCurrentEntry);
     expressionInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") { event.preventDefault(); evaluateHome(); }
       else if (event.key === "ArrowUp") { event.preventDefault(); recallHistory(1); }
       else if (event.key === "ArrowDown") { event.preventDefault(); recallHistory(-1); }
     });
+    const homeView = calculator.querySelector(".gc-home-view");
+    if (homeView) {
+      homeView.addEventListener("pointerdown", () => window.setTimeout(() => expressionInput.focus(), 0));
+    }
 
     renderFunctionEditor();
     renderWindowEditor();
     renderHistory();
+    renderCurrentEntry();
     updateModeLabel();
     showView("home");
     root.graphingCalculator = { showView, drawGraph, getState: () => ({ ...state }) };
