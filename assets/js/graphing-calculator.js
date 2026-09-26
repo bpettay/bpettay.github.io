@@ -1,7 +1,8 @@
 (function graphingCalculatorModule(root) {
-  const STORAGE_KEY = "brock.graphingCalculator.v1";
-  const FUNCTION_COLORS = ["#72b7ff", "#f0b55a", "#77c994", "#d48ac7", "#e5796e", "#9c91df"];
-  const DEFAULT_WINDOW = { xmin: -10, xmax: 10, xscl: 1, ymin: -10, ymax: 10, yscl: 1 };
+  const STORAGE_KEY = "engineering.graphingCalculator.v2";
+  const LEGACY_STORAGE_KEY = "brock.graphingCalculator.v1";
+  const FUNCTION_COLORS = ["#72b7ff", "#f0b55a", "#77c994", "#d48ac7", "#e5796e", "#9c91df", "#70c7c1", "#d59b6a", "#9ab86d", "#b98ac8"];
+  const DEFAULT_WINDOW = { xmin: -10, xmax: 10, xscl: 1, ymin: -10, ymax: 10, yscl: 1, xres: 1 };
   let initialized = false;
 
   function formatNumber(value) {
@@ -17,12 +18,18 @@
   function initializeGraphingCalculator() {
     if (initialized) return;
     const calculator = document.getElementById("graphingCalculator");
-    if (!calculator || typeof root.math !== "object") return;
+    if (!calculator) return;
+    if (!root.math || typeof root.math.compile !== "function") {
+      window.setTimeout(initializeGraphingCalculator, 80);
+      return;
+    }
     initialized = true;
 
     const canvas = document.getElementById("gcGraphCanvas");
     const context = canvas.getContext("2d");
     const expressionInput = document.getElementById("gcExpressionInput");
+    const entryDisplay = document.getElementById("gcEntryDisplay");
+    const entryRow = document.getElementById("gcEntryRow");
     const historyEl = document.getElementById("gcHistory");
     const functionList = document.getElementById("gcFunctionList");
     const windowGrid = document.getElementById("gcWindowGrid");
@@ -35,8 +42,8 @@
 
     const defaults = {
       angle: "RADIAN",
-      functions: ["sin(x)", "", "", "", "", ""],
-      enabled: [true, true, true, true, true, true],
+      functions: ["sin(x)", "", "", "", "", "", "", "", "", ""],
+      enabled: [true, true, true, true, true, true, true, true, true, true],
       graphWindow: { ...DEFAULT_WINDOW },
       history: [],
       ans: 0,
@@ -50,23 +57,23 @@
     let secondMode = false;
 
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY));
       if (saved && typeof saved === "object") {
         state = {
           ...state,
           ...saved,
           graphWindow: { ...DEFAULT_WINDOW, ...(saved.graphWindow || {}) },
-          functions: Array.isArray(saved.functions) ? saved.functions.slice(0, 6) : defaults.functions,
-          enabled: Array.isArray(saved.enabled) ? saved.enabled.slice(0, 6) : defaults.enabled,
-          history: Array.isArray(saved.history) ? saved.history.slice(-6) : [],
+          functions: Array.isArray(saved.functions) ? saved.functions.slice(0, 10) : defaults.functions,
+          enabled: Array.isArray(saved.enabled) ? saved.enabled.slice(0, 10) : defaults.enabled,
+          history: Array.isArray(saved.history) ? saved.history.slice(-40) : [],
         };
       }
     } catch (error) {
       // Invalid local state is ignored and replaced on the next successful action.
     }
 
-    while (state.functions.length < 6) state.functions.push("");
-    while (state.enabled.length < 6) state.enabled.push(true);
+    while (state.functions.length < 10) state.functions.push("");
+    while (state.enabled.length < 10) state.enabled.push(true);
 
     function saveState() {
       try {
@@ -75,7 +82,7 @@
           functions: state.functions,
           enabled: state.enabled,
           graphWindow: state.graphWindow,
-          history: state.history.slice(-6),
+          history: state.history.slice(-40),
           ans: state.ans,
         }));
       } catch (error) {
