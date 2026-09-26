@@ -71,6 +71,98 @@ textarea:focus { background: #090c0e; }
 .logo { width: 63px; height: 63px; flex-basis: 63px; border-radius: 8px; }
 .site-name { font-size: 0.88rem; }
 .command-trigger { min-height: 32px; border-radius: 4px; background: transparent; }
+
+.nav-tools-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nav-tools-trigger {
+  gap: 0.42rem;
+}
+
+.nav-tools-trigger::after {
+  content: "";
+  width: 0.38rem;
+  height: 0.38rem;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: translateY(-0.12rem) rotate(45deg);
+  transition: transform 160ms ease;
+}
+
+.nav-tools-menu.open .nav-tools-trigger::after,
+.nav-tools-menu:focus-within .nav-tools-trigger::after {
+  transform: translateY(0.08rem) rotate(225deg);
+}
+
+.tools-nav-dropdown {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 0;
+  z-index: 320;
+  display: grid;
+  gap: 0.2rem;
+  width: 230px;
+  padding: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #050708;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .34);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease, visibility 140ms ease;
+}
+
+.nav-tools-menu.open .tools-nav-dropdown,
+.nav-tools-menu:focus-within .tools-nav-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  pointer-events: auto;
+}
+
+.tools-nav-item {
+  display: grid;
+  gap: 0.12rem;
+  width: 100%;
+  padding: 0.68rem 0.72rem;
+  border: 0;
+  border-radius: 3px;
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.tools-nav-item:hover,
+.tools-nav-item:focus-visible {
+  outline: none;
+  background: #101417;
+}
+
+.tools-nav-item strong {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.tools-nav-item span {
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+@media (hover: hover) and (min-width: 721px) {
+  .nav-tools-menu:hover .tools-nav-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+  }
+}
 .nav-menu-toggle { display: none; }
 
 .nav-flyout,
@@ -421,5 +513,36 @@ textarea:focus { background: #090c0e; }
   .nav-flyout.open { opacity: 1; visibility: visible; transform: none; pointer-events: auto; }
   .nav-flyout .nav-link,
   .nav.nav-compact .nav-flyout .nav-link { justify-content: flex-start; width: 100%; border-radius: 3px; }
+
+  .nav-tools-menu {
+    display: block;
+    width: 100%;
+  }
+
+  .tools-nav-dropdown {
+    position: static;
+    display: none;
+    width: 100%;
+    margin-top: 0.2rem;
+    padding: 0.2rem 0 0.1rem 0.55rem;
+    border: 0;
+    border-left: 1px solid var(--line);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  .nav-tools-menu.open .tools-nav-dropdown,
+  .nav-tools-menu:focus-within .tools-nav-dropdown {
+    display: grid;
+  }
+
+  .tools-nav-item {
+    padding: 0.58rem 0.65rem;
+  }
   .surface { border-radius: 5px; }
 }
