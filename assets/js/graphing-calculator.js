@@ -176,18 +176,16 @@
 
     function renderHistory() {
       historyEl.replaceChildren();
-      state.history.slice(-5).forEach((item) => {
-        const row = document.createElement("div");
-        row.className = "gc-history-item";
-        const expression = document.createElement("span");
+      state.history.slice(-20).forEach((item) => {
+        const expression = document.createElement("div");
         expression.className = "gc-history-expression";
         expression.textContent = item.expression;
-        const result = document.createElement("strong");
+        const result = document.createElement("div");
         result.className = `gc-history-result${item.error ? " gc-history-error" : ""}`;
         result.textContent = item.result;
-        row.append(expression, result);
-        historyEl.appendChild(row);
+        historyEl.append(expression, result);
       });
+      historyEl.scrollTop = historyEl.scrollHeight;
     }
 
     function evaluateHome() {
@@ -196,18 +194,20 @@
       try {
         const compiled = compileExpression(expression);
         const raw = compiled.evaluate(scopeFor(0));
-        const value = typeof raw === "number" ? raw : Number(raw);
-        const result = formatNumber(value);
-        if (result === "ERROR") throw new Error("Non-real result");
-        state.ans = value;
+        const result = formatResult(raw);
+        if (!result || result === "undefined" || result === "NaN") throw new Error("Invalid result");
+        if (typeof raw === "number") state.ans = raw;
         state.history.push({ expression, result });
       } catch (error) {
-        state.history.push({ expression, result: "ERROR", error: true });
+        const message = String(error && error.message ? error.message : "");
+        const errorLabel = /domain|complex|real number|undefined value/i.test(message) ? "ERR:DOMAIN" : "ERR:SYNTAX";
+        state.history.push({ expression, result: errorLabel, error: true });
       }
-      state.history = state.history.slice(-6);
+      state.history = state.history.slice(-40);
       expressionInput.value = "";
       historyCursor = -1;
       renderHistory();
+      renderCurrentEntry();
       saveState();
     }
 
