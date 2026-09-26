@@ -353,6 +353,10 @@
             <section class="gc-view gc-window-view" data-gc-view="window" hidden>
               <div class="gc-window-grid" id="gcWindowGrid"></div>
             </section>
+            <section class="gc-view gc-menu-view" data-gc-view="menu" hidden>
+              <div class="gc-menu-heading" id="gcMenuHeading">MENU</div>
+              <div class="gc-menu-list" id="gcMenuList"></div>
+            </section>
             <section class="gc-view gc-table-view" data-gc-view="table" hidden>
               <div class="gc-table-wrap"><table><thead id="gcTableHead"></thead><tbody id="gcTableBody"></tbody></table></div>
             </section>
@@ -372,29 +376,29 @@
         <div class="gc-keypad" id="gcKeypad" aria-label="Calculator keypad">
           <button type="button" class="gc-key gc-key-blue" data-gc-action="second"><small>2nd</small></button>
           <button type="button" class="gc-key" data-gc-action="mode"><small>MODE</small></button>
-          <button type="button" class="gc-key" data-gc-insert="pi"><small>π</small></button>
+          <button type="button" class="gc-key" data-gc-action="math"><small>MATH</small></button>
           <button type="button" class="gc-key" data-gc-action="delete"><small>DEL</small></button>
           <button type="button" class="gc-key gc-key-nav" data-gc-action="up" aria-label="Move up">▲</button>
 
           <button type="button" class="gc-key gc-key-green" data-gc-insert="x"><small>X,T,θ,n</small></button>
           <button type="button" class="gc-key" data-gc-insert="sqrt("><small>√</small></button>
-          <button type="button" class="gc-key" data-gc-insert="sin("><small>sin</small></button>
-          <button type="button" class="gc-key" data-gc-insert="cos("><small>cos</small></button>
+          <button type="button" class="gc-key" data-gc-insert="sin(" data-gc-second-insert="asin("><strong>sin⁻¹</strong><small>sin</small></button>
+          <button type="button" class="gc-key" data-gc-insert="cos(" data-gc-second-insert="acos("><strong>cos⁻¹</strong><small>cos</small></button>
           <button type="button" class="gc-key gc-key-nav" data-gc-action="left" aria-label="Move left">◀</button>
 
           <button type="button" class="gc-key" data-gc-insert="^2"><small>x²</small></button>
-          <button type="button" class="gc-key" data-gc-insert="^"><small>^</small></button>
-          <button type="button" class="gc-key" data-gc-insert="tan("><small>tan</small></button>
+          <button type="button" class="gc-key" data-gc-insert="^" data-gc-second-insert="pi"><strong>π</strong><small>^</small></button>
+          <button type="button" class="gc-key" data-gc-insert="tan(" data-gc-second-insert="atan("><strong>tan⁻¹</strong><small>tan</small></button>
           <button type="button" class="gc-key" data-gc-insert="("><small>(</small></button>
           <button type="button" class="gc-key gc-key-nav" data-gc-action="right" aria-label="Move right">▶</button>
 
-          <button type="button" class="gc-key" data-gc-insert="log10("><small>LOG</small></button>
+          <button type="button" class="gc-key" data-gc-insert="log10(" data-gc-second-insert="10^("><strong>10ˣ</strong><small>LOG</small></button>
           <button type="button" class="gc-key gc-key-number" data-gc-insert="7">7</button>
           <button type="button" class="gc-key gc-key-number" data-gc-insert="8">8</button>
           <button type="button" class="gc-key gc-key-number" data-gc-insert="9">9</button>
           <button type="button" class="gc-key gc-key-nav" data-gc-action="down" aria-label="Move down">▼</button>
 
-          <button type="button" class="gc-key" data-gc-insert="ln("><small>LN</small></button>
+          <button type="button" class="gc-key" data-gc-insert="ln(" data-gc-second-insert="e^("><strong>eˣ</strong><small>LN</small></button>
           <button type="button" class="gc-key gc-key-number" data-gc-insert="4">4</button>
           <button type="button" class="gc-key gc-key-number" data-gc-insert="5">5</button>
           <button type="button" class="gc-key gc-key-number" data-gc-insert="6">6</button>
@@ -412,7 +416,7 @@
           <button type="button" class="gc-key gc-key-operator" data-gc-insert="/">÷</button>
           <button type="button" class="gc-key gc-key-operator" data-gc-insert="+">+</button>
 
-          <button type="button" class="gc-key" data-gc-insert=","><small>,</small></button>
+          <button type="button" class="gc-key" data-gc-insert="→"><small>STO→</small></button>
           <button type="button" class="gc-key" data-gc-insert=")"><small>)</small></button>
           <button type="button" class="gc-key" data-gc-action="clear"><small>CLEAR</small></button>
           <button type="button" class="gc-key gc-key-enter" data-gc-action="enter"><small>ENTER</small></button>
