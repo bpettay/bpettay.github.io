@@ -1,9 +1,13 @@
-const CACHE_NAME = "engineering-dashboard-shell-v8";
+const CACHE_NAME = "engineering-dashboard-shell-v9";
 const SHELL_ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./Favicon.png",
+  "./assets/branding/mark-01.png",
+  "./assets/branding/mark-02.png",
+  "./assets/branding/mark-03.png",
+  "./assets/branding/mark-04.png",
+  "./assets/branding/mark-05.png",
   "./assets/css/style.css?v=20260926-1",
   "./assets/css/home.css?v=20260926-1",
   "./assets/css/tools.css?v=20260926-1",
@@ -13,7 +17,6 @@ const SHELL_ASSETS = [
   "./assets/css/command-bar.css?v=20260926-1",
   "./assets/css/refinement.css?v=20260926-1",
   "./assets/css/graphing-calculator.css?v=20260926-1",
-  "./assets/js/logo-assets.js?v=20260926-2",
   "./assets/js/date-utils.js?v=20260926-1",
   "./assets/js/converter-data.js?v=20260926-1",
   "./assets/js/navigation.js?v=20260926-1",

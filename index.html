@@ -19,24 +19,24 @@
   <link rel="stylesheet" href="./assets/css/refinement.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/graphing-calculator.css?v=20260926-1" />
 
-  <link rel="icon" type="image/webp" href="./Favicon.png" />
-  <script src="./assets/js/logo-assets.js?v=20260926-2"></script>
+  <link rel="icon" type="image/png" href="./assets/branding/mark-01.png" />
   <script>
     (() => {
-      const favicons = Array.isArray(window.LOGO_ASSETS) && window.LOGO_ASSETS.length
-        ? window.LOGO_ASSETS
-        : ["./Favicon.png"];
-      let faviconIndex = Math.floor(Date.now() / 30000) % favicons.length;
+      const logos = ["./assets/branding/mark-01.png","./assets/branding/mark-02.png","./assets/branding/mark-03.png","./assets/branding/mark-04.png","./assets/branding/mark-05.png"];
+      let faviconIndex = Math.floor(Date.now() / 30000) % logos.length;
       const icon = document.querySelector('link[rel="icon"]');
+
       const rotateFavicon = () => {
-        icon.href = favicons[faviconIndex];
-        faviconIndex = (faviconIndex + 1) % favicons.length;
+        icon.href = logos[faviconIndex];
+        faviconIndex = (faviconIndex + 1) % logos.length;
       };
+
       rotateFavicon();
       setInterval(rotateFavicon, 30000);
+
       window.addEventListener('DOMContentLoaded', () => {
         const siteLogo = document.querySelector('.nav-left .logo');
-        if (siteLogo) siteLogo.src = favicons[Math.floor(Math.random() * favicons.length)];
+        if (siteLogo) siteLogo.src = logos[Math.floor(Math.random() * logos.length)];
       });
     })();
   </script>
@@ -60,7 +60,7 @@
 <body>
   <nav class="nav" aria-label="Primary">
     <div class="nav-left">
-      <img src="./Favicon.png" alt="Engineering monogram" class="logo" />
+      <img src="./assets/branding/mark-01.png" alt="Engineering monogram" class="logo" />
       <button class="command-trigger" type="button" data-command-open aria-label="Open engineering command bar">
         <span class="command-trigger-mark" aria-hidden="true"></span>
         <span class="command-trigger-label">Command</span>

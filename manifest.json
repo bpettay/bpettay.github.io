@@ -1,6 +1,6 @@
 {
-  "name": "Brock Pettay - Engineering Tools",
-  "short_name": "Brock Tools",
+  "name": "Engineering Dashboard",
+  "short_name": "Engineering",
   "description": "Personal engineering dashboard, tools, and interface simulations",
   "start_url": "./",
   "scope": "./",
@@ -10,8 +10,8 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "Favicon.png",
-      "sizes": "512x512",
+      "src": "assets/branding/mark-01.png",
+      "sizes": "1254x1254",
       "type": "image/png"
     }
   ]
