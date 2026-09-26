@@ -118,7 +118,14 @@
       titleEl.textContent = titles[view] || "HOME";
       if (view === "graph" || view === "trace") drawGraph();
       if (view === "table") renderTable();
-      if (view === "home") window.setTimeout(() => expressionInput.focus(), 0);
+      if (view === "home") {
+        activeInput = expressionInput;
+        window.setTimeout(() => expressionInput.focus(), 0);
+      } else if (view === "functions") {
+        activeInput = functionList.querySelector('input[type="text"]') || expressionInput;
+      } else if (view === "window") {
+        activeInput = windowGrid.querySelector('input[type="number"]') || expressionInput;
+      }
     }
 
     function renderHistory() {
@@ -388,7 +395,17 @@
     }
 
     function insertAtCursor(value) {
-      if (!(activeInput instanceof HTMLInputElement) || activeInput.type === "number") activeInput = expressionInput;
+      if (currentView === "graph" || currentView === "trace" || currentView === "table") showView("home");
+      if (!(activeInput instanceof HTMLInputElement) || activeInput.closest("[hidden]")) activeInput = expressionInput;
+
+      if (activeInput.type === "number") {
+        if (!/^[0-9.\-]$/.test(value)) return;
+        activeInput.value += value;
+        activeInput.dispatchEvent(new Event("change", { bubbles: true }));
+        activeInput.focus();
+        return;
+      }
+
       const start = activeInput.selectionStart ?? activeInput.value.length;
       const end = activeInput.selectionEnd ?? start;
       activeInput.setRangeText(value, start, end, "end");
@@ -397,7 +414,14 @@
     }
 
     function deleteAtCursor() {
-      if (!(activeInput instanceof HTMLInputElement) || activeInput.type === "number") activeInput = expressionInput;
+      if (currentView === "graph" || currentView === "trace" || currentView === "table") showView("home");
+      if (!(activeInput instanceof HTMLInputElement) || activeInput.closest("[hidden]")) activeInput = expressionInput;
+      if (activeInput.type === "number") {
+        activeInput.value = activeInput.value.slice(0, -1);
+        activeInput.dispatchEvent(new Event("change", { bubbles: true }));
+        activeInput.focus();
+        return;
+      }
       const start = activeInput.selectionStart ?? activeInput.value.length;
       const end = activeInput.selectionEnd ?? start;
       if (start !== end) activeInput.setRangeText("", start, end, "end");
