@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="./assets/css/pyro-gates.css" />
   <link rel="stylesheet" href="./assets/css/command-bar.css" />
   <link rel="stylesheet" href="./assets/css/refinement.css" />
+  <link rel="stylesheet" href="./assets/css/graphing-calculator.css" />
 
   <link rel="icon" type="image/png" href="./Favicon.png" />
   <link rel="manifest" href="./manifest.json" />
@@ -30,6 +31,8 @@
   <script src="./assets/js/pyro-team.js" defer></script>
   <script src="./assets/js/pyro-gates.js" defer></script>
   <script src="./assets/js/weather-window.js" defer></script>
+  <script src="./assets/js/vendor/math.js" defer></script>
+  <script src="./assets/js/graphing-calculator.js" defer></script>
   <script src="./assets/js/app.js" defer></script>
   <script src="./assets/js/command-bar.js" defer></script>
 </head>
@@ -302,45 +305,94 @@
       <div class="tool-header">
         <div>
           <p class="tool-label">Calculator</p>
-          <h2>Scientific Calculator</h2>
-          <p class="tool-intro">A compact calculator for everyday arithmetic and common scientific functions.</p>
+          <h2>Graphing Calculator</h2>
+          <p class="tool-intro">A full scientific workspace with function plotting, trace, tables, and adjustable graph windows.</p>
         </div>
       </div>
 
-      <div class="mini-calc" aria-label="Scientific calculator">
-        <div class="calc-display">
-          <div id="calcExpression" class="calc-expression">0</div>
-          <div id="calcResult" class="calc-result">Ready</div>
+      <div class="graphing-calculator" id="graphingCalculator" aria-label="Graphing calculator">
+        <div class="gc-brand-row">
+          <div><strong>GRAPH-84</strong><span>Scientific graphing system</span></div>
+          <span class="gc-memory-mark">MATH ENGINE</span>
         </div>
-        <div class="calc-keypad">
-          <button type="button" data-calc-key="sin(">sin</button>
-          <button type="button" data-calc-key="cos(">cos</button>
-          <button type="button" data-calc-key="tan(">tan</button>
-          <button type="button" data-calc-key="sqrt(">√</button>
-          <button type="button" data-calc-key="log(">log</button>
-          <button type="button" data-calc-key="ln(">ln</button>
-          <button type="button" data-calc-key="pi">π</button>
-          <button type="button" data-calc-key="^">^</button>
-          <button type="button" data-calc-key="7">7</button>
-          <button type="button" data-calc-key="8">8</button>
-          <button type="button" data-calc-key="9">9</button>
-          <button type="button" data-calc-key="/">÷</button>
-          <button type="button" data-calc-key="4">4</button>
-          <button type="button" data-calc-key="5">5</button>
-          <button type="button" data-calc-key="6">6</button>
-          <button type="button" data-calc-key="*">×</button>
-          <button type="button" data-calc-key="1">1</button>
-          <button type="button" data-calc-key="2">2</button>
-          <button type="button" data-calc-key="3">3</button>
-          <button type="button" data-calc-key="-">−</button>
-          <button type="button" data-calc-key="0">0</button>
-          <button type="button" data-calc-key=".">.</button>
-          <button type="button" data-calc-key="(">(</button>
-          <button type="button" data-calc-key=")">)</button>
-          <button type="button" data-calc-action="clear" class="calc-key-danger">CLR</button>
-          <button type="button" data-calc-action="backspace">DEL</button>
-          <button type="button" data-calc-key="+">+</button>
-          <button type="button" data-calc-action="equals" class="calc-key-enter">ENTER</button>
+
+        <div class="gc-screen-frame">
+          <div class="gc-screen" id="gcScreen">
+            <div class="gc-status-bar"><span id="gcModeLabel">NORMAL · FLOAT · RADIAN</span><span id="gcScreenTitle">HOME</span></div>
+            <canvas id="gcGraphCanvas" width="800" height="500" aria-label="Function graph" hidden></canvas>
+            <section class="gc-view gc-home-view" data-gc-view="home">
+              <div class="gc-history" id="gcHistory" aria-live="polite"></div>
+              <div class="gc-entry-row"><span>&gt;</span><input id="gcExpressionInput" type="text" autocomplete="off" spellcheck="false" aria-label="Calculator expression" /></div>
+            </section>
+            <section class="gc-view gc-function-view" data-gc-view="functions" hidden>
+              <div class="gc-function-list" id="gcFunctionList"></div>
+            </section>
+            <section class="gc-view gc-window-view" data-gc-view="window" hidden>
+              <div class="gc-window-grid" id="gcWindowGrid"></div>
+            </section>
+            <section class="gc-view gc-table-view" data-gc-view="table" hidden>
+              <div class="gc-table-wrap"><table><thead id="gcTableHead"></thead><tbody id="gcTableBody"></tbody></table></div>
+            </section>
+            <div class="gc-trace-readout" id="gcTraceReadout" hidden></div>
+          </div>
+        </div>
+
+        <div class="gc-mode-keys" aria-label="Graph controls">
+          <button type="button" data-gc-action="functions"><span>Y=</span></button>
+          <button type="button" data-gc-action="window"><span>WINDOW</span></button>
+          <button type="button" data-gc-action="zoom"><span>ZOOM</span></button>
+          <button type="button" data-gc-action="trace"><span>TRACE</span></button>
+          <button type="button" data-gc-action="graph"><span>GRAPH</span></button>
+          <button type="button" data-gc-action="table"><span>TABLE</span></button>
+        </div>
+
+        <div class="gc-keypad" id="gcKeypad" aria-label="Calculator keypad">
+          <button type="button" class="gc-key gc-key-blue" data-gc-action="second"><small>2nd</small></button>
+          <button type="button" class="gc-key" data-gc-action="mode"><small>MODE</small></button>
+          <button type="button" class="gc-key" data-gc-insert="pi"><small>π</small></button>
+          <button type="button" class="gc-key" data-gc-action="delete"><small>DEL</small></button>
+          <button type="button" class="gc-key gc-key-nav" data-gc-action="up" aria-label="Move up">▲</button>
+
+          <button type="button" class="gc-key gc-key-green" data-gc-insert="x"><small>X,T,θ,n</small></button>
+          <button type="button" class="gc-key" data-gc-insert="sqrt("><small>√</small></button>
+          <button type="button" class="gc-key" data-gc-insert="sin("><small>sin</small></button>
+          <button type="button" class="gc-key" data-gc-insert="cos("><small>cos</small></button>
+          <button type="button" class="gc-key gc-key-nav" data-gc-action="left" aria-label="Move left">◀</button>
+
+          <button type="button" class="gc-key" data-gc-insert="^2"><small>x²</small></button>
+          <button type="button" class="gc-key" data-gc-insert="^"><small>^</small></button>
+          <button type="button" class="gc-key" data-gc-insert="tan("><small>tan</small></button>
+          <button type="button" class="gc-key" data-gc-insert="("><small>(</small></button>
+          <button type="button" class="gc-key gc-key-nav" data-gc-action="right" aria-label="Move right">▶</button>
+
+          <button type="button" class="gc-key" data-gc-insert="log10("><small>LOG</small></button>
+          <button type="button" class="gc-key gc-key-number" data-gc-insert="7">7</button>
+          <button type="button" class="gc-key gc-key-number" data-gc-insert="8">8</button>
+          <button type="button" class="gc-key gc-key-number" data-gc-insert="9">9</button>
+          <button type="button" class="gc-key gc-key-nav" data-gc-action="down" aria-label="Move down">▼</button>
+
+          <button type="button" class="gc-key" data-gc-insert="ln("><small>LN</small></button>
+          <button type="button" class="gc-key gc-key-number" data-gc-insert="4">4</button>
+          <button type="button" class="gc-key gc-key-number" data-gc-insert="5">5</button>
+          <button type="button" class="gc-key gc-key-number" data-gc-insert="6">6</button>
+          <button type="button" class="gc-key gc-key-operator" data-gc-insert="*">×</button>
+
+          <button type="button" class="gc-key" data-gc-insert="(-"><small>(−)</small></button>
+          <button type="button" class="gc-key gc-key-number" data-gc-insert="1">1</button>
+          <button type="button" class="gc-key gc-key-number" data-gc-insert="2">2</button>
+          <button type="button" class="gc-key gc-key-number" data-gc-insert="3">3</button>
+          <button type="button" class="gc-key gc-key-operator" data-gc-insert="-">−</button>
+
+          <button type="button" class="gc-key" data-gc-insert="Ans"><small>ANS</small></button>
+          <button type="button" class="gc-key gc-key-number gc-key-zero" data-gc-insert="0">0</button>
+          <button type="button" class="gc-key gc-key-number" data-gc-insert=".">.</button>
+          <button type="button" class="gc-key gc-key-operator" data-gc-insert="/">÷</button>
+          <button type="button" class="gc-key gc-key-operator" data-gc-insert="+">+</button>
+
+          <button type="button" class="gc-key" data-gc-insert=","><small>,</small></button>
+          <button type="button" class="gc-key" data-gc-insert=")"><small>)</small></button>
+          <button type="button" class="gc-key" data-gc-action="clear"><small>CLEAR</small></button>
+          <button type="button" class="gc-key gc-key-enter" data-gc-action="enter"><small>ENTER</small></button>
         </div>
       </div>
     </section>

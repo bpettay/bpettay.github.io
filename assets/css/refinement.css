@@ -271,14 +271,10 @@ textarea:focus { background: #090c0e; }
 .preview-panel,
 .result-panel,
 .related-panel,
-.calc-display,
 .related-item { border-radius: 4px; background: #030506; }
-.calc-keypad button,
 #tools .converter-control-grid input,
 #tools .converter-control-grid select,
 #tools .converter-swap-button { border-radius: 4px; background: #0b0e10; }
-.calc-keypad button:hover,
-.calc-keypad button:focus-visible { background: #12171a; }
 
 .pyro-card,
 .pyro-panel,

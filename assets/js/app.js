@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateTodayPanel();
   loadHomeWeather();
   initializeToolsSwitcher();
-  initializeMiniCalculator();
+  if (typeof initializeGraphingCalculator === "function") initializeGraphingCalculator();
 
   if (typeof initializeNavigation === "function") initializeNavigation();
 
@@ -388,7 +388,7 @@ function initializeToolsSwitcher() {
 
   const descriptions = {
     converter: "Convert between common engineering units.",
-    calculator: "Run arithmetic and common scientific functions.",
+    calculator: "Graph functions, trace curves, inspect tables, and run scientific calculations.",
   };
 
   const showTool = (tool) => {
@@ -405,62 +405,6 @@ function initializeToolsSwitcher() {
   select.addEventListener("change", () => showTool(select.value));
   showTool(select.value);
   window.siteTools = { showTool };
-}
-
-function initializeMiniCalculator() {
-  const expressionEl = document.getElementById("calcExpression");
-  const resultEl = document.getElementById("calcResult");
-  const keypad = document.querySelector(".calc-keypad");
-  if (!expressionEl || !resultEl || !keypad) return;
-
-  let expression = "";
-  const render = () => {
-    expressionEl.textContent = expression || "0";
-  };
-
-  const evaluate = () => {
-    try {
-      const sanitized = expression
-        .replace(/π/g, "pi")
-        .replace(/sin\(/g, "Math.sin(")
-        .replace(/cos\(/g, "Math.cos(")
-        .replace(/tan\(/g, "Math.tan(")
-        .replace(/sqrt\(/g, "Math.sqrt(")
-        .replace(/log\(/g, "Math.log10(")
-        .replace(/ln\(/g, "Math.log(")
-        .replace(/pi/g, "Math.PI")
-        .replace(/\^/g, "**");
-
-      if (!/^[0-9+\-*/().\sMathPIcosintaqrgl*]+$/.test(sanitized)) throw new Error("Bad expression");
-
-      const value = Function(`"use strict"; return (${sanitized});`)();
-      resultEl.textContent = Number.isFinite(value)
-        ? Number(value).toPrecision(6).replace(/\.0+$/, "").trim()
-        : "Error";
-    } catch (error) {
-      resultEl.textContent = "Error";
-    }
-  };
-
-  keypad.addEventListener("click", (event) => {
-    const button = event.target.closest("button");
-    if (!button) return;
-
-    if (button.dataset.calcAction === "clear") {
-      expression = "";
-      resultEl.textContent = "Ready";
-    } else if (button.dataset.calcAction === "backspace") {
-      expression = expression.slice(0, -1);
-    } else if (button.dataset.calcAction === "equals") {
-      evaluate();
-    } else if (button.dataset.calcKey) {
-      expression += button.dataset.calcKey === "pi" ? "π" : button.dataset.calcKey;
-    }
-
-    render();
-  });
-
-  render();
 }
 
 function initializeGroupedUnitSelectors() {

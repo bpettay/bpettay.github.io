@@ -17,6 +17,7 @@ The website is built using standard web technologies:
 - HTML5
 - CSS3
 - JavaScript (ES6+)
+- Math.js expression engine (vendored for offline calculator support)
 
 The project intentionally keeps the stack lightweight while taking advantage of modern browser capabilities.
 
@@ -36,6 +37,10 @@ The long-term goals of this website are to:
 ## Deployment
 
 The website is hosted with GitHub Pages and is automatically updated when changes are pushed to the main branch.
+
+## Third-Party Software
+
+The graphing calculator uses Math.js 15.2.0 under the Apache License 2.0. Its license is included at `assets/js/vendor/math.LICENSE`.
 
 ## Author
 

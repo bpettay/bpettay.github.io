@@ -6,6 +6,7 @@ const vm = require("node:vm");
 
 const { getCalendarMetrics } = require("../assets/js/date-utils.js");
 const { findWorkWindows } = require("../assets/js/weather-window.js");
+const { formatNumber } = require("../assets/js/graphing-calculator.js");
 
 test("calendar metrics are not shifted by daylight-saving time", () => {
   assert.deepEqual(getCalendarMetrics(2026, 8, 25), {
@@ -80,4 +81,11 @@ test("weather window finder excludes nighttime and undersized windows", () => {
   };
 
   assert.deepEqual(findWorkWindows(hourly, "2026-09-25T18:00", "general", 2), []);
+});
+
+test("graphing calculator formats ordinary and extreme values", () => {
+  assert.equal(formatNumber(1 / 3), "0.3333333333");
+  assert.equal(formatNumber(0), "0");
+  assert.match(formatNumber(1.2e12), /^1\.2e\+12$/);
+  assert.equal(formatNumber(Number.POSITIVE_INFINITY), "ERROR");
 });
