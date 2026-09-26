@@ -106,9 +106,48 @@
       };
     }
 
+    function normalizeExpression(expression) {
+      return String(expression)
+        .replace(/π/g, "pi")
+        .replace(/×/g, "*")
+        .replace(/÷/g, "/")
+        .replace(/√\\\(/g, "sqrt(")
+        .replace(/−/g, "-");
+    }
+
     function compileExpression(expression) {
       if (!String(expression).trim()) return null;
-      return root.math.compile(String(expression).replace(/π/g, "pi").replace(/×/g, "*").replace(/÷/g, "/"));
+      return root.math.compile(normalizeExpression(expression));
+    }
+
+    function formatResult(value) {
+      if (typeof value === "number") return formatNumber(value);
+      if (value && typeof value === "object" && value.isComplex) {
+        const re = formatNumber(value.re);
+        const im = formatNumber(Math.abs(value.im));
+        const sign = value.im < 0 ? "-" : "+";
+        if (value.re === 0) return `${value.im < 0 ? "-" : ""}${im}i`;
+        if (value.im === 0) return re;
+        return `${re}${sign}${im}i`;
+      }
+      if (Array.isArray(value)) return `{${value.map(formatResult).join(",")}}`;
+      if (value && typeof value.toArray === "function") {
+        const array = value.toArray();
+        return Array.isArray(array)
+          ? `[${array.map((row) => Array.isArray(row) ? row.map(formatResult).join(" ") : formatResult(row)).join("; ")}]`
+          : String(value);
+      }
+      try {
+        return root.math.format(value, { precision: 10 });
+      } catch (error) {
+        return String(value);
+      }
+    }
+
+    function renderCurrentEntry() {
+      if (!entryDisplay) return;
+      entryDisplay.textContent = expressionInput.value || "";
+      if (entryRow) entryRow.classList.toggle("gc-entry-empty", !expressionInput.value);
     }
 
     function updateModeLabel() {
