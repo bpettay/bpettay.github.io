@@ -339,7 +339,13 @@
             <canvas id="gcGraphCanvas" width="800" height="500" aria-label="Function graph" hidden></canvas>
             <section class="gc-view gc-home-view" data-gc-view="home">
               <div class="gc-history" id="gcHistory" aria-live="polite"></div>
-              <div class="gc-entry-row"><span>&gt;</span><input id="gcExpressionInput" type="text" autocomplete="off" spellcheck="false" placeholder="Enter expression…" aria-label="Calculator expression" /></div>
+              <div class="gc-entry-row" id="gcEntryRow">
+                <span class="gc-entry-prompt">&gt;</span>
+                <div class="gc-entry-display-wrap" aria-hidden="true">
+                  <span id="gcEntryDisplay" class="gc-entry-display"></span><span class="gc-entry-cursor"></span>
+                </div>
+                <input id="gcExpressionInput" class="gc-keyboard-capture" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Calculator expression" />
+              </div>
             </section>
             <section class="gc-view gc-function-view" data-gc-view="functions" hidden>
               <div class="gc-function-list" id="gcFunctionList"></div>
