@@ -66,8 +66,9 @@ textarea:focus { background: #090c0e; }
   box-shadow: none;
 }
 
-.nav-left { padding: 0; }
-.logo { width: 28px; height: 28px; flex-basis: 28px; border-radius: 3px; }
+.nav-left { padding: 0; flex: 0 0 auto; gap: .8rem; }
+.nav-right { margin-left: .15rem; }
+.logo { width: 63px; height: 63px; flex-basis: 63px; border-radius: 8px; }
 .site-name { font-size: 0.88rem; }
 .command-trigger { min-height: 32px; border-radius: 4px; background: transparent; }
 .nav-menu-toggle { display: none; }
