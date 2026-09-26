@@ -634,6 +634,15 @@
       else if (action === "mode") openModeMenu();
       else if (action === "math") openMathMenu();
       else if (action === "second") { secondMode = !secondMode; calculator.classList.toggle("gc-second-active", secondMode); }
+      else if (action === "home") showView("home");
+      else if (action === "entry") {
+        if (state.history.length) {
+          showView("home");
+          expressionInput.value = state.history[state.history.length - 1].expression;
+          renderCurrentEntry();
+          expressionInput.focus();
+        }
+      }
       else if (action === "delete") deleteAtCursor();
       else if (action === "clear") {
         if (currentView !== "home") showView("home");
@@ -668,11 +677,23 @@
         return;
       }
 
+      if (secondMode && button.dataset.gcSecondAction) {
+        handleAction(button.dataset.gcSecondAction);
+        secondMode = false;
+        calculator.classList.remove("gc-second-active");
+        return;
+      }
+
       if (secondMode && button.dataset.gcSecondInsert !== undefined) {
         insertAtCursor(button.dataset.gcSecondInsert);
         secondMode = false;
         calculator.classList.remove("gc-second-active");
         return;
+      }
+
+      if (secondMode && button.dataset.gcAction !== "second") {
+        secondMode = false;
+        calculator.classList.remove("gc-second-active");
       }
 
       if (button.dataset.gcInsert !== undefined) insertAtCursor(button.dataset.gcInsert);
