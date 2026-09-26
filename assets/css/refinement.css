@@ -92,8 +92,7 @@ textarea:focus { background: #090c0e; }
   transition: transform 160ms ease;
 }
 
-.nav-tools-menu.open .nav-tools-trigger::after,
-.nav-tools-menu:focus-within .nav-tools-trigger::after {
+.nav-tools-menu.open .nav-tools-trigger::after {
   transform: translateY(0.08rem) rotate(225deg);
 }
 
@@ -117,8 +116,7 @@ textarea:focus { background: #090c0e; }
   transition: opacity 140ms ease, transform 140ms ease, visibility 140ms ease;
 }
 
-.nav-tools-menu.open .tools-nav-dropdown,
-.nav-tools-menu:focus-within .tools-nav-dropdown {
+.nav-tools-menu.open .tools-nav-dropdown {
   opacity: 1;
   visibility: visible;
   transform: none;
@@ -536,8 +534,7 @@ textarea:focus { background: #090c0e; }
     pointer-events: auto;
   }
 
-  .nav-tools-menu.open .tools-nav-dropdown,
-  .nav-tools-menu:focus-within .tools-nav-dropdown {
+  .nav-tools-menu.open .tools-nav-dropdown {
     display: grid;
   }
 
