@@ -47,6 +47,7 @@
       graphWindow: { ...DEFAULT_WINDOW },
       history: [],
       ans: 0,
+      variables: {},
     };
     let state = { ...defaults, graphWindow: { ...DEFAULT_WINDOW } };
     let currentView = "home";
@@ -66,6 +67,7 @@
           functions: Array.isArray(saved.functions) ? saved.functions.slice(0, 10) : defaults.functions,
           enabled: Array.isArray(saved.enabled) ? saved.enabled.slice(0, 10) : defaults.enabled,
           history: Array.isArray(saved.history) ? saved.history.slice(-40) : [],
+          variables: saved.variables && typeof saved.variables === "object" ? saved.variables : {},
         };
       }
     } catch (error) {
@@ -84,6 +86,7 @@
           graphWindow: state.graphWindow,
           history: state.history.slice(-40),
           ans: state.ans,
+          variables: state.variables,
         }));
       } catch (error) {
         // Storage is optional; calculation remains available without it.
@@ -93,7 +96,9 @@
     function scopeFor(x) {
       const toRadians = (value) => state.angle === "DEGREE" ? value * Math.PI / 180 : value;
       return {
+        ...state.variables,
         x,
+        X: x,
         Ans: state.ans,
         sin: (value) => Math.sin(toRadians(value)),
         cos: (value) => Math.cos(toRadians(value)),
@@ -192,11 +197,14 @@
       const expression = expressionInput.value.trim();
       if (!expression) return;
       try {
-        const compiled = compileExpression(expression);
+        const storeMatch = expression.match(/^(.*)→([A-Za-z])$/);
+        const sourceExpression = storeMatch ? storeMatch[1].trim() : expression;
+        const compiled = compileExpression(sourceExpression);
         const raw = compiled.evaluate(scopeFor(0));
         const result = formatResult(raw);
         if (!result || result === "undefined" || result === "NaN") throw new Error("Invalid result");
         if (typeof raw === "number") state.ans = raw;
+        if (storeMatch) state.variables[storeMatch[2].toUpperCase()] = raw;
         state.history.push({ expression, result });
       } catch (error) {
         const message = String(error && error.message ? error.message : "");
