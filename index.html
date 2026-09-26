@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="./assets/css/pyro-gates.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/command-bar.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/refinement.css?v=20260926-4" />
-  <link rel="stylesheet" href="./assets/css/graphing-calculator.css?v=20260926-1" />
+  <link rel="stylesheet" href="./assets/css/graphing-calculator.css?v=20260926-2" />
 
   <link rel="icon" type="image/png" href="./assets/branding/mark-01.png" />
   <script>
@@ -52,7 +52,7 @@
   <script src="./assets/js/pyro-gates.js?v=20260926-1" defer></script>
   <script src="./assets/js/weather-window.js?v=20260926-1" defer></script>
   <script src="./assets/js/vendor/math.js?v=20260926-1" defer></script>
-  <script src="./assets/js/graphing-calculator.js?v=20260926-1" defer></script>
+  <script src="./assets/js/graphing-calculator.js?v=20260926-2" defer></script>
   <script src="./assets/js/app.js?v=20260926-1" defer></script>
   <script src="./assets/js/command-bar.js?v=20260926-1" defer></script>
 </head>
@@ -339,7 +339,7 @@
             <canvas id="gcGraphCanvas" width="800" height="500" aria-label="Function graph" hidden></canvas>
             <section class="gc-view gc-home-view" data-gc-view="home">
               <div class="gc-history" id="gcHistory" aria-live="polite"></div>
-              <div class="gc-entry-row"><span>&gt;</span><input id="gcExpressionInput" type="text" autocomplete="off" spellcheck="false" aria-label="Calculator expression" /></div>
+              <div class="gc-entry-row"><span>&gt;</span><input id="gcExpressionInput" type="text" autocomplete="off" spellcheck="false" placeholder="Enter expression…" aria-label="Calculator expression" /></div>
             </section>
             <section class="gc-view gc-function-view" data-gc-view="functions" hidden>
               <div class="gc-function-list" id="gcFunctionList"></div>
