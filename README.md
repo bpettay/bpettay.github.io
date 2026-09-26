@@ -49,3 +49,5 @@ Brock Pettay
 ## License
 
 This repository is intended for personal and portfolio use.
+
+<sub>AI-assisted · Verify critical outputs independently.</sub>
