@@ -127,7 +127,7 @@ button { color: inherit; touch-action: manipulation; }
 .nav-left, .nav-right { display: flex; align-items: center; min-width: 0; }
 .nav-left { flex: 1 1 auto; gap: .8rem; padding-left: .5rem; }
 .nav-right { flex: 0 0 auto; gap: .3rem; }
-.logo { width: 42px; height: 42px; flex: 0 0 42px; object-fit: contain; border-radius: 7px; margin-right: .1rem; }
+.logo { width: 63px; height: 63px; flex: 0 0 63px; object-fit: contain; border-radius: 8px; margin-right: .1rem; }
 .site-name { overflow: hidden; color: var(--ink); font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
 
 .nav-link {
