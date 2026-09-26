@@ -188,6 +188,7 @@
         input.value = value;
         input.autocomplete = "off";
         input.spellcheck = false;
+        input.placeholder = index === 0 ? "Enter function…" : "";
         input.addEventListener("focus", () => { activeInput = input; });
         input.addEventListener("input", () => {
           state.functions[index] = input.value;
