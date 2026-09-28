@@ -10,13 +10,13 @@
   <title>Dashboard</title>
 
   <link rel="stylesheet" href="./assets/css/style.css?v=20260928-2" />
-  <link rel="stylesheet" href="./assets/css/home.css?v=20260928-6" />
+  <link rel="stylesheet" href="./assets/css/home.css?v=20260928-7" />
   <link rel="stylesheet" href="./assets/css/tools.css?v=20260927-3" />
   <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/pyro-gates.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/command-bar.css?v=20260926-1" />
-  <link rel="stylesheet" href="./assets/css/refinement.css?v=20260928-2" />
+  <link rel="stylesheet" href="./assets/css/refinement.css?v=20260928-3" />
   <link rel="stylesheet" href="./assets/css/graphing-calculator.css?v=20260927-4" />
 
   <link rel="icon" type="image/png" href="./assets/branding/mark-01.png" />
@@ -104,87 +104,83 @@
     </header>
 
     <section class="home-dashboard-only" aria-label="Daily overview dashboard">
-      <article class="dashboard-card surface home-time-card">
+      <article class="dashboard-card surface home-now-card">
         <div class="dashboard-card-head">
-          <span class="dashboard-label">Local time</span>
-          <strong>New Philadelphia, OH</strong>
+          <span class="dashboard-label">Now</span>
+          <div class="now-card-meta">
+            <strong>New Philadelphia, OH</strong>
+            <span id="homeWeatherUpdated">Updating…</span>
+          </div>
         </div>
 
-        <div class="time-today-layout">
-          <div class="clock-layout">
-            <div class="analog-clock" aria-hidden="true">
-              <div class="clock-face">
-                <span class="clock-ring hour" id="clockHourRing"></span>
-                <span class="clock-ring minute" id="clockMinuteRing"></span>
-                <span class="clock-ring second" id="clockSecondRing"></span>
+        <div class="now-primary-grid">
+          <section class="now-time-panel" aria-label="Local time">
+            <div class="time-today-layout">
+              <div class="clock-layout">
+                <div class="analog-clock" aria-hidden="true">
+                  <div class="clock-face">
+                    <span class="clock-ring hour" id="clockHourRing"></span>
+                    <span class="clock-ring minute" id="clockMinuteRing"></span>
+                    <span class="clock-ring second" id="clockSecondRing"></span>
+                  </div>
+                </div>
+                <div class="digital-clock">
+                  <span class="day-phase" id="homeDayPhase">Local time</span>
+                  <strong id="homeClockTime">--:--</strong>
+                  <small id="homeClockDate">Loading</small>
+                  <div class="clock-ring-key" aria-label="Ring colors: hours, minutes, seconds">
+                    <span class="hour" title="Hours">H</span>
+                    <span class="minute" title="Minutes">M</span>
+                    <span class="second" title="Seconds">S</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="day-progress-panel">
+                <div class="day-progress-head">
+                  <strong class="next-time-boundary" id="homeNextBoundary">Calculating next milestone</strong>
+                  <span id="homeDayProgress">--% of day</span>
+                </div>
+                <div
+                  class="day-progress-track"
+                  id="homeDayProgressTrack"
+                  role="progressbar"
+                  aria-label="Progress through the local day"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow="0"
+                >
+                  <span class="day-progress-fill"></span>
+                  <span class="day-progress-marker"></span>
+                </div>
               </div>
             </div>
-            <div class="digital-clock">
-              <span class="day-phase" id="homeDayPhase">Local time</span>
-              <strong id="homeClockTime">--:--</strong>
-              <small id="homeClockDate">Loading</small>
-              <div class="clock-ring-key" aria-label="Ring colors: hours, minutes, seconds">
-                <span class="hour" title="Hours">H</span>
-                <span class="minute" title="Minutes">M</span>
-                <span class="second" title="Seconds">S</span>
+          </section>
+
+          <section class="now-weather-panel" aria-label="Current weather">
+            <div class="weather-current-band">
+              <div class="weather-current-row">
+                <div class="condition-pictogram" id="homeWeatherIcon" role="img" aria-label="Loading weather"></div>
+                <div>
+                  <strong id="homeWeatherTemp">--°</strong>
+                  <small id="homeWeatherSummary">Loading current conditions</small>
+                </div>
+              </div>
+
+              <div class="weather-today-summary" aria-label="Today's temperature range">
+                <div><span>High</span><strong id="homeWeatherHigh">--°</strong></div>
+                <div><span>Low</span><strong id="homeWeatherLow">--°</strong></div>
               </div>
             </div>
-          </div>
 
-          <div class="day-progress-panel">
-            <div class="day-progress-head">
-              <strong class="next-time-boundary" id="homeNextBoundary">Calculating next milestone</strong>
-              <span id="homeDayProgress">--% of day</span>
+            <div class="go-card" id="homeGoCard">
+              <div class="go-card-line">
+                <strong id="homeGoTitle">Loading conditions</strong>
+                <span id="homeGoPill" class="go-pill neutral">Checking</span>
+              </div>
+              <p id="homeGoReason" class="dashboard-note">Checking wind, rain risk, air quality, UV, and temperature.</p>
             </div>
-            <div
-              class="day-progress-track"
-              id="homeDayProgressTrack"
-              role="progressbar"
-              aria-label="Progress through the local day"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              aria-valuenow="0"
-            >
-              <span class="day-progress-fill"></span>
-              <span class="day-progress-marker"></span>
-            </div>
-          </div>
-
-          <div class="time-context-grid" aria-label="Calendar context">
-            <div><span>Week</span><strong id="homeWeekNumber">--</strong></div>
-            <div><span>Year</span><strong id="homeYearProgress">--%</strong></div>
-            <div><span>Weekend</span><strong id="homeWeekendCountdown">--</strong></div>
-          </div>
-        </div>
-      </article>
-
-      <article class="dashboard-card surface home-weather-card">
-        <div class="dashboard-card-head">
-          <span class="dashboard-label">Weather + Outside</span>
-          <strong id="homeWeatherUpdated">Updating…</strong>
-        </div>
-
-        <div class="weather-current-band">
-          <div class="weather-current-row">
-            <div class="condition-pictogram" id="homeWeatherIcon" role="img" aria-label="Loading weather"></div>
-            <div>
-              <strong id="homeWeatherTemp">--°</strong>
-              <small id="homeWeatherSummary">Loading current conditions</small>
-            </div>
-          </div>
-
-          <div class="weather-today-summary" aria-label="Today's temperature range">
-            <div><span>High</span><strong id="homeWeatherHigh">--°</strong></div>
-            <div><span>Low</span><strong id="homeWeatherLow">--°</strong></div>
-          </div>
-        </div>
-
-        <div class="go-card" id="homeGoCard">
-          <div class="go-card-line">
-            <strong id="homeGoTitle">Loading conditions</strong>
-            <span id="homeGoPill" class="go-pill neutral">Checking</span>
-          </div>
-          <p id="homeGoReason" class="dashboard-note">Checking wind, rain risk, air quality, UV, and temperature.</p>
+          </section>
         </div>
 
         <div class="weather-critical-grid" aria-label="Critical weather metrics">
@@ -196,10 +192,16 @@
 
         <details class="weather-details" id="weatherDetails">
           <summary>
-            <span>Weather details</span>
-            <small>Forecast, daylight, and work windows</small>
+            <span>More details</span>
+            <small>Calendar, forecast, daylight, and work windows</small>
           </summary>
           <div class="weather-details-body">
+            <div class="time-context-grid" aria-label="Calendar context">
+              <div><span>Week</span><strong id="homeWeekNumber">--</strong></div>
+              <div><span>Year</span><strong id="homeYearProgress">--%</strong></div>
+              <div><span>Weekend</span><strong id="homeWeekendCountdown">--</strong></div>
+            </div>
+
             <div class="weather-mini-grid weather-secondary-grid" aria-label="Additional weather metrics">
               <span>Gusts <strong id="homeWeatherGusts">-- mph</strong></span>
               <span>Humidity <strong id="homeWeatherHumidity">--%</strong></span>

@@ -308,9 +308,9 @@ textarea:focus { background: #090c0e; }
 .go-pill.go { color: #96c8aa; background: transparent; }
 .go-pill.caution { color: #cfb879; background: transparent; }
 
-.home-weather-card .weather-mini-grid { gap: 0; border-block: 1px solid var(--line); }
+.home-now-card .weather-mini-grid { gap: 0; border-block: 1px solid var(--line); }
 .weather-mini-grid span,
-.home-weather-card .weather-mini-grid span {
+.home-now-card .weather-mini-grid span {
   min-height: 54px;
   padding: 0.58rem 0.65rem;
   border: 0;
@@ -318,8 +318,8 @@ textarea:focus { background: #090c0e; }
   border-radius: 0;
   background: transparent;
 }
-.home-weather-card .weather-mini-grid span:nth-child(5n) { border-right: 0; }
-.home-weather-card .weather-mini-grid span:nth-child(n + 6) { border-top: 1px solid var(--line); }
+.home-now-card .weather-mini-grid span:nth-child(5n) { border-right: 0; }
+.home-now-card .weather-mini-grid span:nth-child(n + 6) { border-top: 1px solid var(--line); }
 
 .hourly-forecast-card,
 .sun-position-card {
@@ -477,8 +477,8 @@ textarea:focus { background: #090c0e; }
 @media (max-width: 760px) {
   .home-overview { padding-inline: 0.25rem; }
   .weather-mini-grid span,
-  .home-weather-card .weather-mini-grid span { border: 0; border-bottom: 1px solid var(--line); }
-  .home-weather-card .weather-mini-grid span:nth-child(odd) { border-right: 1px solid var(--line); }
+  .home-now-card .weather-mini-grid span { border: 0; border-bottom: 1px solid var(--line); }
+  .home-now-card .weather-mini-grid span:nth-child(odd) { border-right: 1px solid var(--line); }
   .work-window-results { border: 0; gap: 0.5rem; }
   .work-window-result,
   .work-window-result:first-child { border: 1px solid var(--line); border-radius: 4px; }
