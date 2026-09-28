@@ -10,7 +10,7 @@
   <title>Engineering Dashboard</title>
 
   <link rel="stylesheet" href="./assets/css/style.css?v=20260926-1" />
-  <link rel="stylesheet" href="./assets/css/home.css?v=20260927-1" />
+  <link rel="stylesheet" href="./assets/css/home.css?v=20260927-2" />
   <link rel="stylesheet" href="./assets/css/tools.css?v=20260927-3" />
   <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260926-1" />
@@ -53,7 +53,7 @@
   <script src="./assets/js/weather-window.js?v=20260926-1" defer></script>
   <script src="./assets/js/vendor/math.js?v=20260926-1" defer></script>
   <script src="./assets/js/graphing-calculator.js?v=20260927-3" defer></script>
-  <script src="./assets/js/app.js?v=20260927-4" defer></script>
+  <script src="./assets/js/app.js?v=20260927-5" defer></script>
   <script src="./assets/js/command-bar.js?v=20260927-1" defer></script>
 </head>
 
@@ -106,7 +106,7 @@
     <section class="home-dashboard-only" aria-label="Daily overview dashboard">
       <article class="dashboard-card surface home-time-card">
         <div class="dashboard-card-head">
-          <span class="dashboard-label">Time + Today</span>
+          <span class="dashboard-label">Local time</span>
           <strong>New Philadelphia, OH</strong>
         </div>
 
@@ -114,6 +114,7 @@
           <div class="clock-layout">
             <div class="analog-clock" aria-hidden="true">
               <div class="clock-face">
+                <span class="clock-day-ring" id="clockDayRing"></span>
                 <span class="clock-marker twelve"></span>
                 <span class="clock-marker three"></span>
                 <span class="clock-marker six"></span>
@@ -125,18 +126,43 @@
               </div>
             </div>
             <div class="digital-clock">
+              <span class="day-phase" id="homeDayPhase">Local time</span>
               <strong id="homeClockTime">--:--</strong>
               <small id="homeClockDate">Loading</small>
             </div>
           </div>
 
-          <div class="today-grid">
-            <div><span>Date</span><strong id="homeFullDate">--</strong></div>
-            <div><span>Day #</span><strong id="homeDayOfYear">--</strong></div>
+          <div class="day-progress-panel">
+            <div class="day-progress-head">
+              <span>Today</span>
+              <strong id="homeDayProgress">--% elapsed</strong>
+            </div>
+            <div
+              class="day-progress-track"
+              id="homeDayProgressTrack"
+              role="progressbar"
+              aria-label="Progress through the local day"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <span class="day-progress-fill"></span>
+              <span class="day-progress-marker"></span>
+            </div>
+            <div class="day-progress-scale" aria-hidden="true">
+              <span>12 AM</span>
+              <span>Noon</span>
+              <span>12 AM</span>
+            </div>
+            <strong class="next-time-boundary" id="homeNextBoundary">Calculating next milestone</strong>
+          </div>
+
+          <div class="time-context-grid" aria-label="Calendar context">
+            <div><span>Time zone</span><strong id="homeTimezone">--</strong></div>
             <div><span>Week</span><strong id="homeWeekNumber">--</strong></div>
+            <div><span>Year</span><strong id="homeYearProgress">--%</strong></div>
             <div><span>Weekend</span><strong id="homeWeekendCountdown">--</strong></div>
           </div>
-          <span class="sr-only" id="homeWeekday">--</span>
         </div>
       </article>
 

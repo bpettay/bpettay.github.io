@@ -25,13 +25,13 @@ function startHomeClock() {
   const timeEl = document.getElementById("homeClockTime");
   const dateEl = document.getElementById("homeClockDate");
   if (!timeEl || !dateEl) return;
+  let lastMinute = "";
 
   const updateClock = () => {
     const now = new Date();
     timeEl.textContent = new Intl.DateTimeFormat("en-US", {
       hour: "numeric",
       minute: "2-digit",
-      second: "2-digit",
       hour12: true,
       timeZone: DASHBOARD_LOCATION.timezone,
     }).format(now);
@@ -43,6 +43,11 @@ function startHomeClock() {
       timeZone: DASHBOARD_LOCATION.timezone,
     }).format(now);
 
+    const minuteKey = Math.floor(now.getTime() / 60000);
+    if (minuteKey !== lastMinute) {
+      updateTodayPanel(now);
+      lastMinute = minuteKey;
+    }
   };
 
   updateClock();
@@ -334,24 +339,35 @@ async function loadHomeWeather() {
   }
 }
 
-function updateTodayPanel() {
-  const now = new Date();
+function updateTodayPanel(now = new Date()) {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: DASHBOARD_LOCATION.timezone,
     year: "numeric",
     month: "numeric",
     day: "numeric",
     weekday: "short",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hourCycle: "h23",
+    timeZoneName: "short",
   }).formatToParts(now);
 
   const part = (type) => parts.find((item) => item.type === type)?.value;
   const localDate = new Date(Number(part("year")), Number(part("month")) - 1, Number(part("day")));
   const weekday = part("weekday");
-  const weekdayEl = document.getElementById("homeWeekday");
-  const fullDateEl = document.getElementById("homeFullDate");
-  const dayEl = document.getElementById("homeDayOfYear");
+  const hour = Number(part("hour"));
+  const minute = Number(part("minute"));
+  const second = Number(part("second"));
+  const phaseEl = document.getElementById("homeDayPhase");
+  const timezoneEl = document.getElementById("homeTimezone");
   const weekEl = document.getElementById("homeWeekNumber");
+  const yearEl = document.getElementById("homeYearProgress");
   const weekendEl = document.getElementById("homeWeekendCountdown");
+  const progressEl = document.getElementById("homeDayProgress");
+  const progressTrack = document.getElementById("homeDayProgressTrack");
+  const nextBoundaryEl = document.getElementById("homeNextBoundary");
+  const dayRing = document.getElementById("clockDayRing");
 
   const calendarMetrics = window.SiteDateUtils?.getCalendarMetrics(
     localDate.getFullYear(),
@@ -361,20 +377,48 @@ function updateTodayPanel() {
   const dayOfYear = calendarMetrics?.dayOfYear ?? "--";
   const weekNumber = calendarMetrics?.weekNumber ?? "--";
   const daysUntilSaturday = calendarMetrics?.daysUntilSaturday ?? 0;
+  const secondsToday = (hour * 3600) + (minute * 60) + second;
+  const dayProgress = Math.min(100, Math.max(0, (secondsToday / 86400) * 100));
+  const daysInYear = new Date(localDate.getFullYear(), 1, 29).getMonth() === 1 ? 366 : 365;
+  const yearProgress = Number.isFinite(dayOfYear)
+    ? (((dayOfYear - 1) + (dayProgress / 100)) / daysInYear) * 100
+    : 0;
+  const phases = [
+    [5, "Night"],
+    [8, "Early morning"],
+    [12, "Morning"],
+    [17, "Afternoon"],
+    [21, "Evening"],
+    [24, "Late evening"],
+  ];
+  const dayPhase = phases.find(([endHour]) => hour < endHour)?.[1] || "Local time";
+  const nextBoundaryMinutes = hour < 12
+    ? (12 * 60) - ((hour * 60) + minute)
+    : (24 * 60) - ((hour * 60) + minute);
+  const nextBoundaryName = hour < 12 ? "Noon" : "Tomorrow";
+  const roundedBoundaryMinutes = Math.max(1, nextBoundaryMinutes);
+  const boundaryHours = Math.floor(roundedBoundaryMinutes / 60);
+  const boundaryMinutes = roundedBoundaryMinutes % 60;
+  const boundaryDuration = boundaryHours
+    ? `${boundaryHours}h${boundaryMinutes ? ` ${boundaryMinutes}m` : ""}`
+    : `${boundaryMinutes}m`;
 
-  if (weekdayEl) {
-    weekdayEl.textContent = new Intl.DateTimeFormat("en-US", { weekday: "long", timeZone: DASHBOARD_LOCATION.timezone }).format(now);
+  if (phaseEl) phaseEl.textContent = dayPhase;
+  if (timezoneEl) timezoneEl.textContent = part("timeZoneName") || "ET";
+  if (weekEl) weekEl.textContent = `W${weekNumber}`;
+  if (yearEl) yearEl.textContent = `${Math.round(yearProgress)}%`;
+  if (progressEl) progressEl.textContent = `${Math.floor(dayProgress)}% elapsed`;
+  if (progressTrack) {
+    progressTrack.style.setProperty("--day-progress", `${dayProgress}%`);
+    progressTrack.setAttribute("aria-valuenow", String(Math.floor(dayProgress)));
   }
-  if (fullDateEl) {
-    fullDateEl.textContent = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: DASHBOARD_LOCATION.timezone }).format(now);
-  }
-  if (dayEl) dayEl.textContent = String(dayOfYear);
-  if (weekEl) weekEl.textContent = String(weekNumber);
+  if (dayRing) dayRing.style.setProperty("--day-progress", `${dayProgress}%`);
+  if (nextBoundaryEl) nextBoundaryEl.textContent = `${nextBoundaryName} in ${boundaryDuration}`;
   if (weekendEl) {
     if (weekday === "Sat" || weekday === "Sun") {
       weekendEl.textContent = "Now";
     } else {
-      weekendEl.textContent = `${daysUntilSaturday}d`;
+      weekendEl.textContent = `${daysUntilSaturday}d away`;
     }
   }
 }
