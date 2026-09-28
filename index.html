@@ -11,7 +11,7 @@
 
   <link rel="stylesheet" href="./assets/css/style.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/home.css?v=20260926-1" />
-  <link rel="stylesheet" href="./assets/css/tools.css?v=20260926-1" />
+  <link rel="stylesheet" href="./assets/css/tools.css?v=20260927-1" />
   <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/pyro-gates.css?v=20260926-1" />
@@ -46,7 +46,7 @@
   <script src="./assets/js/date-utils.js?v=20260926-1" defer></script>
   <script src="./assets/js/converter-data.js?v=20260926-1" defer></script>
   <script src="./assets/js/navigation.js?v=20260927-3" defer></script>
-  <script src="./assets/js/converter.js?v=20260926-1" defer></script>
+  <script src="./assets/js/converter.js?v=20260927-1" defer></script>
   <script src="./assets/js/pyro-sim.js?v=20260926-1" defer></script>
   <script src="./assets/js/pyro-team.js?v=20260926-1" defer></script>
   <script src="./assets/js/pyro-gates.js?v=20260926-1" defer></script>
@@ -271,56 +271,66 @@
   </main>
   <main id="tools" class="page" hidden>
     <section class="tool-card compact-tool-card surface tool-panel" data-tool-panel="converter">
-      <div class="tool-header">
+      <div class="tool-header converter-header">
         <div>
           <p class="tool-label">Converter</p>
-          <h2>Engineering Unit Converter</h2>
-          <p class="tool-intro">Convert common engineering units quickly. Type a value manually or use the quick query box.</p>
+          <h2>Unit Converter</h2>
         </div>
       </div>
 
-      <div class="compact-converter-layout">
-        <div class="field-group">
-          <label for="queryInput">Quick query</label>
-          <input id="queryInput" type="text" inputmode="text" autocomplete="off" placeholder="Example: 10 in to mm" />
-          <div class="preview-panel" aria-live="polite">
-            <p id="previewSummary" class="preview-summary">Try a quick conversion like “10 in to mm”.</p>
-            <p id="previewFactor" class="preview-factor">The standard converter below is ready to use.</p>
-            <p id="queryStatus" class="query-status"></p>
-          </div>
-        </div>
-
-        <div class="tool-grid compact-tool-grid">
-          <div class="field-group">
-            <label for="category">Category</label>
+      <div class="converter-shell">
+        <div class="converter-toolbar">
+          <div class="field-group converter-category-group">
+            <label for="category">Measurement</label>
             <select id="category"></select>
           </div>
-          <div class="field-group">
-            <label for="inputValue">Value</label>
-            <input id="inputValue" type="number" inputmode="decimal" value="1" step="any" />
-          </div>
-          <div class="field-group">
-            <label for="fromUnit">From</label>
-            <select id="fromUnit"></select>
-          </div>
-          <div class="field-group">
-            <label for="toUnit">To</label>
-            <select id="toUnit"></select>
+          <div class="field-group converter-query-group">
+            <label for="queryInput">Type a conversion</label>
+            <input id="queryInput" type="text" inputmode="text" autocomplete="off" placeholder="10 in to mm" aria-describedby="queryStatus" />
+            <p id="queryStatus" class="query-status" aria-live="polite"></p>
           </div>
         </div>
 
-        <div class="compact-results-grid">
-          <section class="result-panel" aria-live="polite">
-            <p class="tool-label">Result</p>
-            <p id="resultValue" class="result-value">—</p>
-            <p id="resultFormula" class="result-formula">Enter a value to convert.</p>
-            <p id="resultFactor" class="result-factor"></p>
+        <div class="converter-workspace">
+          <section class="converter-side converter-source" aria-labelledby="converterSourceLabel">
+            <p class="converter-side-label" id="converterSourceLabel">From</p>
+            <div class="converter-value-row">
+              <label class="sr-only" for="inputValue">Value</label>
+              <input id="inputValue" class="converter-value-input" type="number" inputmode="decimal" value="1" step="any" />
+              <label class="sr-only" for="fromUnit">Source unit</label>
+              <select id="fromUnit" class="converter-unit-select"></select>
+            </div>
           </section>
-          <section class="related-panel">
-            <p class="tool-label">Related</p>
-            <div id="relatedResults" class="related-results"></div>
+
+          <button id="swapUnits" class="converter-swap-button" type="button" title="Swap units" aria-label="Swap source and destination units">
+            <span aria-hidden="true">⇄</span>
+          </button>
+
+          <section class="converter-side converter-destination" aria-labelledby="converterDestinationLabel">
+            <div class="converter-output-heading">
+              <p class="converter-side-label" id="converterDestinationLabel">To</p>
+              <button id="copyResult" class="converter-copy-button" type="button">Copy</button>
+            </div>
+            <div class="converter-value-row">
+              <output id="resultValue" class="result-value" for="inputValue fromUnit toUnit">—</output>
+              <label class="sr-only" for="toUnit">Destination unit</label>
+              <select id="toUnit" class="converter-unit-select"></select>
+            </div>
           </section>
         </div>
+
+        <div class="converter-detail" aria-live="polite">
+          <p id="resultFormula" class="result-formula">Enter a value to convert.</p>
+          <p id="resultFactor" class="result-factor"></p>
+        </div>
+
+        <section class="converter-related" aria-labelledby="relatedHeading">
+          <div class="converter-related-heading">
+            <p class="tool-label" id="relatedHeading">Common equivalents</p>
+            <span id="relatedContext"></span>
+          </div>
+          <div id="relatedResults" class="related-results"></div>
+        </section>
       </div>
     </section>
 

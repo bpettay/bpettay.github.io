@@ -7,14 +7,11 @@ function initializeConverter() {
   const resultFormulaEl = document.getElementById("resultFormula");
   const resultFactorEl = document.getElementById("resultFactor");
   const relatedResultsEl = document.getElementById("relatedResults");
+  const relatedContextEl = document.getElementById("relatedContext");
   const queryInputEl = document.getElementById("queryInput");
   const queryStatusEl = document.getElementById("queryStatus");
-  const previewSummaryEl = document.getElementById("previewSummary");
-  const previewFactorEl = document.getElementById("previewFactor");
-  const previewPanel = previewSummaryEl?.closest(".preview-panel");
-  const controlGrid = categoryEl?.closest(".tool-grid");
-  const queryGroup = queryInputEl?.closest(".field-group");
-  const resultsGrid = resultValueEl?.closest(".compact-results-grid");
+  const swapButton = document.getElementById("swapUnits");
+  const copyButton = document.getElementById("copyResult");
 
   const required = [
     categoryEl,
@@ -25,26 +22,17 @@ function initializeConverter() {
     resultFormulaEl,
     resultFactorEl,
     relatedResultsEl,
-    controlGrid,
-    resultsGrid,
+    queryInputEl,
+    queryStatusEl,
+    swapButton,
+    copyButton,
   ];
 
   if (required.some((el) => !el) || typeof unitData !== "object") return;
   if (categoryEl.dataset.converterReady === "true") return;
   categoryEl.dataset.converterReady = "true";
 
-  const categoryGroup = categoryEl.closest(".field-group");
-  const valueGroup = inputValueEl.closest(".field-group");
-  const fromGroup = fromUnitEl.closest(".field-group");
-  const toGroup = toUnitEl.closest(".field-group");
-
-  queryGroup?.classList.add("converter-query-group");
-  controlGrid.classList.add("converter-control-grid");
-  resultsGrid.classList.add("converter-results-grid");
-  categoryGroup?.classList.add("converter-category-group");
-  valueGroup?.classList.add("converter-value-group");
-  fromGroup?.classList.add("converter-from-group");
-  toGroup?.classList.add("converter-to-group");
+  let lastResultText = "";
 
   const getUnits = (category) => {
     const info = unitData[category];
@@ -232,22 +220,9 @@ function initializeConverter() {
     return `1 ${from} = ${formatNumber(convertUnits(1, category, from, to))} ${to}`;
   }
 
-  function renderEquation(value, category, from, to, converted) {
-    if (!previewPanel) return;
-
-    let equation = document.getElementById("equationPreview");
-    if (!equation) {
-      equation = document.createElement("div");
-      equation.id = "equationPreview";
-      equation.setAttribute("aria-live", "polite");
-      previewPanel.appendChild(equation);
-    }
-
-    equation.textContent = getFormulaText(value, category, from, to, converted);
-  }
-
   function renderRelatedConversions(value, category, from, to) {
     relatedResultsEl.replaceChildren();
+    if (relatedContextEl) relatedContextEl.textContent = `${formatNumber(value)} ${from}`;
     const common = unitData[category].common || getUnits(category);
 
     common
@@ -255,8 +230,10 @@ function initializeConverter() {
       .slice(0, 4)
       .forEach((unit) => {
         const converted = convertUnits(value, category, from, unit);
-        const row = document.createElement("div");
+        const row = document.createElement("button");
+        row.type = "button";
         row.className = "related-item";
+        row.setAttribute("aria-label", `Convert to ${unit}`);
 
         const label = document.createElement("span");
         label.className = "related-item-label";
@@ -267,6 +244,11 @@ function initializeConverter() {
         result.textContent = `${formatNumber(converted)} ${unit}`;
 
         row.append(label, result);
+        row.addEventListener("click", () => {
+          toUnitEl.value = unit;
+          resetQuickQuery();
+          convertManual();
+        });
         relatedResultsEl.appendChild(row);
       });
   }
@@ -275,31 +257,30 @@ function initializeConverter() {
     resultValueEl.textContent = "—";
     resultFormulaEl.textContent = message;
     resultFactorEl.textContent = "";
+    lastResultText = "";
+    if (relatedContextEl) relatedContextEl.textContent = "";
     relatedResultsEl.replaceChildren();
   }
 
-  function renderConversion(value, category, from, to, updatePreview = false) {
+  function renderConversion(value, category, from, to) {
     const problem = validateInput(value, category, from);
 
     if (problem) {
       clearResult(problem);
-      if (updatePreview) document.getElementById("equationPreview")?.remove();
       return NaN;
     }
 
     const converted = convertUnits(value, category, from, to);
     if (Number.isNaN(converted)) {
       clearResult("Those units are not compatible.");
-      if (updatePreview) document.getElementById("equationPreview")?.remove();
       return NaN;
     }
 
-    resultValueEl.textContent = `${formatNumber(converted)} ${to}`;
+    resultValueEl.textContent = formatNumber(converted);
     resultFormulaEl.textContent = getFormulaText(value, category, from, to, converted);
     resultFactorEl.textContent = getFactorText(category, from, to);
+    lastResultText = `${formatNumber(converted)} ${to}`;
     renderRelatedConversions(value, category, from, to);
-
-    if (updatePreview) renderEquation(value, category, from, to, converted);
     return converted;
   }
 
@@ -324,87 +305,41 @@ function initializeConverter() {
     return Number.isFinite(value) && resolved ? { value, ...resolved } : null;
   }
 
-  function setPreviewVisible(visible) {
-    if (!previewPanel) return;
-    previewPanel.hidden = !visible;
-  }
-
   function resetQuickQuery() {
-    if (!queryInputEl) return;
     queryInputEl.value = "";
-    if (queryStatusEl) queryStatusEl.textContent = "";
-    document.getElementById("equationPreview")?.remove();
-    setPreviewVisible(false);
+    queryStatusEl.textContent = "";
+    queryStatusEl.removeAttribute("data-state");
   }
 
   function updateQuickQuery() {
-    if (!queryInputEl || !previewSummaryEl || !previewFactorEl || !queryStatusEl) return;
     const query = queryInputEl.value.trim();
 
     if (!query) {
-      resetQuickQuery();
+      queryStatusEl.textContent = "";
+      queryStatusEl.removeAttribute("data-state");
       return;
     }
 
-    setPreviewVisible(true);
     const parsed = parseQuickQuery(query);
 
     if (!parsed) {
-      previewSummaryEl.textContent = "Waiting for a complete conversion…";
-      previewFactorEl.textContent = "Use: value unit to unit";
-      queryStatusEl.textContent = "";
-      document.getElementById("equationPreview")?.remove();
+      queryStatusEl.textContent = "Use: value unit to unit";
+      queryStatusEl.dataset.state = "hint";
       return;
     }
 
     setUnitSelections(parsed.category, parsed.from, parsed.to);
     inputValueEl.value = parsed.value;
-    const converted = renderConversion(parsed.value, parsed.category, parsed.from, parsed.to, true);
+    const converted = renderConversion(parsed.value, parsed.category, parsed.from, parsed.to);
 
     if (Number.isNaN(converted)) {
       queryStatusEl.textContent = resultFormulaEl.textContent;
+      queryStatusEl.dataset.state = "error";
       return;
     }
 
-    previewSummaryEl.textContent = `${formatNumber(parsed.value)} ${parsed.from} = ${formatNumber(converted)} ${parsed.to}`;
-    previewFactorEl.textContent = getFactorText(parsed.category, parsed.from, parsed.to);
     queryStatusEl.textContent = parsed.category;
-  }
-
-  function installSwapButton() {
-    if (document.getElementById("swapUnits") || !toGroup) return;
-
-    const wrapper = document.createElement("div");
-    wrapper.className = "field-group converter-swap-group";
-
-    const label = document.createElement("span");
-    label.className = "converter-swap-label";
-    label.textContent = "Swap";
-    label.setAttribute("aria-hidden", "true");
-
-    const button = document.createElement("button");
-    button.id = "swapUnits";
-    button.type = "button";
-    button.className = "converter-swap-button";
-    button.textContent = "⇄";
-    button.title = "Swap units";
-    button.setAttribute("aria-label", "Swap source and destination units");
-
-    button.addEventListener("click", () => {
-      const previous = fromUnitEl.value;
-      fromUnitEl.value = toUnitEl.value;
-      toUnitEl.value = previous;
-
-      if (queryInputEl?.value.trim()) {
-        queryInputEl.value = `${inputValueEl.value} ${fromUnitEl.value} to ${toUnitEl.value}`;
-        updateQuickQuery();
-      } else {
-        convertManual();
-      }
-    });
-
-    wrapper.append(label, button);
-    controlGrid.insertBefore(wrapper, toGroup);
+    queryStatusEl.dataset.state = "success";
   }
 
   function switchToManualMode() {
@@ -420,12 +355,28 @@ function initializeConverter() {
   inputValueEl.addEventListener("input", switchToManualMode);
   fromUnitEl.addEventListener("change", switchToManualMode);
   toUnitEl.addEventListener("change", switchToManualMode);
-  queryInputEl?.addEventListener("input", updateQuickQuery);
+  queryInputEl.addEventListener("input", updateQuickQuery);
+  swapButton.addEventListener("click", () => {
+    const previous = fromUnitEl.value;
+    fromUnitEl.value = toUnitEl.value;
+    toUnitEl.value = previous;
+    resetQuickQuery();
+    convertManual();
+  });
+  copyButton.addEventListener("click", async () => {
+    if (!lastResultText) return;
+    try {
+      await navigator.clipboard.writeText(lastResultText);
+      copyButton.textContent = "Copied";
+      window.setTimeout(() => { copyButton.textContent = "Copy"; }, 1200);
+    } catch (error) {
+      copyButton.textContent = "Unavailable";
+      window.setTimeout(() => { copyButton.textContent = "Copy"; }, 1200);
+    }
+  });
 
   populateCategories();
   categoryEl.value = Object.prototype.hasOwnProperty.call(unitData, "Length") ? "Length" : Object.keys(unitData)[0];
   setDefaultUnits(categoryEl.value);
-  installSwapButton();
-  setPreviewVisible(false);
   convertManual();
 }
