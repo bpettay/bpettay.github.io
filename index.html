@@ -10,7 +10,7 @@
   <title>Engineering Dashboard</title>
 
   <link rel="stylesheet" href="./assets/css/style.css?v=20260926-1" />
-  <link rel="stylesheet" href="./assets/css/home.css?v=20260927-2" />
+  <link rel="stylesheet" href="./assets/css/home.css?v=20260928-1" />
   <link rel="stylesheet" href="./assets/css/tools.css?v=20260927-3" />
   <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260926-1" />
@@ -45,7 +45,7 @@
 
   <script src="./assets/js/date-utils.js?v=20260926-1" defer></script>
   <script src="./assets/js/converter-data.js?v=20260926-1" defer></script>
-  <script src="./assets/js/navigation.js?v=20260927-3" defer></script>
+  <script src="./assets/js/navigation.js?v=20260928-1" defer></script>
   <script src="./assets/js/converter.js?v=20260927-2" defer></script>
   <script src="./assets/js/pyro-sim.js?v=20260926-1" defer></script>
   <script src="./assets/js/pyro-team.js?v=20260926-1" defer></script>
@@ -114,21 +114,20 @@
           <div class="clock-layout">
             <div class="analog-clock" aria-hidden="true">
               <div class="clock-face">
-                <span class="clock-day-ring" id="clockDayRing"></span>
-                <span class="clock-marker twelve"></span>
-                <span class="clock-marker three"></span>
-                <span class="clock-marker six"></span>
-                <span class="clock-marker nine"></span>
-                <span class="clock-hand hour" id="clockHourHand"></span>
-                <span class="clock-hand minute" id="clockMinuteHand"></span>
-                <span class="clock-hand second" id="clockSecondHand"></span>
-                <span class="clock-center"></span>
+                <span class="clock-ring hour" id="clockHourRing"></span>
+                <span class="clock-ring minute" id="clockMinuteRing"></span>
+                <span class="clock-ring second" id="clockSecondRing"></span>
               </div>
             </div>
             <div class="digital-clock">
               <span class="day-phase" id="homeDayPhase">Local time</span>
               <strong id="homeClockTime">--:--</strong>
               <small id="homeClockDate">Loading</small>
+              <div class="clock-ring-key" aria-hidden="true">
+                <span class="hour">Hr</span>
+                <span class="minute">Min</span>
+                <span class="second">Sec</span>
+              </div>
             </div>
           </div>
 

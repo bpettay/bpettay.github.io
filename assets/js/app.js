@@ -367,7 +367,6 @@ function updateTodayPanel(now = new Date()) {
   const progressEl = document.getElementById("homeDayProgress");
   const progressTrack = document.getElementById("homeDayProgressTrack");
   const nextBoundaryEl = document.getElementById("homeNextBoundary");
-  const dayRing = document.getElementById("clockDayRing");
 
   const calendarMetrics = window.SiteDateUtils?.getCalendarMetrics(
     localDate.getFullYear(),
@@ -412,7 +411,6 @@ function updateTodayPanel(now = new Date()) {
     progressTrack.style.setProperty("--day-progress", `${dayProgress}%`);
     progressTrack.setAttribute("aria-valuenow", String(Math.floor(dayProgress)));
   }
-  if (dayRing) dayRing.style.setProperty("--day-progress", `${dayProgress}%`);
   if (nextBoundaryEl) nextBoundaryEl.textContent = `${nextBoundaryName} in ${boundaryDuration}`;
   if (weekendEl) {
     if (weekday === "Sat" || weekday === "Sun") {

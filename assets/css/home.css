@@ -117,85 +117,46 @@
   box-shadow: inset 0 0 0 5px #0e151d;
 }
 
-.clock-day-ring {
+.clock-ring {
   position: absolute;
-  z-index: 1;
-  inset: 3px;
+  z-index: 2;
   border-radius: 50%;
-  background: conic-gradient(#ff7352 var(--day-progress, 0%), rgba(190, 207, 220, 0.12) 0);
-  -webkit-mask: radial-gradient(circle, transparent 0 88%, #000 89% 100%);
-  mask: radial-gradient(circle, transparent 0 88%, #000 89% 100%);
+  background: conic-gradient(
+    var(--ring-color) 0 var(--ring-progress, 0%),
+    var(--ring-track) var(--ring-progress, 0%) 100%
+  );
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--ring-width)),
+    #000 calc(100% - var(--ring-width) + 1px)
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - var(--ring-width)),
+    #000 calc(100% - var(--ring-width) + 1px)
+  );
   pointer-events: none;
 }
 
-.clock-marker {
-  position: absolute;
-  border-radius: 999px;
-  background: rgba(243, 245, 247, 0.48);
+.clock-ring.hour {
+  --ring-color: #ff7352;
+  --ring-track: rgba(255, 115, 82, 0.12);
+  --ring-width: 5px;
+  inset: 29%;
 }
 
-.clock-marker.twelve,
-.clock-marker.six {
-  left: 50%;
-  width: 3px;
-  height: 12px;
-  transform: translateX(-50%);
+.clock-ring.minute {
+  --ring-color: #56c7e8;
+  --ring-track: rgba(86, 199, 232, 0.12);
+  --ring-width: 4px;
+  inset: 20%;
 }
 
-.clock-marker.twelve { top: 11px; }
-.clock-marker.six { bottom: 11px; }
-
-.clock-marker.three,
-.clock-marker.nine {
-  top: 50%;
-  width: 12px;
-  height: 3px;
-  transform: translateY(-50%);
-}
-
-.clock-marker.three { right: 11px; }
-.clock-marker.nine { left: 11px; }
-
-.clock-hand {
-  position: absolute;
-  left: 50%;
-  bottom: 50%;
-  border-radius: 999px;
-  transform-origin: bottom center;
-}
-
-.clock-hand.hour {
-  z-index: 3;
-  width: 5px;
-  height: 27%;
-  background: rgba(243, 245, 247, 0.96);
-}
-
-.clock-hand.minute {
-  z-index: 2;
-  width: 3px;
-  height: 38%;
-  background: rgba(210, 222, 228, 0.9);
-}
-
-.clock-hand.second {
-  z-index: 4;
-  width: 2px;
-  height: 43%;
-  background: #ff7a59;
-}
-
-.clock-center {
-  position: absolute;
-  z-index: 5;
-  top: 50%;
-  left: 50%;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: #f3f5f7;
-  box-shadow: 0 0 0 3px #263442;
-  transform: translate(-50%, -50%);
+.clock-ring.second {
+  --ring-color: #f4c95d;
+  --ring-track: rgba(244, 201, 93, 0.12);
+  --ring-width: 3px;
+  inset: 11%;
 }
 
 .digital-clock {
@@ -232,6 +193,35 @@
 }
 
 .digital-clock > strong { letter-spacing: 0; }
+
+.clock-ring-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  margin-top: 0.15rem;
+  color: var(--ink-soft);
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.clock-ring-key span {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.clock-ring-key span::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.clock-ring-key .hour { color: #ff7352; }
+.clock-ring-key .minute { color: #56c7e8; }
+.clock-ring-key .second { color: #f4c95d; }
 
 .day-progress-panel {
   display: grid;
@@ -1214,11 +1204,10 @@
   border: 1px solid rgba(255,255,255,0.028);
 }
 
-.clock-marker { display: none; }
-
 .clock-tick-ring,
 .clock-numerals {
   position: absolute;
+  z-index: 4;
   inset: 0;
   border-radius: 50%;
   pointer-events: none;
@@ -1258,60 +1247,6 @@
 .clock-numeral.n6 { left: 50%; top: 81%; }
 .clock-numeral.n9 { left: 19%; top: 50%; }
 
-.clock-hand {
-  will-change: transform;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.45);
-}
-
-.clock-hand.hour {
-  width: 5px;
-  height: 25%;
-  background: linear-gradient(to top, #dce4e9, #f6f8f9);
-}
-
-.clock-hand.minute {
-  width: 3px;
-  height: 36%;
-  background: linear-gradient(to top, #aebdc7, #e3eaee);
-}
-
-.clock-hand.second {
-  width: 1.5px;
-  height: 42%;
-  border-radius: 999px 999px 0 0;
-  background: #ff7352;
-  box-shadow: 0 0 5px rgba(255, 115, 82, 0.22);
-}
-
-.clock-hand.second::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 100%;
-  width: 1.5px;
-  height: 13px;
-  border-radius: 0 0 999px 999px;
-  background: #ff7352;
-  transform: translateX(-50%);
-}
-
-.clock-center {
-  z-index: 8;
-  width: 10px;
-  height: 10px;
-  border: 2px solid #dfe7ec;
-  background: #17232e;
-  box-shadow: 0 0 0 2px #263442, 0 2px 5px rgba(0,0,0,0.55);
-}
-
-.clock-center::after {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  border-radius: 50%;
-  background: #ff7352;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .clock-hand { will-change: auto; }
+  .clock-ring { transition: none; }
 }

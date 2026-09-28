@@ -179,10 +179,10 @@ function initializeNavigation() {
 
 function initializeDetailedHomeClock() {
   const face = document.querySelector(".clock-face");
-  const hourHand = document.getElementById("clockHourHand");
-  const minuteHand = document.getElementById("clockMinuteHand");
-  const secondHand = document.getElementById("clockSecondHand");
-  if (!face || !hourHand || !minuteHand || !secondHand || face.dataset.detailedClock === "true") return;
+  const hourRing = document.getElementById("clockHourRing");
+  const minuteRing = document.getElementById("clockMinuteRing");
+  const secondRing = document.getElementById("clockSecondRing");
+  if (!face || !hourRing || !minuteRing || !secondRing || face.dataset.detailedClock === "true") return;
 
   face.dataset.detailedClock = "true";
 
@@ -224,9 +224,9 @@ function initializeDetailedHomeClock() {
     const minuteProgress = minutes + seconds / 60;
     const hourProgress = (hours % 12) + minuteProgress / 60;
 
-    hourHand.style.transform = `translateX(-50%) rotate(${hourProgress * 30}deg)`;
-    minuteHand.style.transform = `translateX(-50%) rotate(${minuteProgress * 6}deg)`;
-    secondHand.style.transform = `translateX(-50%) rotate(${seconds * 6}deg)`;
+    hourRing.style.setProperty("--ring-progress", `${(hourProgress / 12) * 100}%`);
+    minuteRing.style.setProperty("--ring-progress", `${(minuteProgress / 60) * 100}%`);
+    secondRing.style.setProperty("--ring-progress", `${(seconds / 60) * 100}%`);
   }
 
   drawClock();
