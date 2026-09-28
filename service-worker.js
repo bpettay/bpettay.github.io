@@ -1,4 +1,4 @@
-const CACHE_NAME = "engineering-dashboard-shell-v42";
+const CACHE_NAME = "engineering-dashboard-shell-v43";
 const SHELL_ASSETS = [
   "./",
   "./index.html",
@@ -9,7 +9,7 @@ const SHELL_ASSETS = [
   "./assets/branding/mark-04.png",
   "./assets/branding/mark-05.png",
   "./assets/css/style.css?v=20260928-2",
-  "./assets/css/home.css?v=20260928-7",
+  "./assets/css/home.css?v=20260928-8",
   "./assets/css/tools.css?v=20260927-3",
   "./assets/css/pyro-auth.css?v=20260926-1",
   "./assets/css/pyro-team.css?v=20260926-1",
@@ -28,7 +28,7 @@ const SHELL_ASSETS = [
   "./assets/js/vendor/math.js?v=20260926-1",
   "./assets/js/graphing-calculator.js?v=20260927-3",
   "./assets/js/command-bar.js?v=20260927-1",
-  "./assets/js/app.js?v=20260928-1",
+  "./assets/js/app.js?v=20260928-2",
 ];
 
 self.addEventListener("install", (event) => {

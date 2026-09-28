@@ -407,18 +407,19 @@
 }
 
 .weather-today-summary div {
-  display: grid;
-  gap: 0.18rem;
+  display: flex;
+  gap: 0.45rem;
+  align-items: baseline;
+  justify-content: center;
   min-width: 92px;
   padding: 0.7rem 0.85rem;
   border-left: 1px solid var(--line);
 }
 
-.weather-today-summary span {
+.temperature-direction {
   color: var(--ink-soft);
-  font-size: 0.67rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .weather-today-summary strong {
@@ -541,6 +542,7 @@
 
 .go-card[data-status="go"] { border-color: rgba(120, 255, 190, 0.22); }
 .go-card[data-status="caution"] { border-color: rgba(255, 202, 95, 0.28); }
+.go-card[data-status="go"] .dashboard-note { display: none; }
 
 .go-card-line {
   display: flex;

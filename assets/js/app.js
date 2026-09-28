@@ -403,7 +403,7 @@ function updateTodayPanel(now = new Date()) {
   if (phaseEl) phaseEl.textContent = dayPhase;
   if (weekEl) weekEl.textContent = `W${weekNumber}`;
   if (yearEl) yearEl.textContent = `${Math.round(yearProgress)}%`;
-  if (progressEl) progressEl.textContent = `${Math.floor(dayProgress)}% of day`;
+  if (progressEl) progressEl.textContent = `${Math.floor(dayProgress)}%`;
   if (progressTrack) {
     progressTrack.style.setProperty("--day-progress", `${dayProgress}%`);
     progressTrack.setAttribute("aria-valuenow", String(Math.floor(dayProgress)));
