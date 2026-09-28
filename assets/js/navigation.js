@@ -215,9 +215,9 @@ function initializeDetailedHomeClock() {
   });
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const ringStates = [
-    { element: hourRing, duration: 1500, previous: null, wrapStarted: null },
-    { element: minuteRing, duration: 1200, previous: null, wrapStarted: null },
-    { element: secondRing, duration: 900, previous: null, wrapStarted: null },
+    { element: hourRing, duration: 2000, previous: null, wrapStarted: null },
+    { element: minuteRing, duration: 1700, previous: null, wrapStarted: null },
+    { element: secondRing, duration: 1400, previous: null, wrapStarted: null },
   ];
 
   const updateRing = (state, progress, timestamp) => {
@@ -230,7 +230,7 @@ function initializeDetailedHomeClock() {
     if (state.wrapStarted !== null) {
       const elapsed = timestamp - state.wrapStarted;
       const completion = Math.min(1, elapsed / state.duration);
-      const eased = 1 - ((1 - completion) ** 3);
+      const eased = 1 - ((1 - completion) ** 5);
       const tail = Math.max(progress, eased * 100);
 
       state.element.dataset.wrapping = "true";
