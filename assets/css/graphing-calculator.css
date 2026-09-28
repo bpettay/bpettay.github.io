@@ -323,6 +323,10 @@
   background: #050b07;
 }
 
+#gcGraphCanvas[hidden] {
+  display: none !important;
+}
+
 .gc-trace-readout {
   position: absolute;
   z-index: 4;
