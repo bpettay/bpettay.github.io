@@ -498,6 +498,8 @@ textarea:focus { background: #090c0e; }
   }
 
   .nav-left { display: flex !important; }
+  .nav-right,
+  .nav.nav-compact .nav-right { position: static; }
   .nav-menu-toggle { display: inline-grid; width: 42px; height: 42px; min-height: 42px; border-radius: 4px; }
   .nav-flyout,
   .nav-flyout.open {
@@ -507,12 +509,15 @@ textarea:focus { background: #090c0e; }
     bottom: calc(100% + 0.45rem);
     display: grid;
     width: min(240px, calc(100vw - 1rem));
+    max-height: calc(100dvh - 6rem);
     padding: 0.35rem;
     border: 1px solid var(--line);
     border-radius: 5px;
     background: #050708;
     box-shadow: none;
     transform-origin: bottom right;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .nav-flyout {
