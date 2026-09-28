@@ -400,6 +400,12 @@ function initializeToolsSwitcher() {
       panel.hidden = panel.dataset.toolPanel !== activeTool;
     });
     if (description) description.textContent = descriptions[activeTool];
+    if (activeTool === "calculator") {
+      window.scrollTo({ top: 0, behavior: "instant" });
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => window.fitGraphingCalculator?.());
+      });
+    }
   };
 
   if (select) select.addEventListener("change", () => showTool(select.value));

@@ -1,4 +1,4 @@
-const CACHE_NAME = "engineering-dashboard-shell-v15";
+const CACHE_NAME = "engineering-dashboard-shell-v16";
 const SHELL_ASSETS = [
   "./",
   "./index.html",
@@ -16,7 +16,7 @@ const SHELL_ASSETS = [
   "./assets/css/pyro-gates.css?v=20260926-1",
   "./assets/css/command-bar.css?v=20260926-1",
   "./assets/css/refinement.css?v=20260926-4",
-  "./assets/css/graphing-calculator.css?v=20260926-4",
+  "./assets/css/graphing-calculator.css?v=20260927-2",
   "./assets/js/date-utils.js?v=20260926-1",
   "./assets/js/converter-data.js?v=20260926-1",
   "./assets/js/navigation.js?v=20260926-1",
@@ -26,9 +26,9 @@ const SHELL_ASSETS = [
   "./assets/js/pyro-gates.js?v=20260926-1",
   "./assets/js/weather-window.js?v=20260926-1",
   "./assets/js/vendor/math.js?v=20260926-1",
-  "./assets/js/graphing-calculator.js?v=20260926-4",
+  "./assets/js/graphing-calculator.js?v=20260927-1",
   "./assets/js/command-bar.js?v=20260926-1",
-  "./assets/js/app.js?v=20260926-1",
+  "./assets/js/app.js?v=20260927-2",
 ];
 
 self.addEventListener("install", (event) => {

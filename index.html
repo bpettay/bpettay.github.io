@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="./assets/css/pyro-gates.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/command-bar.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/refinement.css?v=20260926-4" />
-  <link rel="stylesheet" href="./assets/css/graphing-calculator.css?v=20260926-4" />
+  <link rel="stylesheet" href="./assets/css/graphing-calculator.css?v=20260927-2" />
 
   <link rel="icon" type="image/png" href="./assets/branding/mark-01.png" />
   <script>
@@ -52,8 +52,8 @@
   <script src="./assets/js/pyro-gates.js?v=20260926-1" defer></script>
   <script src="./assets/js/weather-window.js?v=20260926-1" defer></script>
   <script src="./assets/js/vendor/math.js?v=20260926-1" defer></script>
-  <script src="./assets/js/graphing-calculator.js?v=20260926-4" defer></script>
-  <script src="./assets/js/app.js?v=20260926-1" defer></script>
+  <script src="./assets/js/graphing-calculator.js?v=20260927-1" defer></script>
+  <script src="./assets/js/app.js?v=20260927-2" defer></script>
   <script src="./assets/js/command-bar.js?v=20260926-1" defer></script>
 </head>
 
@@ -327,6 +327,7 @@
         </div>
       </div>
 
+      <div class="gc-fit-stage" id="gcFitStage">
       <div class="graphing-calculator" id="graphingCalculator" aria-label="Graphing calculator">
         <div class="gc-brand-row">
           <div><strong>GRAPH-84</strong><span>Scientific graphing system</span></div>
@@ -421,6 +422,7 @@
           <button type="button" class="gc-key" data-gc-action="clear"><small>CLEAR</small></button>
           <button type="button" class="gc-key gc-key-enter" data-gc-action="enter" data-gc-second-action="entry"><strong>ENTRY</strong><small>ENTER</small></button>
         </div>
+      </div>
       </div>
     </section>
   </main>

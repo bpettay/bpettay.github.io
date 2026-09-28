@@ -26,6 +26,7 @@
     initialized = true;
 
     const canvas = document.getElementById("gcGraphCanvas");
+    const fitStage = document.getElementById("gcFitStage");
     const context = canvas.getContext("2d");
     const expressionInput = document.getElementById("gcExpressionInput");
     const entryDisplay = document.getElementById("gcEntryDisplay");
@@ -58,6 +59,42 @@
     let activeInput = expressionInput;
     let historyCursor = -1;
     let secondMode = false;
+    let fitFrame = 0;
+
+    function fitCalculatorToViewport() {
+      if (!fitStage || calculator.offsetParent === null) return;
+
+      calculator.style.setProperty("--gc-fit-scale", "1");
+      calculator.style.width = "";
+      fitStage.style.height = "auto";
+
+      const stageWidth = fitStage.clientWidth;
+      if (!stageWidth) return;
+
+      calculator.style.width = `${Math.min(stageWidth, 900)}px`;
+      const naturalHeight = calculator.offsetHeight;
+      const naturalWidth = calculator.offsetWidth;
+      if (!naturalHeight || !naturalWidth) return;
+
+      const viewportHeight = root.visualViewport?.height || root.innerHeight;
+      const stageTop = fitStage.getBoundingClientRect().top;
+      const nav = document.querySelector(".nav");
+      const navIsFixed = nav && root.getComputedStyle(nav).position === "fixed";
+      const navReserve = navIsFixed
+        ? Math.max(0, viewportHeight - nav.getBoundingClientRect().top) + 8
+        : 12;
+      const availableHeight = Math.max(1, viewportHeight - Math.max(8, stageTop) - navReserve);
+      const scale = Math.min(1, availableHeight / naturalHeight, stageWidth / naturalWidth);
+
+      calculator.style.setProperty("--gc-fit-scale", scale.toFixed(4));
+      fitStage.style.height = `${Math.ceil(naturalHeight * scale)}px`;
+      fitStage.dataset.fitScale = scale.toFixed(4);
+    }
+
+    function scheduleCalculatorFit() {
+      root.cancelAnimationFrame(fitFrame);
+      fitFrame = root.requestAnimationFrame(fitCalculatorToViewport);
+    }
 
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY));
@@ -716,6 +753,10 @@
     renderCurrentEntry();
     updateModeLabel();
     showView("home");
+    scheduleCalculatorFit();
+    root.addEventListener("resize", scheduleCalculatorFit, { passive: true });
+    root.visualViewport?.addEventListener("resize", scheduleCalculatorFit, { passive: true });
+    root.fitGraphingCalculator = scheduleCalculatorFit;
     root.graphingCalculator = { showView, drawGraph, getState: () => ({ ...state }) };
   }
 
