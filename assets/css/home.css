@@ -138,6 +138,14 @@
   pointer-events: none;
 }
 
+.clock-ring[data-wrapping="true"] {
+  background: conic-gradient(
+    var(--ring-color) 0 var(--ring-progress, 0%),
+    var(--ring-track) var(--ring-progress, 0%) var(--ring-tail, 0%),
+    var(--ring-color) var(--ring-tail, 0%) 100%
+  );
+}
+
 .clock-ring.hour {
   --ring-color: #ff7352;
   --ring-track: rgba(255, 115, 82, 0.12);

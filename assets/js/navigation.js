@@ -213,6 +213,38 @@ function initializeDetailedHomeClock() {
     hour12: false,
     timeZone: "America/New_York",
   });
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const ringStates = [
+    { element: hourRing, duration: 1500, previous: null, wrapStarted: null },
+    { element: minuteRing, duration: 1200, previous: null, wrapStarted: null },
+    { element: secondRing, duration: 900, previous: null, wrapStarted: null },
+  ];
+
+  const updateRing = (state, progress, timestamp) => {
+    if (!reducedMotion && state.previous !== null && progress < state.previous) {
+      state.wrapStarted = timestamp;
+    }
+
+    state.element.style.setProperty("--ring-progress", `${progress}%`);
+
+    if (state.wrapStarted !== null) {
+      const elapsed = timestamp - state.wrapStarted;
+      const completion = Math.min(1, elapsed / state.duration);
+      const eased = 1 - ((1 - completion) ** 3);
+      const tail = Math.max(progress, eased * 100);
+
+      state.element.dataset.wrapping = "true";
+      state.element.style.setProperty("--ring-tail", `${tail}%`);
+
+      if (completion === 1) {
+        state.wrapStarted = null;
+        delete state.element.dataset.wrapping;
+        state.element.style.removeProperty("--ring-tail");
+      }
+    }
+
+    state.previous = progress;
+  };
 
   function drawClock() {
     const now = new Date();
@@ -223,13 +255,14 @@ function initializeDetailedHomeClock() {
     const seconds = value("second") + (now.getMilliseconds() / 1000);
     const minuteProgress = minutes + seconds / 60;
     const hourProgress = (hours % 12) + minuteProgress / 60;
+    const timestamp = window.performance.now();
 
-    hourRing.style.setProperty("--ring-progress", `${(hourProgress / 12) * 100}%`);
-    minuteRing.style.setProperty("--ring-progress", `${(minuteProgress / 60) * 100}%`);
-    secondRing.style.setProperty("--ring-progress", `${(seconds / 60) * 100}%`);
+    updateRing(ringStates[0], (hourProgress / 12) * 100, timestamp);
+    updateRing(ringStates[1], (minuteProgress / 60) * 100, timestamp);
+    updateRing(ringStates[2], (seconds / 60) * 100, timestamp);
   }
 
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (reducedMotion) {
     drawClock();
     window.setInterval(drawClock, 1000);
     return;
