@@ -350,7 +350,6 @@ function updateTodayPanel(now = new Date()) {
     minute: "numeric",
     second: "numeric",
     hourCycle: "h23",
-    timeZoneName: "short",
   }).formatToParts(now);
 
   const part = (type) => parts.find((item) => item.type === type)?.value;
@@ -360,7 +359,6 @@ function updateTodayPanel(now = new Date()) {
   const minute = Number(part("minute"));
   const second = Number(part("second"));
   const phaseEl = document.getElementById("homeDayPhase");
-  const timezoneEl = document.getElementById("homeTimezone");
   const weekEl = document.getElementById("homeWeekNumber");
   const yearEl = document.getElementById("homeYearProgress");
   const weekendEl = document.getElementById("homeWeekendCountdown");
@@ -403,10 +401,9 @@ function updateTodayPanel(now = new Date()) {
     : `${boundaryMinutes}m`;
 
   if (phaseEl) phaseEl.textContent = dayPhase;
-  if (timezoneEl) timezoneEl.textContent = part("timeZoneName") || "ET";
   if (weekEl) weekEl.textContent = `W${weekNumber}`;
   if (yearEl) yearEl.textContent = `${Math.round(yearProgress)}%`;
-  if (progressEl) progressEl.textContent = `${Math.floor(dayProgress)}% elapsed`;
+  if (progressEl) progressEl.textContent = `${Math.floor(dayProgress)}% of day`;
   if (progressTrack) {
     progressTrack.style.setProperty("--day-progress", `${dayProgress}%`);
     progressTrack.setAttribute("aria-valuenow", String(Math.floor(dayProgress)));

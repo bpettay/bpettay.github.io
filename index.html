@@ -10,7 +10,7 @@
   <title>Engineering Dashboard</title>
 
   <link rel="stylesheet" href="./assets/css/style.css?v=20260926-1" />
-  <link rel="stylesheet" href="./assets/css/home.css?v=20260928-1" />
+  <link rel="stylesheet" href="./assets/css/home.css?v=20260928-2" />
   <link rel="stylesheet" href="./assets/css/tools.css?v=20260927-3" />
   <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260926-1" />
@@ -53,7 +53,7 @@
   <script src="./assets/js/weather-window.js?v=20260926-1" defer></script>
   <script src="./assets/js/vendor/math.js?v=20260926-1" defer></script>
   <script src="./assets/js/graphing-calculator.js?v=20260927-3" defer></script>
-  <script src="./assets/js/app.js?v=20260927-5" defer></script>
+  <script src="./assets/js/app.js?v=20260928-1" defer></script>
   <script src="./assets/js/command-bar.js?v=20260927-1" defer></script>
 </head>
 
@@ -123,18 +123,18 @@
               <span class="day-phase" id="homeDayPhase">Local time</span>
               <strong id="homeClockTime">--:--</strong>
               <small id="homeClockDate">Loading</small>
-              <div class="clock-ring-key" aria-hidden="true">
-                <span class="hour">Hr</span>
-                <span class="minute">Min</span>
-                <span class="second">Sec</span>
+              <div class="clock-ring-key" aria-label="Ring colors: hours, minutes, seconds">
+                <span class="hour" title="Hours">H</span>
+                <span class="minute" title="Minutes">M</span>
+                <span class="second" title="Seconds">S</span>
               </div>
             </div>
           </div>
 
           <div class="day-progress-panel">
             <div class="day-progress-head">
-              <span>Today</span>
-              <strong id="homeDayProgress">--% elapsed</strong>
+              <strong class="next-time-boundary" id="homeNextBoundary">Calculating next milestone</strong>
+              <span id="homeDayProgress">--% of day</span>
             </div>
             <div
               class="day-progress-track"
@@ -148,16 +148,9 @@
               <span class="day-progress-fill"></span>
               <span class="day-progress-marker"></span>
             </div>
-            <div class="day-progress-scale" aria-hidden="true">
-              <span>12 AM</span>
-              <span>Noon</span>
-              <span>12 AM</span>
-            </div>
-            <strong class="next-time-boundary" id="homeNextBoundary">Calculating next milestone</strong>
           </div>
 
           <div class="time-context-grid" aria-label="Calendar context">
-            <div><span>Time zone</span><strong id="homeTimezone">--</strong></div>
             <div><span>Week</span><strong id="homeWeekNumber">--</strong></div>
             <div><span>Year</span><strong id="homeYearProgress">--%</strong></div>
             <div><span>Weekend</span><strong id="homeWeekendCountdown">--</strong></div>
