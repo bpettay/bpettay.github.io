@@ -220,7 +220,7 @@ function initializeDetailedHomeClock() {
     const value = (type) => Number(parts.find((part) => part.type === type)?.value || 0);
     const hours = value("hour");
     const minutes = value("minute");
-    const seconds = value("second");
+    const seconds = value("second") + (now.getMilliseconds() / 1000);
     const minuteProgress = minutes + seconds / 60;
     const hourProgress = (hours % 12) + minuteProgress / 60;
 
@@ -229,8 +229,14 @@ function initializeDetailedHomeClock() {
     secondRing.style.setProperty("--ring-progress", `${(seconds / 60) * 100}%`);
   }
 
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    drawClock();
+    window.setInterval(drawClock, 1000);
+    return;
+  }
+
   drawClock();
-  window.setInterval(drawClock, 1000);
+  window.setInterval(drawClock, 50);
 }
 
 document.addEventListener("DOMContentLoaded", initializeDetailedHomeClock);

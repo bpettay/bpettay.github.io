@@ -1242,10 +1242,10 @@
   text-shadow: 0 1px 2px rgba(0,0,0,0.65);
 }
 
-.clock-numeral.n12 { left: 50%; top: 19%; }
-.clock-numeral.n3 { left: 81%; top: 50%; }
-.clock-numeral.n6 { left: 50%; top: 81%; }
-.clock-numeral.n9 { left: 19%; top: 50%; }
+.clock-numeral.n12 { left: 50%; top: 34%; }
+.clock-numeral.n3 { left: 66%; top: 50%; }
+.clock-numeral.n6 { left: 50%; top: 66%; }
+.clock-numeral.n9 { left: 34%; top: 50%; }
 
 @media (prefers-reduced-motion: reduce) {
   .clock-ring { transition: none; }
