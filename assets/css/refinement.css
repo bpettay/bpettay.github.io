@@ -501,21 +501,32 @@ textarea:focus { background: #090c0e; }
   .nav-right,
   .nav.nav-compact .nav-right { position: static; }
   .nav-menu-toggle { display: inline-grid; width: 42px; height: 42px; min-height: 42px; border-radius: 4px; }
+  .nav-menu-toggle[aria-expanded="true"] {
+    border-color: var(--line-strong);
+    background: #101417;
+  }
+  .nav.nav-flyout-open,
+  .nav.nav-compact.nav-flyout-open {
+    border-radius: 0 0 6px 6px;
+    border-top-color: transparent;
+  }
   .nav-flyout,
   .nav-flyout.open {
     position: absolute;
     top: auto;
     right: 0;
-    bottom: calc(100% + 0.45rem);
+    bottom: calc(100% - 1px);
+    left: 0;
     display: grid;
-    width: min(240px, calc(100vw - 1rem));
+    width: auto;
     max-height: calc(100dvh - 6rem);
-    padding: 0.35rem;
+    padding: 0.42rem;
     border: 1px solid var(--line);
-    border-radius: 5px;
-    background: #050708;
-    box-shadow: none;
-    transform-origin: bottom right;
+    border-bottom-color: transparent;
+    border-radius: 6px 6px 0 0;
+    background: rgba(3, 5, 6, 0.98);
+    box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.28);
+    transform-origin: bottom center;
     overflow-y: auto;
     overscroll-behavior: contain;
   }
@@ -523,7 +534,7 @@ textarea:focus { background: #090c0e; }
   .nav-flyout {
     opacity: 0;
     visibility: hidden;
-    transform: translateY(4px);
+    transform: translateY(8px) scaleY(0.98);
     pointer-events: none;
   }
 

@@ -37,6 +37,7 @@ function initializeNavigation() {
 
     const setOpen = (open) => {
       flyout.classList.toggle("open", open);
+      nav?.classList.toggle("nav-flyout-open", open);
       toggle.setAttribute("aria-expanded", String(open));
       toggle.setAttribute("aria-label", open ? "Close navigation menu" : "Open navigation menu");
     };
