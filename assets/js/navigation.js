@@ -188,10 +188,10 @@ function initializeDetailedHomeClock() {
 
   const tickRing = document.createElement("div");
   tickRing.className = "clock-tick-ring";
-  for (let i = 0; i < 60; i += 1) {
+  for (let i = 0; i < 12; i += 1) {
     const tick = document.createElement("span");
-    tick.className = `clock-tick${i % 5 === 0 ? " major" : ""}`;
-    tick.style.setProperty("--tick-angle", `${i * 6}deg`);
+    tick.className = `clock-tick${i % 3 === 0 ? " major" : ""}`;
+    tick.style.setProperty("--tick-angle", `${i * 30}deg`);
     tickRing.appendChild(tick);
   }
   face.prepend(tickRing);
