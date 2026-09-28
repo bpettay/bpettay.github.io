@@ -2,6 +2,13 @@
   max-width: 1080px;
 }
 
+html.calculator-scroll-locked,
+body.calculator-scroll-locked {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .gc-fit-stage {
   display: flex;
   align-items: flex-start;

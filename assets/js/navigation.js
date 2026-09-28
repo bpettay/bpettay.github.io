@@ -125,6 +125,8 @@ function initializeNavigation() {
       page.hidden = !isActive;
     });
 
+    window.siteTools?.syncCalculatorScrollLock?.();
+
     if (updateUrl) syncUrl(pageId, replaceState);
     return pageId;
   }

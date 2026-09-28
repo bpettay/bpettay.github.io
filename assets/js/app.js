@@ -386,6 +386,15 @@ function initializeToolsSwitcher() {
   const description = document.getElementById("toolSwitcherDescription");
   if (!panels.length) return;
 
+  const syncCalculatorScrollLock = () => {
+    const calculatorIsActive = Boolean(
+      document.getElementById("tools")?.classList.contains("active")
+      && document.querySelector('[data-tool-panel="calculator"]:not([hidden])')
+    );
+    document.documentElement.classList.toggle("calculator-scroll-locked", calculatorIsActive);
+    document.body.classList.toggle("calculator-scroll-locked", calculatorIsActive);
+  };
+
   const descriptions = {
     converter: "Convert between common engineering units.",
     calculator: "Graph functions, trace curves, inspect tables, and run scientific calculations.",
@@ -406,11 +415,12 @@ function initializeToolsSwitcher() {
         window.requestAnimationFrame(() => window.fitGraphingCalculator?.());
       });
     }
+    syncCalculatorScrollLock();
   };
 
   if (select) select.addEventListener("change", () => showTool(select.value));
   showTool(select?.value || "converter");
-  window.siteTools = { showTool };
+  window.siteTools = { showTool, syncCalculatorScrollLock };
 }
 
 function initializeGroupedUnitSelectors() {
