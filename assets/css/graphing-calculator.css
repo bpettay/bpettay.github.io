@@ -230,7 +230,8 @@ body.calculator-scroll-locked {
   visibility: visible;
 }
 .gc-function-row input[type="text"]:hover,
-.gc-function-row input[type="text"]:focus {
+.gc-function-row input[type="text"]:focus,
+.gc-function-row input[type="text"].gc-input-active {
   border-color: rgba(174, 190, 178, 0.28);
   background: rgba(155, 174, 158, 0.075);
 }
@@ -269,7 +270,8 @@ body.calculator-scroll-locked {
   visibility: visible;
 }
 .gc-window-grid input:hover,
-.gc-window-grid input:focus {
+.gc-window-grid input:focus,
+.gc-window-grid input.gc-input-active {
   border-color: rgba(174, 190, 178, 0.34);
   background: #0a150e;
 }

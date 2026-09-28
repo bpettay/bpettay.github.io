@@ -61,15 +61,21 @@
     let secondMode = false;
     let fitFrame = 0;
     const userAgent = root.navigator?.userAgent || "";
-    const suppressCaptureKeyboard = Boolean(
+    const suppressVirtualKeyboard = Boolean(
       root.matchMedia?.("(hover: none) and (pointer: coarse)").matches
       || /Android|iPad|iPhone|iPod/i.test(userAgent)
       || (/Macintosh/i.test(userAgent) && (root.navigator?.maxTouchPoints || 0) > 1)
     );
 
+    function setActiveInput(input) {
+      activeInput?.classList.remove("gc-input-active");
+      activeInput = input || expressionInput;
+      if (activeInput !== expressionInput) activeInput.classList.add("gc-input-active");
+    }
+
     function focusCalculatorInput(input = activeInput) {
-      if (input === expressionInput && suppressCaptureKeyboard) {
-        expressionInput.blur();
+      if (suppressVirtualKeyboard) {
+        input?.blur();
         return;
       }
       input?.focus({ preventScroll: true });
@@ -223,12 +229,12 @@
       if (view === "graph" || view === "trace") drawGraph();
       if (view === "table") renderTable();
       if (view === "home") {
-        activeInput = expressionInput;
+        setActiveInput(expressionInput);
         window.setTimeout(() => focusCalculatorInput(expressionInput), 0);
       } else if (view === "functions") {
-        activeInput = functionList.querySelector('input[type="text"]') || expressionInput;
+        setActiveInput(functionList.querySelector('input[type="text"]') || expressionInput);
       } else if (view === "window") {
-        activeInput = windowGrid.querySelector('input[type="number"]') || expressionInput;
+        setActiveInput(windowGrid.querySelector('input[type="number"]') || expressionInput);
       }
     }
 
@@ -417,8 +423,10 @@
         input.value = value;
         input.autocomplete = "off";
         input.spellcheck = false;
+        input.inputMode = "none";
+        input.readOnly = suppressVirtualKeyboard;
         input.placeholder = index === 0 ? "Enter function…" : "";
-        input.addEventListener("focus", () => { activeInput = input; });
+        input.addEventListener("focus", () => { setActiveInput(input); });
         input.addEventListener("input", () => {
           state.functions[index] = input.value;
           saveState();
@@ -444,7 +452,9 @@
         input.step = "any";
         input.value = state.graphWindow[key];
         input.dataset.windowKey = key;
-        input.addEventListener("focus", () => { activeInput = input; });
+        input.inputMode = "none";
+        input.readOnly = suppressVirtualKeyboard;
+        input.addEventListener("focus", () => { setActiveInput(input); });
         input.addEventListener("change", () => {
           const value = Number(input.value);
           if (Number.isFinite(value)) state.graphWindow[key] = value;
@@ -628,7 +638,7 @@
 
     function insertAtCursor(value) {
       if (currentView === "graph" || currentView === "trace" || currentView === "table") showView("home");
-      if (!(activeInput instanceof HTMLInputElement) || activeInput.closest("[hidden]")) activeInput = expressionInput;
+      if (!(activeInput instanceof HTMLInputElement) || activeInput.closest("[hidden]")) setActiveInput(expressionInput);
 
       if (activeInput === expressionInput && !activeInput.value && /^[+*/^]$/.test(value)) {
         activeInput.value = "Ans";
@@ -652,7 +662,7 @@
 
     function deleteAtCursor() {
       if (currentView === "graph" || currentView === "trace" || currentView === "table") showView("home");
-      if (!(activeInput instanceof HTMLInputElement) || activeInput.closest("[hidden]")) activeInput = expressionInput;
+      if (!(activeInput instanceof HTMLInputElement) || activeInput.closest("[hidden]")) setActiveInput(expressionInput);
       if (activeInput.type === "number") {
         activeInput.value = activeInput.value.slice(0, -1);
         activeInput.dispatchEvent(new Event("change", { bubbles: true }));
@@ -712,7 +722,25 @@
     }
 
     calculator.addEventListener("focusin", (event) => {
-      if (event.target instanceof HTMLInputElement) activeInput = event.target;
+      if (!(event.target instanceof HTMLInputElement)) return;
+      setActiveInput(event.target);
+      if (suppressVirtualKeyboard && event.target.type !== "checkbox") event.target.blur();
+    });
+    calculator.addEventListener("pointerdown", (event) => {
+      if (!suppressVirtualKeyboard || !(event.target instanceof Element)) return;
+
+      const focusedInput = document.activeElement;
+      if (focusedInput instanceof HTMLInputElement && calculator.contains(focusedInput)) focusedInput.blur();
+
+      let input = event.target.closest('input[type="text"], input[type="number"]');
+      if (!input) {
+        const editor = event.target.closest(".gc-function-row, .gc-window-grid label");
+        input = editor?.querySelector('input[type="text"], input[type="number"]') || null;
+      }
+      if (!input) return;
+
+      event.preventDefault();
+      setActiveInput(input);
     });
     calculator.addEventListener("click", (event) => {
       const button = event.target.closest("button");
@@ -757,7 +785,7 @@
       else if (event.key === "ArrowDown") { event.preventDefault(); recallHistory(-1); }
     });
     const homeView = calculator.querySelector(".gc-home-view");
-    if (homeView && !suppressCaptureKeyboard) {
+    if (homeView && !suppressVirtualKeyboard) {
       homeView.addEventListener("pointerdown", () => window.setTimeout(() => focusCalculatorInput(expressionInput), 0));
     }
 
@@ -766,6 +794,7 @@
     renderHistory();
     renderCurrentEntry();
     updateModeLabel();
+    expressionInput.readOnly = suppressVirtualKeyboard;
     showView("home");
     scheduleCalculatorFit();
     root.addEventListener("resize", scheduleCalculatorFit, { passive: true });
