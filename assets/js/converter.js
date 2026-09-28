@@ -12,6 +12,8 @@ function initializeConverter() {
   const queryStatusEl = document.getElementById("queryStatus");
   const swapButton = document.getElementById("swapUnits");
   const copyButton = document.getElementById("copyResult");
+  const fitStage = document.getElementById("converterFitStage");
+  const fitContent = document.getElementById("converterFitContent");
 
   const required = [
     categoryEl,
@@ -26,6 +28,8 @@ function initializeConverter() {
     queryStatusEl,
     swapButton,
     copyButton,
+    fitStage,
+    fitContent,
   ];
 
   if (required.some((el) => !el) || typeof unitData !== "object") return;
@@ -33,6 +37,42 @@ function initializeConverter() {
   categoryEl.dataset.converterReady = "true";
 
   let lastResultText = "";
+  let fitFrame = 0;
+
+  function fitConverterToViewport() {
+    if (fitStage.offsetParent === null) return;
+
+    fitContent.style.setProperty("--converter-fit-scale", "1");
+    fitContent.style.width = "";
+    fitStage.style.height = "auto";
+
+    const stageWidth = fitStage.clientWidth;
+    if (!stageWidth) return;
+
+    fitContent.style.width = `${stageWidth}px`;
+    const naturalHeight = fitContent.offsetHeight;
+    const naturalWidth = fitContent.offsetWidth;
+    if (!naturalHeight || !naturalWidth) return;
+
+    const viewportHeight = window.visualViewport?.height || window.innerHeight;
+    const stageTop = fitStage.getBoundingClientRect().top;
+    const nav = document.querySelector(".nav");
+    const navIsFixed = nav && window.getComputedStyle(nav).position === "fixed";
+    const navReserve = navIsFixed
+      ? Math.max(0, viewportHeight - nav.getBoundingClientRect().top) + 8
+      : 12;
+    const availableHeight = Math.max(1, viewportHeight - Math.max(8, stageTop) - navReserve);
+    const scale = Math.min(1, availableHeight / naturalHeight, stageWidth / naturalWidth);
+
+    fitContent.style.setProperty("--converter-fit-scale", scale.toFixed(4));
+    fitStage.style.height = `${Math.ceil(naturalHeight * scale)}px`;
+    fitStage.dataset.fitScale = scale.toFixed(4);
+  }
+
+  function scheduleConverterFit() {
+    window.cancelAnimationFrame(fitFrame);
+    fitFrame = window.requestAnimationFrame(fitConverterToViewport);
+  }
 
   const getUnits = (category) => {
     const info = unitData[category];
@@ -260,6 +300,7 @@ function initializeConverter() {
     lastResultText = "";
     if (relatedContextEl) relatedContextEl.textContent = "";
     relatedResultsEl.replaceChildren();
+    scheduleConverterFit();
   }
 
   function renderConversion(value, category, from, to) {
@@ -281,6 +322,7 @@ function initializeConverter() {
     resultFactorEl.textContent = getFactorText(category, from, to);
     lastResultText = `${formatNumber(converted)} ${to}`;
     renderRelatedConversions(value, category, from, to);
+    scheduleConverterFit();
     return converted;
   }
 
@@ -379,4 +421,8 @@ function initializeConverter() {
   categoryEl.value = Object.prototype.hasOwnProperty.call(unitData, "Length") ? "Length" : Object.keys(unitData)[0];
   setDefaultUnits(categoryEl.value);
   convertManual();
+  scheduleConverterFit();
+  window.addEventListener("resize", scheduleConverterFit, { passive: true });
+  window.visualViewport?.addEventListener("resize", scheduleConverterFit, { passive: true });
+  window.fitUnitConverter = scheduleConverterFit;
 }

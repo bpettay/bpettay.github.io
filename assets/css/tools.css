@@ -847,6 +847,22 @@
 
 #tools .converter-header { margin-bottom: .8rem; }
 
+#tools .converter-fit-stage {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+}
+
+#tools .converter-fit-content {
+  --converter-fit-scale: 1;
+  flex: 0 0 auto;
+  width: 100%;
+  transform: scale(var(--converter-fit-scale));
+  transform-origin: top center;
+}
+
 #tools .converter-header h2 {
   font-size: 1.45rem;
   line-height: 1.1;

@@ -11,13 +11,13 @@
 
   <link rel="stylesheet" href="./assets/css/style.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/home.css?v=20260926-1" />
-  <link rel="stylesheet" href="./assets/css/tools.css?v=20260927-1" />
+  <link rel="stylesheet" href="./assets/css/tools.css?v=20260927-2" />
   <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/pyro-gates.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/command-bar.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/refinement.css?v=20260927-7" />
-  <link rel="stylesheet" href="./assets/css/graphing-calculator.css?v=20260927-3" />
+  <link rel="stylesheet" href="./assets/css/graphing-calculator.css?v=20260927-4" />
 
   <link rel="icon" type="image/png" href="./assets/branding/mark-01.png" />
   <script>
@@ -46,14 +46,14 @@
   <script src="./assets/js/date-utils.js?v=20260926-1" defer></script>
   <script src="./assets/js/converter-data.js?v=20260926-1" defer></script>
   <script src="./assets/js/navigation.js?v=20260927-3" defer></script>
-  <script src="./assets/js/converter.js?v=20260927-1" defer></script>
+  <script src="./assets/js/converter.js?v=20260927-2" defer></script>
   <script src="./assets/js/pyro-sim.js?v=20260926-1" defer></script>
   <script src="./assets/js/pyro-team.js?v=20260926-1" defer></script>
   <script src="./assets/js/pyro-gates.js?v=20260926-1" defer></script>
   <script src="./assets/js/weather-window.js?v=20260926-1" defer></script>
   <script src="./assets/js/vendor/math.js?v=20260926-1" defer></script>
   <script src="./assets/js/graphing-calculator.js?v=20260927-3" defer></script>
-  <script src="./assets/js/app.js?v=20260927-3" defer></script>
+  <script src="./assets/js/app.js?v=20260927-4" defer></script>
   <script src="./assets/js/command-bar.js?v=20260926-1" defer></script>
 </head>
 
@@ -271,6 +271,8 @@
   </main>
   <main id="tools" class="page" hidden>
     <section class="tool-card compact-tool-card surface tool-panel" data-tool-panel="converter">
+      <div class="converter-fit-stage" id="converterFitStage">
+      <div class="converter-fit-content" id="converterFitContent">
       <div class="tool-header converter-header">
         <div>
           <p class="tool-label">Converter</p>
@@ -332,6 +334,8 @@
           <div id="relatedResults" class="related-results"></div>
         </section>
       </div>
+      </div>
+      </div>
     </section>
 
     <section class="tool-card calculator-tool-card surface tool-panel" data-tool-panel="calculator" hidden>
@@ -358,9 +362,7 @@
               <div class="gc-history" id="gcHistory" aria-live="polite"></div>
               <div class="gc-entry-row" id="gcEntryRow">
                 <span class="gc-entry-prompt">&gt;</span>
-                <div class="gc-entry-display-wrap" aria-hidden="true">
-                  <span id="gcEntryDisplay" class="gc-entry-display"></span><span class="gc-entry-cursor"></span>
-                </div>
+                <div class="gc-entry-display-wrap" aria-hidden="true"><span id="gcEntryDisplay" class="gc-entry-display"></span><span class="gc-entry-cursor"></span></div>
                 <input id="gcExpressionInput" class="gc-keyboard-capture" type="text" inputmode="none" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Calculator expression" />
               </div>
             </section>

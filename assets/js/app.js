@@ -386,12 +386,12 @@ function initializeToolsSwitcher() {
   if (!panels.length) return;
 
   const syncCalculatorScrollLock = () => {
-    const calculatorIsActive = Boolean(
+    const fittedToolIsActive = Boolean(
       document.getElementById("tools")?.classList.contains("active")
-      && document.querySelector('[data-tool-panel="calculator"]:not([hidden])')
+      && document.querySelector('[data-tool-panel]:not([hidden])')
     );
-    document.documentElement.classList.toggle("calculator-scroll-locked", calculatorIsActive);
-    document.body.classList.toggle("calculator-scroll-locked", calculatorIsActive);
+    document.documentElement.classList.toggle("calculator-scroll-locked", fittedToolIsActive);
+    document.body.classList.toggle("calculator-scroll-locked", fittedToolIsActive);
   };
 
   const descriptions = {
@@ -412,6 +412,11 @@ function initializeToolsSwitcher() {
       window.scrollTo({ top: 0, behavior: "instant" });
       window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => window.fitGraphingCalculator?.());
+      });
+    } else if (activeTool === "converter") {
+      window.scrollTo({ top: 0, behavior: "instant" });
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => window.fitUnitConverter?.());
       });
     }
     syncCalculatorScrollLock();
