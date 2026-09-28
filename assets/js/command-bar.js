@@ -24,7 +24,11 @@
       { title: "Open daily overview", detail: "Time, conditions, and shortcuts", group: "Navigate", terms: "home dashboard today", run: () => openPage("home") },
       { title: "Find a weather work window", detail: "Rank the next 48 hours by job limits", group: "Weather", terms: "forecast outside plan rain wind", run: async () => {
         await openPage("home");
-        window.setTimeout(() => document.getElementById("weatherWorkWindow")?.scrollIntoView({ behavior: "smooth", block: "center" }), 180);
+        window.setTimeout(() => {
+          const details = document.getElementById("weatherDetails");
+          if (details) details.open = true;
+          document.getElementById("weatherWorkWindow")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 180);
       } },
       { title: "Refresh weather", detail: "Request current conditions again", group: "Weather", terms: "reload update forecast", run: () => window.loadHomeWeather?.() },
       { title: "Open unit converter", detail: "Convert common engineering units", group: "Tools", terms: "conversion units measurement", run: () => openTool("converter", "queryInput") },

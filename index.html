@@ -10,7 +10,7 @@
   <title>Engineering Dashboard</title>
 
   <link rel="stylesheet" href="./assets/css/style.css?v=20260926-1" />
-  <link rel="stylesheet" href="./assets/css/home.css?v=20260926-1" />
+  <link rel="stylesheet" href="./assets/css/home.css?v=20260927-1" />
   <link rel="stylesheet" href="./assets/css/tools.css?v=20260927-3" />
   <link rel="stylesheet" href="./assets/css/pyro-auth.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260926-1" />
@@ -54,7 +54,7 @@
   <script src="./assets/js/vendor/math.js?v=20260926-1" defer></script>
   <script src="./assets/js/graphing-calculator.js?v=20260927-3" defer></script>
   <script src="./assets/js/app.js?v=20260927-4" defer></script>
-  <script src="./assets/js/command-bar.js?v=20260926-1" defer></script>
+  <script src="./assets/js/command-bar.js?v=20260927-1" defer></script>
 </head>
 
 <body>
@@ -169,84 +169,95 @@
           <p id="homeGoReason" class="dashboard-note">Checking wind, rain risk, air quality, UV, and temperature.</p>
         </div>
 
-        <div class="weather-mini-grid" aria-label="Current weather details">
+        <div class="weather-critical-grid" aria-label="Critical weather metrics">
           <span>Feels like <strong id="homeWeatherFeels">--°</strong></span>
           <span>Wind <strong id="homeWeatherWind">-- mph</strong></span>
-          <span>Gusts <strong id="homeWeatherGusts">-- mph</strong></span>
-          <span>Humidity <strong id="homeWeatherHumidity">--%</strong></span>
           <span>Rain chance <strong id="homeWeatherRainChance">--%</strong></span>
-          <span>Today’s precip. <strong id="homeWeatherPrecip">-- in</strong></span>
           <span>AQI <strong id="homeWeatherAqi">--</strong></span>
-          <span>UV <strong id="homeWeatherUv">--</strong></span>
-          <span>Pressure <strong id="homeWeatherPressure">-- mb</strong></span>
-          <span>Visibility <strong id="homeWeatherVisibility">-- mi</strong></span>
         </div>
 
-        <div class="weather-detail-grid">
-          <section class="hourly-forecast-card" aria-labelledby="hourlyForecastTitle">
-            <div class="weather-section-head">
-              <div>
-                <p class="dashboard-label">Near term</p>
-                <h3 id="hourlyForecastTitle">Next 6 hours</h3>
+        <details class="weather-details" id="weatherDetails">
+          <summary>
+            <span>Weather details</span>
+            <small>Forecast, daylight, and work windows</small>
+          </summary>
+          <div class="weather-details-body">
+            <div class="weather-mini-grid weather-secondary-grid" aria-label="Additional weather metrics">
+              <span>Gusts <strong id="homeWeatherGusts">-- mph</strong></span>
+              <span>Humidity <strong id="homeWeatherHumidity">--%</strong></span>
+              <span>Today’s precip. <strong id="homeWeatherPrecip">-- in</strong></span>
+              <span>UV <strong id="homeWeatherUv">--</strong></span>
+              <span>Pressure <strong id="homeWeatherPressure">-- mb</strong></span>
+              <span>Visibility <strong id="homeWeatherVisibility">-- mi</strong></span>
+            </div>
+
+            <div class="weather-detail-grid">
+              <section class="hourly-forecast-card" aria-labelledby="hourlyForecastTitle">
+                <div class="weather-section-head">
+                  <div>
+                    <p class="dashboard-label">Near term</p>
+                    <h3 id="hourlyForecastTitle">Next 6 hours</h3>
+                  </div>
+                </div>
+                <div class="hourly-forecast-strip" id="homeHourlyForecast" aria-live="polite">
+                  <span class="forecast-loading">Loading hourly forecast…</span>
+                </div>
+              </section>
+
+              <div class="sun-position-card">
+                <div class="weather-section-head">
+                  <div>
+                    <p class="dashboard-label">Daylight</p>
+                    <h3>Sun position</h3>
+                  </div>
+                  <strong id="homeDaylightLeft">--</strong>
+                </div>
+                <div class="sun-path" id="homeSunPath" aria-label="Sun progress from sunrise to sunset">
+                  <span class="sun-path-line"></span>
+                  <span class="sun-dot" id="homeSunDot"></span>
+                  <span class="horizon-line"></span>
+                </div>
+                <div class="sun-times-grid">
+                  <div><span>Sunrise</span><strong id="homeSunrise">--:--</strong></div>
+                  <div><span>Sunset</span><strong id="homeSunset">--:--</strong></div>
+                </div>
               </div>
             </div>
-            <div class="hourly-forecast-strip" id="homeHourlyForecast" aria-live="polite">
-              <span class="forecast-loading">Loading hourly forecast…</span>
-            </div>
-          </section>
 
-          <div class="sun-position-card">
-            <div class="weather-section-head">
+            <section class="work-window-card" id="weatherWorkWindow" aria-labelledby="workWindowTitle">
+              <div class="work-window-head">
               <div>
-                <p class="dashboard-label">Daylight</p>
-                <h3>Sun position</h3>
+                  <p class="dashboard-label">Plan ahead</p>
+                  <h3 id="workWindowTitle">Weather work-window finder</h3>
+                </div>
+                <div class="work-window-controls">
+                  <label>Job profile
+                    <select id="workWindowProfile">
+                      <option value="general">General outdoor</option>
+                      <option value="painting">Painting / coating</option>
+                      <option value="roof">Roof / ladder</option>
+                      <option value="precision">Precision setup</option>
+                    </select>
+                  </label>
+                  <label>Minimum
+                    <select id="workWindowDuration">
+                      <option value="2">2 hours</option>
+                      <option value="3">3 hours</option>
+                      <option value="4">4 hours</option>
+                      <option value="6">6 hours</option>
+                    </select>
+                  </label>
+                </div>
               </div>
-              <strong id="homeDaylightLeft">--</strong>
-            </div>
-            <div class="sun-path" id="homeSunPath" aria-label="Sun progress from sunrise to sunset">
-              <span class="sun-path-line"></span>
-              <span class="sun-dot" id="homeSunDot"></span>
-              <span class="horizon-line"></span>
-            </div>
-            <div class="sun-times-grid">
-              <div><span>Sunrise</span><strong id="homeSunrise">--:--</strong></div>
-              <div><span>Sunset</span><strong id="homeSunset">--:--</strong></div>
-            </div>
-          </div>
-        </div>
+              <p class="work-window-criteria" id="workWindowCriteria">Checking daylight, rain, wind, gusts, and temperature.</p>
+              <div class="work-window-results" id="workWindowResults" aria-live="polite">
+                <span class="forecast-loading">Finding workable forecast windows…</span>
+              </div>
+            </section>
 
-        <section class="work-window-card" id="weatherWorkWindow" aria-labelledby="workWindowTitle">
-          <div class="work-window-head">
-            <div>
-              <p class="dashboard-label">Plan ahead</p>
-              <h3 id="workWindowTitle">Weather work-window finder</h3>
-            </div>
-            <div class="work-window-controls">
-              <label>Job profile
-                <select id="workWindowProfile">
-                  <option value="general">General outdoor</option>
-                  <option value="painting">Painting / coating</option>
-                  <option value="roof">Roof / ladder</option>
-                  <option value="precision">Precision setup</option>
-                </select>
-              </label>
-              <label>Minimum
-                <select id="workWindowDuration">
-                  <option value="2">2 hours</option>
-                  <option value="3">3 hours</option>
-                  <option value="4">4 hours</option>
-                  <option value="6">6 hours</option>
-                </select>
-              </label>
-            </div>
+            <p class="weather-source">New Philadelphia, Ohio · Forecast data by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></p>
           </div>
-          <p class="work-window-criteria" id="workWindowCriteria">Checking daylight, rain, wind, gusts, and temperature.</p>
-          <div class="work-window-results" id="workWindowResults" aria-live="polite">
-            <span class="forecast-loading">Finding workable forecast windows…</span>
-          </div>
-        </section>
-
-        <p class="weather-source">New Philadelphia, Ohio · Forecast data by <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a></p>
+        </details>
       </article>
 
       <article class="dashboard-card surface home-shortcuts-card">
