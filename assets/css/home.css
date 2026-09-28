@@ -149,14 +149,14 @@
 .clock-ring.hour {
   --ring-color: #d8d1c4;
   --ring-track: rgba(216, 209, 196, 0.1);
-  --ring-width: 3px;
+  --ring-width: 6px;
   inset: 29%;
 }
 
 .clock-ring.minute {
   --ring-color: #8fa7b2;
   --ring-track: rgba(143, 167, 178, 0.1);
-  --ring-width: 3px;
+  --ring-width: 4px;
   inset: 20%;
 }
 
