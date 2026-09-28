@@ -1,4 +1,4 @@
-const CACHE_NAME = "engineering-dashboard-shell-v37";
+const CACHE_NAME = "engineering-dashboard-shell-v38";
 const SHELL_ASSETS = [
   "./",
   "./index.html",
