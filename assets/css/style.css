@@ -309,9 +309,9 @@ button:focus-visible, a:focus-visible {
   .nav, .nav.nav-compact {
     position: fixed;
     top: auto;
-    right: max(.65rem, env(safe-area-inset-right));
-    bottom: max(.55rem, env(safe-area-inset-bottom));
-    left: max(.65rem, env(safe-area-inset-left));
+    right: max(18px, calc(env(safe-area-inset-right) + 6px));
+    bottom: max(12px, calc(env(safe-area-inset-bottom) + 4px));
+    left: max(18px, calc(env(safe-area-inset-left) + 6px));
     width: auto;
     margin: 0;
     padding: .38rem;
@@ -403,9 +403,9 @@ button:focus-visible, a:focus-visible {
   }
 
   .nav, .nav.nav-compact {
-    right: max(.45rem, env(safe-area-inset-right));
-    left: max(.45rem, env(safe-area-inset-left));
-    bottom: max(.4rem, env(safe-area-inset-bottom));
+    right: max(18px, calc(env(safe-area-inset-right) + 6px));
+    left: max(18px, calc(env(safe-area-inset-left) + 6px));
+    bottom: max(12px, calc(env(safe-area-inset-bottom) + 4px));
   }
 
   .nav-link,
@@ -417,9 +417,9 @@ button:focus-visible, a:focus-visible {
 @media (orientation: landscape) and (max-height: 500px) {
   body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
   .nav, .nav.nav-compact {
-    right: max(.5rem, env(safe-area-inset-right));
-    bottom: max(.35rem, env(safe-area-inset-bottom));
-    left: max(.5rem, env(safe-area-inset-left));
+    right: max(18px, calc(env(safe-area-inset-right) + 6px));
+    bottom: max(10px, calc(env(safe-area-inset-bottom) + 3px));
+    left: max(18px, calc(env(safe-area-inset-left) + 6px));
     padding: .25rem;
   }
   .nav-link,

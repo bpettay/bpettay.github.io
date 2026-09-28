@@ -492,9 +492,9 @@ textarea:focus { background: #090c0e; }
   .nav.nav-compact {
     position: fixed;
     top: auto;
-    right: max(0.5rem, env(safe-area-inset-right));
-    bottom: max(0.45rem, env(safe-area-inset-bottom));
-    left: max(0.5rem, env(safe-area-inset-left));
+    right: max(18px, calc(env(safe-area-inset-right) + 6px));
+    bottom: max(12px, calc(env(safe-area-inset-bottom) + 4px));
+    left: max(18px, calc(env(safe-area-inset-left) + 6px));
     width: auto;
     min-height: 0;
     padding: 0.32rem;
