@@ -1,4 +1,4 @@
-const CACHE_NAME = "engineering-dashboard-shell-v20";
+const CACHE_NAME = "engineering-dashboard-shell-v21";
 const SHELL_ASSETS = [
   "./",
   "./index.html",
@@ -15,11 +15,11 @@ const SHELL_ASSETS = [
   "./assets/css/pyro-team.css?v=20260926-1",
   "./assets/css/pyro-gates.css?v=20260926-1",
   "./assets/css/command-bar.css?v=20260926-1",
-  "./assets/css/refinement.css?v=20260927-6",
+  "./assets/css/refinement.css?v=20260927-7",
   "./assets/css/graphing-calculator.css?v=20260927-3",
   "./assets/js/date-utils.js?v=20260926-1",
   "./assets/js/converter-data.js?v=20260926-1",
-  "./assets/js/navigation.js?v=20260927-2",
+  "./assets/js/navigation.js?v=20260927-3",
   "./assets/js/converter.js?v=20260926-1",
   "./assets/js/pyro-sim.js?v=20260926-1",
   "./assets/js/pyro-team.js?v=20260926-1",

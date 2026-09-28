@@ -31,7 +31,8 @@ function initializeNavigation() {
     flyout.id = "primaryNavFlyout";
     flyout.setAttribute("aria-label", "Site navigation");
 
-    const primaryItems = Array.from(navRight.children);
+    const primaryItems = Array.from(navRight.children)
+      .filter((item) => !item.matches('[data-page="home"]'));
     primaryItems.forEach((item) => flyout.appendChild(item));
     navRight.append(toggle, flyout);
 

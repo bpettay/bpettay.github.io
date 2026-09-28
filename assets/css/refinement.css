@@ -82,6 +82,12 @@ textarea:focus { background: #090c0e; }
   gap: 0.42rem;
 }
 
+.nav-home-icon {
+  display: none;
+  width: 18px;
+  height: 18px;
+}
+
 .nav-tools-trigger::after {
   content: "";
   width: 0.38rem;
@@ -500,6 +506,19 @@ textarea:focus { background: #090c0e; }
   .nav-left { display: flex !important; }
   .nav-right,
   .nav.nav-compact .nav-right { position: static; }
+  .nav-home-link,
+  .nav.nav-compact .nav-home-link {
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+    padding: 0;
+    border-radius: 4px;
+  }
+  .nav-home-icon { display: block; }
+  .nav-home-label { display: none; }
   .nav-menu-toggle { display: inline-grid; width: 42px; height: 42px; min-height: 42px; border-radius: 4px; }
   .nav-menu-toggle[aria-expanded="true"] {
     border-color: var(--line-strong);

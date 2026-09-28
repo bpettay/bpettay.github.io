@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="./assets/css/pyro-team.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/pyro-gates.css?v=20260926-1" />
   <link rel="stylesheet" href="./assets/css/command-bar.css?v=20260926-1" />
-  <link rel="stylesheet" href="./assets/css/refinement.css?v=20260927-6" />
+  <link rel="stylesheet" href="./assets/css/refinement.css?v=20260927-7" />
   <link rel="stylesheet" href="./assets/css/graphing-calculator.css?v=20260927-3" />
 
   <link rel="icon" type="image/png" href="./assets/branding/mark-01.png" />
@@ -45,7 +45,7 @@
 
   <script src="./assets/js/date-utils.js?v=20260926-1" defer></script>
   <script src="./assets/js/converter-data.js?v=20260926-1" defer></script>
-  <script src="./assets/js/navigation.js?v=20260927-2" defer></script>
+  <script src="./assets/js/navigation.js?v=20260927-3" defer></script>
   <script src="./assets/js/converter.js?v=20260926-1" defer></script>
   <script src="./assets/js/pyro-sim.js?v=20260926-1" defer></script>
   <script src="./assets/js/pyro-team.js?v=20260926-1" defer></script>
@@ -67,7 +67,13 @@
         <kbd>Ctrl K</kbd>
       </button>
       <div class="nav-right">
-        <button class="nav-link active" data-page="home" type="button">Home</button>
+        <button class="nav-link nav-home-link active" data-page="home" type="button" aria-label="Home">
+          <svg class="nav-home-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span class="nav-home-label">Home</span>
+        </button>
         <div class="nav-tools-menu">
           <button class="nav-link nav-tools-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
             Tools
