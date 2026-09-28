@@ -60,6 +60,20 @@
     let historyCursor = -1;
     let secondMode = false;
     let fitFrame = 0;
+    const userAgent = root.navigator?.userAgent || "";
+    const suppressCaptureKeyboard = Boolean(
+      root.matchMedia?.("(hover: none) and (pointer: coarse)").matches
+      || /Android|iPad|iPhone|iPod/i.test(userAgent)
+      || (/Macintosh/i.test(userAgent) && (root.navigator?.maxTouchPoints || 0) > 1)
+    );
+
+    function focusCalculatorInput(input = activeInput) {
+      if (input === expressionInput && suppressCaptureKeyboard) {
+        expressionInput.blur();
+        return;
+      }
+      input?.focus({ preventScroll: true });
+    }
 
     function fitCalculatorToViewport() {
       if (!fitStage || calculator.offsetParent === null) return;
@@ -210,7 +224,7 @@
       if (view === "table") renderTable();
       if (view === "home") {
         activeInput = expressionInput;
-        window.setTimeout(() => expressionInput.focus(), 0);
+        window.setTimeout(() => focusCalculatorInput(expressionInput), 0);
       } else if (view === "functions") {
         activeInput = functionList.querySelector('input[type="text"]') || expressionInput;
       } else if (view === "window") {
@@ -624,7 +638,7 @@
         if (!/^[0-9.\-]$/.test(value)) return;
         activeInput.value += value;
         activeInput.dispatchEvent(new Event("change", { bubbles: true }));
-        activeInput.focus();
+        focusCalculatorInput();
         return;
       }
 
@@ -632,7 +646,7 @@
       const end = activeInput.selectionEnd ?? start;
       activeInput.setRangeText(value, start, end, "end");
       activeInput.dispatchEvent(new Event("input", { bubbles: true }));
-      activeInput.focus();
+      focusCalculatorInput();
       if (activeInput === expressionInput) renderCurrentEntry();
     }
 
@@ -642,7 +656,7 @@
       if (activeInput.type === "number") {
         activeInput.value = activeInput.value.slice(0, -1);
         activeInput.dispatchEvent(new Event("change", { bubbles: true }));
-        activeInput.focus();
+        focusCalculatorInput();
         return;
       }
       const start = activeInput.selectionStart ?? activeInput.value.length;
@@ -650,7 +664,7 @@
       if (start !== end) activeInput.setRangeText("", start, end, "end");
       else if (start > 0) activeInput.setRangeText("", start - 1, start, "end");
       activeInput.dispatchEvent(new Event("input", { bubbles: true }));
-      activeInput.focus();
+      focusCalculatorInput();
       if (activeInput === expressionInput) renderCurrentEntry();
     }
 
@@ -677,7 +691,7 @@
           showView("home");
           expressionInput.value = state.history[state.history.length - 1].expression;
           renderCurrentEntry();
-          expressionInput.focus();
+          focusCalculatorInput(expressionInput);
         }
       }
       else if (action === "delete") deleteAtCursor();
@@ -743,8 +757,8 @@
       else if (event.key === "ArrowDown") { event.preventDefault(); recallHistory(-1); }
     });
     const homeView = calculator.querySelector(".gc-home-view");
-    if (homeView) {
-      homeView.addEventListener("pointerdown", () => window.setTimeout(() => expressionInput.focus(), 0));
+    if (homeView && !suppressCaptureKeyboard) {
+      homeView.addEventListener("pointerdown", () => window.setTimeout(() => focusCalculatorInput(expressionInput), 0));
     }
 
     renderFunctionEditor();
